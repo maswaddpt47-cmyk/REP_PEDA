@@ -159,7 +159,7 @@
   .card-thumb-emoji { z-index: 1; }
   .card-thumb.has-img .card-thumb-emoji { display: none; }
 
-  /* Bouton image — visible au survol de la tuile */
+  /* Bouton image en mode édition */
   .card-img-btn {
     display: none;
     position: absolute; inset: 0; z-index: 2;
@@ -168,14 +168,14 @@
     font-size: 24px; width: 100%; transition: background .15s;
   }
   .card-img-btn:hover { background: rgba(0,0,0,.62); }
-  .card:hover .card-img-btn { display: flex; }
+  body.edit-mode .card-img-btn { display: flex; }
 
   .card-body { padding: 13px 15px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.35; }
   .card-actions { display: flex; gap: 6px; margin-top: auto; }
 
   .card-edit-btn {
-    display: flex;
+    display: none;
     align-items: center; justify-content: center;
     width: 34px; height: 32px; flex-shrink: 0;
     background: rgba(79,142,247,.12); border: 1px solid rgba(79,142,247,.3);
@@ -183,6 +183,7 @@
     cursor: pointer; transition: background .15s;
   }
   .card-edit-btn:hover { background: rgba(79,142,247,.25); }
+  body.edit-mode .card-edit-btn { display: flex; }
 
   .btn {
     flex: 1; padding: 7px 0; border-radius: 7px; font-size: 12px; font-weight: 600;
@@ -368,6 +369,7 @@
     <button class="io-btn" id="btn-export" title="Exporter les liens en JSON">⬆ Export</button>
     <button class="io-btn import" id="btn-import" title="Importer des liens depuis un JSON">⬇ Import</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
+    <button class="edit-toggle" id="edit-toggle">✏️ Gérer les liens</button>
   </div>
 </header>
 
@@ -597,7 +599,7 @@ function driveViewUrl(id)     { return `https://drive.google.com/file/d/${id}/vi
 function driveDownloadUrl(id) { return `https://drive.google.com/uc?export=download&id=${id}`; }
 
 // ── STATE
-let currentChap = "all", currentSearch = "";
+let currentChap = "all", currentSearch = "", editMode = false;
 let modalAtelier = null, editAtelier = null, imgAtelier = null;
 let pendingImgSrc = "";
 
@@ -873,6 +875,14 @@ document.getElementById("modal").addEventListener("click", e => {
 });
 
 // ── EVENTS — divers
+document.getElementById("edit-toggle").addEventListener("click", () => {
+  editMode = !editMode;
+  document.body.classList.toggle("edit-mode", editMode);
+  const btn = document.getElementById("edit-toggle");
+  btn.classList.toggle("on", editMode);
+  btn.textContent = editMode ? "✅ Mode édition ON" : "✏️ Gérer les liens";
+});
+
 document.getElementById("btn-export").addEventListener("click", exportLinks);
 document.getElementById("btn-import").addEventListener("click", () => document.getElementById("import-file").click());
 document.getElementById("import-file").addEventListener("change", e => {
