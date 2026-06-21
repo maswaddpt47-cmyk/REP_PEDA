@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ateliers Numériques — Supports CONUM 47</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0c0e14;
+    --surface: #13161f;
+    --border:  #1e2333;
+    --text:    #e8ecf4;
+    --muted:   #5d6680;
+    --radius:  13px;
+    --gutter:  20px;
+    --A: #2563eb; --A-bg: linear-gradient(145deg,#0f1c3a,#1a3272);
+    --B: #059669; --B-bg: linear-gradient(145deg,#072e20,#0b5c3a);
+    --C: #d97706; --C-bg: linear-gradient(145deg,#2a1a05,#6b3d0a);
+    --D: #7c3aed; --D-bg: linear-gradient(145deg,#1a0f35,#3d1a7a);
+    --E: #dc2626; --E-bg: linear-gradient(145deg,#2a0a0a,#6b1212);
+    --F: #0891b2; --F-bg: linear-gradient(145deg,#051e2a,#0a4d6b);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 36px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100; gap: 16px;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--A), var(--D));
+    border-radius: 9px; display: grid; place-items: center;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; color: #fff;
+  }
+  .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
+  .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .header-center { flex: 1; max-width: 560px; }
+  #search {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px 8px 36px;
+    color: var(--text); font-size: 14px; outline: none; transition: border-color .2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%235d6680' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: 12px center;
+  }
+  #search:focus { border-color: #4f8ef7; }
+  .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .count-badge { background: var(--border); color: var(--muted); font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+  .edit-toggle {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); padding: 6px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all .18s;
+  }
+  .edit-toggle:hover { border-color: #4f8ef7; color: #4f8ef7; }
+  .edit-toggle.on { background: rgba(79,142,247,.12); border-color: #4f8ef7; color: #4f8ef7; }
+  .io-btn {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); padding: 6px 11px; border-radius: 8px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all .18s;
+  }
+  .io-btn:hover { border-color: #22c55e; color: #22c55e; }
+  .io-btn.import:hover { border-color: #f59e0b; color: #f59e0b; }
+
+  /* NAV */
+  .chapitres-nav {
+    display: flex; gap: 6px; padding: 16px 36px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto; scrollbar-width: none; flex-wrap: wrap;
+  }
+  .chap-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted);
+    font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+    transition: all .18s; font-family: 'Inter', sans-serif;
+  }
+  .chap-btn .chap-pill {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px;
+    padding: 2px 6px; border-radius: 5px; color: #fff; opacity: .85;
+  }
+  .chap-btn:hover { color: var(--text); border-color: #2d3347; background: #1a1f2e; }
+  .chap-btn.active { color: #fff; }
+  .chap-btn[data-chap="all"].active { background:#1a1f2e; border-color:#4f8ef7; color:#4f8ef7; }
+  .chap-btn[data-chap="A"].active { background: var(--A-bg); border-color: var(--A); }
+  .chap-btn[data-chap="B"].active { background: var(--B-bg); border-color: var(--B); }
+  .chap-btn[data-chap="C"].active { background: var(--C-bg); border-color: var(--C); }
+  .chap-btn[data-chap="D"].active { background: var(--D-bg); border-color: var(--D); }
+  .chap-btn[data-chap="E"].active { background: var(--E-bg); border-color: var(--E); }
+  .chap-btn[data-chap="F"].active { background: var(--F-bg); border-color: var(--F); }
+  .pill-A{background:var(--A);} .pill-B{background:var(--B);} .pill-C{background:var(--C);}
+  .pill-D{background:var(--D);} .pill-E{background:var(--E);} .pill-F{background:var(--F);}
+
+  /* MAIN */
+  main { padding: 28px 36px 48px; }
+  .chap-section { margin-bottom: 40px; }
+  .chap-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .chap-letter {
+    width: 34px; height: 34px; border-radius: 9px;
+    display: grid; place-items: center;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: #fff; flex-shrink: 0;
+  }
+  .bg-A{background:var(--A);} .bg-B{background:var(--B);} .bg-C{background:var(--C);}
+  .bg-D{background:var(--D);} .bg-E{background:var(--E);} .bg-F{background:var(--F);}
+  .chap-name { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
+  .chap-sub  { font-size: 12px; color: var(--muted); }
+
+  /* GRID */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--gutter); }
+
+  /* CARD */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    cursor: pointer; transition: transform .2s ease, border-color .2s, box-shadow .2s;
+    outline: none; display: flex; flex-direction: column;
+  }
+  .card:hover, .card:focus { transform: translateY(-3px) scale(1.01); box-shadow: 0 10px 36px rgba(0,0,0,.4); }
+  .card[data-chap="A"]:hover,.card[data-chap="A"]:focus{border-color:var(--A);box-shadow:0 8px 30px rgba(37,99,235,.2);}
+  .card[data-chap="B"]:hover,.card[data-chap="B"]:focus{border-color:var(--B);box-shadow:0 8px 30px rgba(5,150,105,.2);}
+  .card[data-chap="C"]:hover,.card[data-chap="C"]:focus{border-color:var(--C);box-shadow:0 8px 30px rgba(217,119,6,.2);}
+  .card[data-chap="D"]:hover,.card[data-chap="D"]:focus{border-color:var(--D);box-shadow:0 8px 30px rgba(124,58,237,.2);}
+  .card[data-chap="E"]:hover,.card[data-chap="E"]:focus{border-color:var(--E);box-shadow:0 8px 30px rgba(220,38,38,.2);}
+  .card[data-chap="F"]:hover,.card[data-chap="F"]:focus{border-color:var(--F);box-shadow:0 8px 30px rgba(8,145,178,.2);}
+  .card-thumb {
+    height: 110px; display: flex; align-items: center; justify-content: center;
+    font-size: 40px; position: relative;
+  }
+  .card-thumb::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.5)); }
+  .card-num {
+    position: absolute; top: 8px; left: 10px; z-index: 1;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; color: rgba(255,255,255,.6);
+  }
+  /* indicateur lien */
+  .card-link-dot {
+    position: absolute; top: 8px; right: 10px; z-index: 1;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #22c55e; box-shadow: 0 0 6px #22c55e;
+    display: none;
+  }
+  .card.has-link .card-link-dot { display: block; }
+
+  .card-body { padding: 13px 15px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.35; }
+  .card-actions { display: flex; gap: 6px; margin-top: auto; }
+
+  /* bouton édition sur la carte */
+  .card-edit-btn {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 34px; height: 32px; flex-shrink: 0;
+    background: rgba(79,142,247,.12); border: 1px solid rgba(79,142,247,.3);
+    border-radius: 7px; color: #4f8ef7; font-size: 14px;
+    cursor: pointer; transition: background .15s;
+  }
+  .card-edit-btn:hover { background: rgba(79,142,247,.25); }
+  body.edit-mode .card-edit-btn { display: flex; }
+
+  .btn {
+    flex: 1; padding: 7px 0; border-radius: 7px; font-size: 12px; font-weight: 600;
+    border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity .15s;
+  }
+  .btn:hover { opacity: .82; }
+  .btn-ghost { background: var(--bg); color: var(--muted); border: 1px solid var(--border); flex: 0 0 34px; padding: 0; }
+  .btn-A{background:var(--A);color:#fff;} .btn-B{background:var(--B);color:#fff;}
+  .btn-C{background:var(--C);color:#fff;} .btn-D{background:var(--D);color:#fff;}
+  .btn-E{background:var(--E);color:#fff;} .btn-F{background:var(--F);color:#fff;}
+  .thumb-A{background:var(--A-bg);} .thumb-B{background:var(--B-bg);}
+  .thumb-C{background:var(--C-bg);} .thumb-D{background:var(--D-bg);}
+  .thumb-E{background:var(--E-bg);} .thumb-F{background:var(--F-bg);}
+
+  /* ── MODAL GÉNÉRIQUE */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.78);
+    backdrop-filter: blur(8px); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; width: 480px; max-width: 90vw; padding: 28px;
+    transform: scale(.94); transition: transform .2s; position: relative;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-close {
+    position: absolute; top: 16px; right: 18px;
+    background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer;
+  }
+  .modal-thumb { height: 130px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 20px; }
+  .modal-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  .modal-title  { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 18px; line-height: 1.3; }
+  .modal-drive  {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 9px; padding: 12px 14px; margin-bottom: 18px; font-size: 13px;
+  }
+  .modal-drive-icon { font-size: 20px; flex-shrink: 0; }
+  .modal-drive-info { flex: 1; }
+  .modal-drive-name { font-weight: 600; color: var(--text); }
+  .modal-drive-meta { color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .modal-actions { display: flex; gap: 8px; }
+  .modal-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity .15s; }
+  .modal-btn:hover { opacity: .85; }
+  .modal-btn-ghost { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+  .no-drive { display:inline-flex; align-items:center; gap:5px; background:rgba(217,119,6,.12); border:1px solid rgba(217,119,6,.25); color:#f59e0b; font-size:11px; font-weight:500; padding:3px 9px; border-radius:5px; }
+
+  /* ── MODAL ÉDITION */
+  .edit-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; width: 520px; max-width: 92vw; padding: 30px;
+    transform: scale(.94); transition: transform .2s; position: relative;
+  }
+  .modal-overlay.open .edit-modal { transform: scale(1); }
+  .edit-modal-title {
+    font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .edit-modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 22px; }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+  .field-input {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px;
+    color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif;
+    outline: none; transition: border-color .2s; width: 100%;
+  }
+  .field-input:focus { border-color: #4f8ef7; }
+  .field-input::placeholder { color: var(--muted); }
+  .field-hint { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .field-hint code {
+    background: var(--border); padding: 1px 5px; border-radius: 4px;
+    font-family: monospace; font-size: 11px; color: #93c5fd;
+  }
+
+  .url-preview {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 7px; padding: 8px 12px;
+    font-size: 11px; color: var(--muted); font-family: monospace;
+    word-break: break-all; min-height: 32px;
+    transition: border-color .2s;
+  }
+  .url-preview.valid { border-color: #22c55e; color: #86efac; }
+  .url-preview.invalid { border-color: #ef4444; color: #fca5a5; }
+
+  .edit-actions { display: flex; gap: 8px; margin-top: 20px; }
+  .btn-save {
+    flex: 1; padding: 10px; border-radius: 8px;
+    background: #4f8ef7; color: #fff;
+    font-size: 14px; font-weight: 600; border: none;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity .15s;
+  }
+  .btn-save:hover { opacity: .88; }
+  .btn-clear {
+    padding: 10px 16px; border-radius: 8px;
+    background: var(--bg); color: #ef4444;
+    border: 1px solid rgba(239,68,68,.25);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity .15s;
+  }
+  .btn-clear:hover { opacity: .8; }
+  .btn-cancel {
+    padding: 10px 16px; border-radius: 8px;
+    background: var(--bg); color: var(--muted);
+    border: 1px solid var(--border);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+
+  .save-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #22c55e; color: #fff;
+    padding: 10px 22px; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    opacity: 0; transition: all .3s; z-index: 999; pointer-events: none;
+  }
+  .save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .empty-state { text-align: center; padding: 80px 0; color: var(--muted); font-size: 15px; }
+  .empty-icon  { font-size: 48px; margin-bottom: 14px; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">CN</div>
+    <div>
+      <div class="logo-text">Supports Ateliers 2025–2026</div>
+      <div class="logo-sub">Conseillers Numériques · Lot-et-Garonne</div>
+    </div>
+  </div>
+  <div class="header-center">
+    <input type="search" id="search" placeholder="Rechercher un atelier…" autocomplete="off">
+  </div>
+  <div class="header-right">
+    <span class="count-badge" id="count-badge">32 ateliers</span>
+    <button class="io-btn" id="btn-export" title="Exporter les liens en JSON">⬆ Export</button>
+    <button class="io-btn import" id="btn-import" title="Importer des liens depuis un JSON">⬇ Import</button>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+    <button class="edit-toggle" id="edit-toggle">✏️ Gérer les liens</button>
+  </div>
+</header>
+
+<nav class="chapitres-nav">
+  <button class="chap-btn active" data-chap="all"><span class="chap-pill" style="background:#4f8ef7">Tout</span>Catalogue complet</button>
+  <button class="chap-btn" data-chap="A"><span class="chap-pill pill-A">A</span>Par l'outil</button>
+  <button class="chap-btn" data-chap="B"><span class="chap-pill pill-B">B</span>Pour le quotidien</button>
+  <button class="chap-btn" data-chap="C"><span class="chap-pill pill-C">C</span>Pour le bureau</button>
+  <button class="chap-btn" data-chap="D"><span class="chap-pill pill-D">D</span>Emploi & mobilité</button>
+  <button class="chap-btn" data-chap="E"><span class="chap-pill pill-E">E</span>Bien vivre</button>
+  <button class="chap-btn" data-chap="F"><span class="chap-pill pill-F">F</span>Se cultiver</button>
+</nav>
+
+<main id="main"></main>
+
+<!-- MODAL OUVERTURE -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <div class="modal-thumb" id="modal-thumb"></div>
+    <div class="modal-eyebrow" id="modal-eyebrow"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-drive">
+      <span class="modal-drive-icon">📁</span>
+      <div class="modal-drive-info">
+        <div class="modal-drive-name" id="modal-filename"></div>
+        <div class="modal-drive-meta">Google Drive · Format PPTX</div>
+      </div>
+      <span id="modal-drive-status"></span>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" id="modal-open">▶ Ouvrir dans Drive</button>
+      <button class="modal-btn modal-btn-ghost" id="modal-download">⬇ Télécharger</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ÉDITION LIEN -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="edit-modal">
+    <button class="modal-close" id="edit-modal-close">✕</button>
+    <div class="edit-modal-title" id="edit-modal-title"></div>
+    <div class="edit-modal-sub">Renseigne le lien Google Drive du fichier PPTX</div>
+
+    <div class="field-group">
+      <div class="field-label">Lien Google Drive</div>
+      <input class="field-input" id="edit-url-input" type="url"
+        placeholder="https://drive.google.com/file/d/…/view">
+      <div class="field-hint">
+        Colle le lien complet du fichier (clic droit → <strong>Obtenir le lien</strong>).<br>
+        Format attendu : <code>drive.google.com/file/d/[ID]/view</code>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">Aperçu du lien détecté</div>
+      <div class="url-preview" id="url-preview">—</div>
+    </div>
+
+    <div class="edit-actions">
+      <button class="btn-save" id="btn-save">✓ Enregistrer</button>
+      <button class="btn-clear" id="btn-clear">✕ Effacer</button>
+      <button class="btn-cancel" id="btn-cancel">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="save-toast" id="toast">✓ Lien enregistré</div>
+
+<script>
+const CHAPITRES = {
+  A: { label: "Le numérique par l'outil" },
+  B: { label: "Le numérique pour le quotidien" },
+  C: { label: "Le numérique pour le bureau" },
+  D: { label: "Le numérique pour l'emploi et la mobilité" },
+  E: { label: "Bien vivre le numérique" },
+  F: { label: "Le numérique pour se cultiver" },
+};
+
+const CATALOGUE = [
+  {chap:"A",num:"A1",emoji:"🖥️",titre:"Prendre en main l'ordinateur"},
+  {chap:"A",num:"A2",emoji:"📱",titre:"Prendre en main la tablette"},
+  {chap:"A",num:"A3",emoji:"📲",titre:"Prendre en main le smartphone"},
+  {chap:"A",num:"A4",emoji:"⬇️",titre:"Télécharger et gérer ses applis (iOS/Android)"},
+  {chap:"A",num:"A5",emoji:"🌐",titre:"Naviguer sur internet"},
+  {chap:"A",num:"A6",emoji:"🔒",titre:"Sécuriser son environnement numérique"},
+  {chap:"B",num:"B1",emoji:"📧",titre:"Prendre en main sa boite mail"},
+  {chap:"B",num:"B2",emoji:"📎",titre:"Recevoir et envoyer un mail avec pièce jointe"},
+  {chap:"B",num:"B3",emoji:"🪪",titre:"Créer son identité numérique (FranceConnect)"},
+  {chap:"B",num:"B4",emoji:"🏛️",titre:"Démarches administratives en ligne"},
+  {chap:"B",num:"B5",emoji:"👤",titre:"Espace personnel site administratif (Ameli, CAF, MSA, Impôts…)"},
+  {chap:"B",num:"B6",emoji:"🏥",titre:"Espace personnel site médical (Mon espace santé, Doctolib…)"},
+  {chap:"B",num:"B7",emoji:"🎓",titre:"Outils numériques de scolarité (Pronote, Educonnect, Parcoursup…)"},
+  {chap:"B",num:"B8",emoji:"💶",titre:"Solutions numériques pour la gestion de budget"},
+  {chap:"B",num:"B9",emoji:"🛒",titre:"Sécuriser ses achats en ligne et éviter les arnaques"},
+  {chap:"C",num:"C1",emoji:"📝",titre:"Traitement de texte"},
+  {chap:"C",num:"C2",emoji:"📊",titre:"Tableur"},
+  {chap:"C",num:"C3",emoji:"📄",titre:"Manier les PDF"},
+  {chap:"C",num:"C4",emoji:"☁️",titre:"Transférer et stocker ses fichiers (Drive, Cloud…)"},
+  {chap:"C",num:"C5",emoji:"🖼️",titre:"Organiser ses fichiers multimédias"},
+  {chap:"D",num:"D1",emoji:"💼",titre:"Recherche d'emploi (CV, lettre de motivation…)"},
+  {chap:"D",num:"D2",emoji:"🎓",titre:"Compte Personnel de Formation (CPF)"},
+  {chap:"D",num:"D3",emoji:"🔎",titre:"Sites JOB47 et France Travail"},
+  {chap:"D",num:"D4",emoji:"🗺️",titre:"Solutions numériques liées à la mobilité (GPS, bus, covoiturage…)"},
+  {chap:"E",num:"E1",emoji:"🛡️",titre:"Cybersécurité"},
+  {chap:"E",num:"E2",emoji:"💬",titre:"Découverte des réseaux sociaux"},
+  {chap:"E",num:"E3",emoji:"👥",titre:"Réseaux sociaux et jeunesse"},
+  {chap:"E",num:"E4",emoji:"🔍",titre:"E-réputation"},
+  {chap:"E",num:"E5",emoji:"📺",titre:"Écrans et jeunesse"},
+  {chap:"E",num:"E6",emoji:"🌿",titre:"Numérique et environnement"},
+  {chap:"E",num:"E7",emoji:"🤖",titre:"Intelligence artificielle (IA)"},
+  {chap:"F",num:"F1",emoji:"📚",titre:"Plateforme ressources numériques de la Médiathèque Départementale"},
+  {chap:"F",num:"F2",emoji:"🎬",titre:"Regarder et écouter (films, musiques)"},
+  {chap:"F",num:"F3",emoji:"📖",titre:"Lire (e-book)"},
+  {chap:"F",num:"F4",emoji:"🧠",titre:"Apprendre et s'informer (autoformation, presse)"},
+  {chap:"F",num:"F5",emoji:"🏛️",titre:"Visites virtuelles (musées, opéras, théâtres…)"},
+];
+
+// ── STORAGE
+const STORAGE_KEY = "conum_links_v1";
+function loadLinks() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
+}
+function saveLink(num, driveId) {
+  const links = loadLinks();
+  if (driveId) links[num] = driveId; else delete links[num];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+}
+function getLink(num) { return loadLinks()[num] || ""; }
+
+// ── EXPORT / IMPORT JSON
+function exportLinks() {
+  const links = loadLinks();
+  if (!Object.keys(links).length) { showToast("⚠ Aucun lien à exporter"); return; }
+  const blob = new Blob([JSON.stringify(links, null, 2)], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `conum-liens-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`✓ ${Object.keys(links).length} liens exportés`);
+}
+
+function importLinks(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (typeof data !== "object" || Array.isArray(data)) throw new Error();
+      // Validation : ne garder que les clés qui correspondent au catalogue
+      const validNums = new Set(CATALOGUE.map(a => a.num));
+      const merged    = loadLinks();
+      let count = 0;
+      for (const [k, v] of Object.entries(data)) {
+        if (validNums.has(k) && typeof v === "string") { merged[k] = v; count++; }
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      renderMain();
+      showToast(`✓ ${count} liens importés`);
+    } catch {
+      showToast("⚠ Fichier JSON invalide");
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── URL UTILS
+function extractDriveId(url) {
+  if (!url) return "";
+  // Format /file/d/ID/  ou  /presentation/d/ID/  ou  /document/d/ID/
+  const m = url.match(/\/(?:file|presentation|document|spreadsheets)\/d\/([a-zA-Z0-9_-]{10,})/);
+  if (m) return m[1];
+  // Format id=ID dans les query params
+  const q = url.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+  if (q) return q[1];
+  // ID brut collé directement
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(url.trim())) return url.trim();
+  return "";
+}
+function driveViewUrl(id)     { return `https://drive.google.com/file/d/${id}/view`; }
+function driveDownloadUrl(id) { return `https://drive.google.com/uc?export=download&id=${id}`; }
+
+// ── STATE
+let currentChap = "all";
+let currentSearch = "";
+let editMode = false;
+let modalAtelier = null;
+let editAtelier = null;
+
+function filtered() {
+  return CATALOGUE.filter(a => {
+    const matchChap = currentChap === "all" || a.chap === currentChap;
+    const q = currentSearch.toLowerCase();
+    return matchChap && (!q || a.titre.toLowerCase().includes(q) || a.num.toLowerCase().includes(q));
+  });
+}
+
+// ── RENDER
+function renderMain() {
+  const main = document.getElementById("main");
+  const list = filtered();
+  const links = loadLinks();
+
+  const linkedCount = CATALOGUE.filter(a => links[a.num]).length;
+  document.getElementById("count-badge").textContent =
+    linkedCount ? `${linkedCount} / ${CATALOGUE.length} liés` : `${CATALOGUE.length} ateliers`;
+
+  if (!list.length) {
+    main.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div>Aucun atelier trouvé.</div>`;
+    return;
+  }
+
+  const grouped = {};
+  list.forEach(a => { if (!grouped[a.chap]) grouped[a.chap] = []; grouped[a.chap].push(a); });
+
+  main.innerHTML = Object.entries(grouped).map(([chap, ateliers]) => `
+    <section class="chap-section">
+      <div class="chap-header">
+        <div class="chap-letter bg-${chap}">${chap}</div>
+        <div>
+          <div class="chap-name">${CHAPITRES[chap].label}</div>
+          <div class="chap-sub">${ateliers.length} atelier${ateliers.length > 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      <div class="grid">
+        ${ateliers.map(a => {
+          const hasLink = !!links[a.num];
+          return `
+          <div class="card ${hasLink ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}">
+            <div class="card-thumb thumb-${a.chap}">
+              <span class="card-num">${a.num}</span>
+              <span class="card-link-dot"></span>
+              ${a.emoji}
+            </div>
+            <div class="card-body">
+              <div class="card-title">${a.titre}</div>
+              <div class="card-actions">
+                <button class="btn btn-${a.chap}" onclick="openModal('${a.num}',event)">▶ Ouvrir</button>
+                <button class="btn btn-ghost" title="Télécharger" onclick="downloadFile('${a.num}',event)">⬇</button>
+                <button class="card-edit-btn" title="Modifier le lien Drive" onclick="openEditModal('${a.num}',event)">✏️</button>
+              </div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </section>
+  `).join("");
+
+}
+
+// ── MODAL OUVERTURE
+function openModal(num, e) {
+  if (e) e.stopPropagation();
+  const a = CATALOGUE.find(x => x.num === num);
+  if (!a) return;
+  modalAtelier = a;
+  const driveId = getLink(num);
+
+  const thumb = document.getElementById("modal-thumb");
+  thumb.className = `modal-thumb thumb-${a.chap}`;
+  thumb.textContent = a.emoji;
+  document.getElementById("modal-eyebrow").textContent = `${a.num} · ${CHAPITRES[a.chap].label}`;
+  document.getElementById("modal-title").textContent = a.titre;
+  document.getElementById("modal-filename").textContent = `${a.num} — ${a.titre}.pptx`;
+
+  const statusEl = document.getElementById("modal-drive-status");
+  statusEl.innerHTML = driveId
+    ? `<span style="color:#22c55e;font-size:12px;font-weight:600">● Disponible</span>`
+    : `<span class="no-drive">⚠ Lien manquant</span>`;
+
+  const openBtn = document.getElementById("modal-open");
+  openBtn.className = `modal-btn btn-${a.chap}`;
+
+  document.getElementById("modal").classList.add("open");
+}
+
+function closeModal() { document.getElementById("modal").classList.remove("open"); modalAtelier = null; }
+
+// ── MODAL ÉDITION
+function openEditModal(num, e) {
+  if (e) e.stopPropagation();
+  editAtelier = CATALOGUE.find(x => x.num === num);
+  if (!editAtelier) return;
+
+  document.getElementById("edit-modal-title").textContent = `${editAtelier.num} — ${editAtelier.titre}`;
+  const existing = getLink(num);
+  const input = document.getElementById("edit-url-input");
+  input.value = existing ? driveViewUrl(existing) : "";
+  updatePreview(input.value);
+
+  document.getElementById("edit-modal").classList.add("open");
+  setTimeout(() => input.focus(), 200);
+}
+
+function closeEditModal() { document.getElementById("edit-modal").classList.remove("open"); editAtelier = null; }
+
+function updatePreview(val) {
+  const preview = document.getElementById("url-preview");
+  if (!val) { preview.textContent = "—"; preview.className = "url-preview"; return; }
+  const id = extractDriveId(val);
+  if (id) {
+    preview.textContent = `ID : ${id}`;
+    preview.className = "url-preview valid";
+  } else {
+    preview.textContent = "Lien non reconnu — vérifie le format";
+    preview.className = "url-preview invalid";
+  }
+}
+
+function showToast(msg = "✓ Lien enregistré") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function downloadFile(num, e) {
+  if (e) e.stopPropagation();
+  const id = getLink(num);
+  if (!id) { openEditModal(num, e); return; }
+  window.open(driveDownloadUrl(id), "_blank");
+}
+
+// ── EVENTS
+document.getElementById("edit-url-input").addEventListener("input", e => updatePreview(e.target.value));
+
+document.getElementById("btn-save").addEventListener("click", () => {
+  if (!editAtelier) return;
+  const val = document.getElementById("edit-url-input").value.trim();
+  const id = extractDriveId(val) || (val.length > 4 && !val.includes("/") ? val : "");
+  if (val && !id) { alert("Lien non reconnu. Colle l'URL complète Google Drive."); return; }
+  saveLink(editAtelier.num, id);
+  closeEditModal();
+  renderMain();
+  showToast(`✓ Lien enregistré pour ${editAtelier.num}`);
+});
+
+document.getElementById("btn-clear").addEventListener("click", () => {
+  if (!editAtelier) return;
+  if (!confirm("Supprimer le lien pour cet atelier ?")) return;
+  saveLink(editAtelier.num, "");
+  closeEditModal();
+  renderMain();
+  showToast("✕ Lien supprimé");
+});
+
+document.getElementById("btn-cancel").addEventListener("click", closeEditModal);
+document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
+document.getElementById("edit-modal").addEventListener("click", e => { if (e.target === document.getElementById("edit-modal")) closeEditModal(); });
+
+document.getElementById("modal-close").addEventListener("click", closeModal);
+document.getElementById("modal").addEventListener("click", e => { if (e.target === document.getElementById("modal")) closeModal(); });
+
+document.getElementById("modal-open").addEventListener("click", () => {
+  if (!modalAtelier) return;
+  const id = getLink(modalAtelier.num);
+  if (!id) { closeModal(); openEditModal(modalAtelier.num); return; }
+  window.open(driveViewUrl(id), "_blank");
+});
+document.getElementById("modal-download").addEventListener("click", () => {
+  if (!modalAtelier) return;
+  const id = getLink(modalAtelier.num);
+  if (!id) { closeModal(); openEditModal(modalAtelier.num); return; }
+  window.open(driveDownloadUrl(id), "_blank");
+});
+
+// Toggle mode édition
+document.getElementById("edit-toggle").addEventListener("click", () => {
+  editMode = !editMode;
+  document.body.classList.toggle("edit-mode", editMode);
+  const btn = document.getElementById("edit-toggle");
+  btn.classList.toggle("on", editMode);
+  btn.textContent = editMode ? "✅ Mode édition ON" : "✏️ Gérer les liens";
+});
+
+document.getElementById("btn-export").addEventListener("click", exportLinks);
+document.getElementById("btn-import").addEventListener("click", () => document.getElementById("import-file").click());
+document.getElementById("import-file").addEventListener("change", e => {
+  importLinks(e.target.files[0]);
+  e.target.value = ""; // reset pour permettre re-import du même fichier
+});
+
+document.querySelectorAll(".chap-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".chap-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentChap = btn.dataset.chap;
+    renderMain();
+  });
+});
+
+document.getElementById("search").addEventListener("input", e => {
+  currentSearch = e.target.value;
+  if (currentSearch) {
+    document.querySelectorAll(".chap-btn").forEach(b => b.classList.remove("active"));
+    document.querySelector('[data-chap="all"]').classList.add("active");
+    currentChap = "all";
+  }
+  renderMain();
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { closeModal(); closeEditModal(); }
+  if (e.key === "/" && !document.getElementById("modal").classList.contains("open") && !document.getElementById("edit-modal").classList.contains("open")) {
+    document.getElementById("search").focus(); e.preventDefault();
+  }
+});
+
+renderMain();
+
+// ── DÉLÉGATION UNIQUE SUR #main (évite les listeners orphelins après re-render)
+document.getElementById("main").addEventListener("click", e => {
+  const card = e.target.closest(".card");
+  if (!card) return;
+  if (!e.target.closest("button")) openModal(card.dataset.id, e);
+});
+document.getElementById("main").addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const card = e.target.closest(".card");
+  if (card) openModal(card.dataset.id, e);
+});
+</script>
+</body>
+</html>
