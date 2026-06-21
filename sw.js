@@ -1,4 +1,4 @@
-const CACHE = "conum47-v1";
+const CACHE = "conum47-v2";
 const PRECACHE = ["./", "./index.html", "./assets/thumbs/manifest.json", "./assets/links.json"];
 
 self.addEventListener("install", e => {
