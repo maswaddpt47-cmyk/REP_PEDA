@@ -1,10 +1,10 @@
-const CACHE = "conum47-v2";
-const PRECACHE = ["./", "./index.html", "./assets/thumbs/manifest.json", "./assets/links.json"];
+const CACHE = "conum47-v3";
+const STATIC = ["./assets/icon.svg", "./assets/links.json", "./assets/thumbs/manifest.json"];
 
 self.addEventListener("install", e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => Promise.allSettled(PRECACHE.map(u => c.add(u))))
+      .then(c => Promise.allSettled(STATIC.map(u => c.add(u))))
       .then(() => self.skipWaiting())
   );
 });
@@ -18,15 +18,24 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
-  if (e.request.url.includes("api.github.com") || e.request.url.includes("fonts.googleapis")) return;
+  if (e.request.url.includes("api.github.com")) return;
+
+  // HTML : toujours réseau (jamais en cache)
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  // Assets statiques : cache-first
   e.respondWith(
     caches.open(CACHE).then(async cache => {
       const cached = await cache.match(e.request);
-      const fresh = fetch(e.request).then(res => {
-        if (res.ok) cache.put(e.request, res.clone());
-        return res;
-      }).catch(() => cached);
-      return cached || fresh;
+      if (cached) return cached;
+      const res = await fetch(e.request);
+      if (res.ok) cache.put(e.request, res.clone());
+      return res;
     })
   );
 });
