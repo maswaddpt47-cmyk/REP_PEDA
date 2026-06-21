@@ -28,6 +28,19 @@
     --E: #dc2626; --E-bg: linear-gradient(145deg,#2a0a0a,#6b1212);
     --F: #0891b2; --F-bg: linear-gradient(145deg,#051e2a,#0a4d6b);
   }
+  :root.light {
+    --bg:      #f0f2f7;
+    --surface: #ffffff;
+    --border:  #dde1ee;
+    --text:    #1a1d2e;
+    --muted:   #8491b0;
+    --A-bg: linear-gradient(145deg,#dbeafe,#bfdbfe);
+    --B-bg: linear-gradient(145deg,#d1fae5,#a7f3d0);
+    --C-bg: linear-gradient(145deg,#fef3c7,#fde68a);
+    --D-bg: linear-gradient(145deg,#ede9fe,#ddd6fe);
+    --E-bg: linear-gradient(145deg,#fee2e2,#fecaca);
+    --F-bg: linear-gradient(145deg,#cffafe,#a5f3fc);
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
 
@@ -76,6 +89,20 @@
   }
   .io-btn:hover { border-color: #22c55e; color: #22c55e; }
   .io-btn.import:hover { border-color: #f59e0b; color: #f59e0b; }
+  .theme-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); font-size: 16px; cursor: pointer;
+    transition: all .18s; flex-shrink: 0;
+  }
+  .theme-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+  :root.light .save-toast { box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+  :root.light #search {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238491b0' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  }
+  :root.light .card { box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+  :root.light .card:hover, :root.light .card:focus { box-shadow: 0 8px 24px rgba(0,0,0,.12); }
 
   /* NAV */
   .chapitres-nav {
@@ -390,9 +417,10 @@
   </div>
   <div class="header-right">
     <span class="count-badge" id="count-badge">32 ateliers</span>
-    <button class="io-btn" id="btn-export" title="Exporter les liens en JSON">⬆ Export</button>
-    <button class="io-btn import" id="btn-import" title="Importer des liens depuis un JSON">⬇ Import</button>
+    <button class="io-btn" id="btn-export" title="Exporter la configuration">⬆ Export</button>
+    <button class="io-btn import" id="btn-import" title="Importer une configuration">⬇ Import</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
+    <button class="theme-btn" id="btn-theme" title="Basculer mode clair / sombre">🌙</button>
   </div>
 </header>
 
@@ -1195,6 +1223,19 @@ document.addEventListener("keydown", e => {
 
 loadManifest().then(loadRepoLinks).then(() => renderMain());
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+
+// ── THEME
+const THEME_KEY = "conum_theme";
+function applyTheme(t) {
+  document.documentElement.classList.toggle("light", t === "light");
+  document.getElementById("btn-theme").textContent = t === "light" ? "🌙" : "☀️";
+}
+(function() { applyTheme(localStorage.getItem(THEME_KEY) || "dark"); })();
+document.getElementById("btn-theme").addEventListener("click", () => {
+  const next = document.documentElement.classList.contains("light") ? "dark" : "light";
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+});
 
 document.getElementById("main").addEventListener("click", e => {
   const card = e.target.closest(".card");
