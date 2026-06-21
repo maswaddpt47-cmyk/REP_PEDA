@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ateliers Numériques — Supports CONUM 47</title>
+<link rel="manifest" href="app.webmanifest">
+<meta name="theme-color" content="#0c0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CONUM 47">
+<link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -151,10 +157,16 @@
   }
   .card-link-badge {
     position: absolute; top: 7px; right: 9px; z-index: 1;
-    background: rgba(34,197,94,.18); border: 1px solid rgba(34,197,94,.35);
-    color: #22c55e; font-size: 10px; font-weight: 700;
+    font-size: 10px; font-weight: 700;
     padding: 1px 7px; border-radius: 10px;
     font-family: 'Space Grotesk', sans-serif;
+    background: rgba(34,197,94,.18); border: 1px solid rgba(34,197,94,.35); color: #22c55e;
+  }
+  .card-link-badge.badge-empty {
+    background: rgba(100,116,139,.1); border-color: rgba(100,116,139,.2); color: #64748b;
+  }
+  .card-link-badge.badge-full {
+    background: rgba(34,197,94,.3); border-color: rgba(34,197,94,.6); color: #4ade80;
   }
   .card-thumb-emoji { z-index: 1; }
   .card-thumb.has-img .card-thumb-emoji { display: none; }
@@ -569,39 +581,73 @@ function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ""; }
 function saveGhToken(t) { if (t) localStorage.setItem(GH_TOKEN_KEY, t.trim()); }
 function clearGhToken() { localStorage.removeItem(GH_TOKEN_KEY); }
 
+function ghHeaders(token) {
+  return { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" };
+}
+async function ghGetFile(path, token) {
+  const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, { headers: ghHeaders(token) });
+  if (res.status === 401 || res.status === 403) { clearGhToken(); return "auth_error"; }
+  if (!res.ok) return null;
+  return res.json();
+}
+async function ghPutFile(path, message, content, sha, token) {
+  const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+    method: "PUT", headers: ghHeaders(token),
+    body: JSON.stringify({ message, content: btoa(unescape(encodeURIComponent(content))), sha, branch: "main" })
+  });
+  if (res.status === 401 || res.status === 403) { clearGhToken(); return "auth_error"; }
+  return res.ok ? true : false;
+}
+
 async function uploadToRepo(num, filename, imageDataUrl, token) {
   try {
-    const headers = {
-      "Authorization": `token ${token}`,
-      "Accept": "application/vnd.github.v3+json",
-      "Content-Type": "application/json"
-    };
-
-    // 1. Upload l'image dans assets/thumbs/
-    const fileUrl = `https://api.github.com/repos/${GH_REPO}/contents/assets/thumbs/${filename}`;
+    // 1. Upload l'image
     const base64 = imageDataUrl.replace(/^data:image\/[^;]+;base64,/, "");
-    let fileSha;
-    const checkRes = await fetch(fileUrl, { headers });
-    if (checkRes.ok) fileSha = (await checkRes.json()).sha;
-    const uploadBody = { message: `feat: image ${filename} pour tuile ${num}`, content: base64, branch: "main" };
-    if (fileSha) uploadBody.sha = fileSha;
-    const uploadRes = await fetch(fileUrl, { method: "PUT", headers, body: JSON.stringify(uploadBody) });
-    if (!uploadRes.ok) return false;
-
-    // 2. Met à jour manifest.json
-    const manifestUrl = `https://api.github.com/repos/${GH_REPO}/contents/${GH_MANIFEST}`;
-    const getRes = await fetch(manifestUrl, { headers });
-    if (!getRes.ok) return false;
-    const current = await getRes.json();
-    const decoded = JSON.parse(decodeURIComponent(escape(atob(current.content.replace(/\n/g, "")))));
-    decoded[num] = filename;
-    const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(decoded, null, 2) + "\n")));
-    const putRes = await fetch(manifestUrl, {
-      method: "PUT", headers,
-      body: JSON.stringify({ message: `feat: ajout ${num} dans manifest`, content: newContent, sha: current.sha, branch: "main" })
+    const existing = await ghGetFile(`assets/thumbs/${filename}`, token);
+    if (existing === "auth_error") return "auth_error";
+    const imgRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/assets/thumbs/${filename}`, {
+      method: "PUT", headers: ghHeaders(token),
+      body: JSON.stringify({ message: `feat: image ${filename} pour tuile ${num}`, content: base64, sha: existing?.sha, branch: "main" })
     });
-    return putRes.ok;
+    if (imgRes.status === 401 || imgRes.status === 403) { clearGhToken(); return "auth_error"; }
+    if (!imgRes.ok) return false;
+
+    // 2. Mise à jour manifest
+    const manifest = await ghGetFile(GH_MANIFEST, token);
+    if (!manifest || manifest === "auth_error") return manifest === "auth_error" ? "auth_error" : false;
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(manifest.content.replace(/\n/g, "")))));
+    decoded[num] = filename;
+    return await ghPutFile(GH_MANIFEST, `feat: ajout ${num} dans manifest`, JSON.stringify(decoded, null, 2) + "\n", manifest.sha, token);
   } catch { return false; }
+}
+
+async function pushLinksToRepo(token) {
+  try {
+    const file = await ghGetFile("assets/links.json", token);
+    if (!file || file === "auth_error") return file === "auth_error" ? "auth_error" : false;
+    return await ghPutFile("assets/links.json", "feat: mise à jour des liens ateliers", JSON.stringify(loadLinks(), null, 2) + "\n", file.sha, token);
+  } catch { return false; }
+}
+
+// ── REPO LIENS (assets/links.json)
+async function loadRepoLinks() {
+  try {
+    const res = await fetch("assets/links.json");
+    if (!res.ok) return;
+    const data = await res.json();
+    const local = loadLinks();
+    let changed = false;
+    const validKeys = new Set(FICHES.map(f => f.key));
+    for (const [num, val] of Object.entries(data)) {
+      if (typeof val !== "object" || Array.isArray(val)) continue;
+      if (!CATALOGUE.find(a => a.num === num)) continue;
+      if (!local[num]) { local[num] = {}; }
+      for (const [k, v] of Object.entries(val)) {
+        if (validKeys.has(k) && v && !local[num][k]) { local[num][k] = v; changed = true; }
+      }
+    }
+    if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
+  } catch {}
 }
 
 // ── STORAGE IMAGES
@@ -661,14 +707,19 @@ function getEffectiveThumb(num) {
 // ── EXPORT / IMPORT
 function exportLinks() {
   const links = loadLinks();
-  if (!Object.keys(links).length) { showToast("⚠ Aucun lien à exporter"); return; }
-  const blob = new Blob([JSON.stringify(links, null, 2)], { type: "application/json" });
+  const thumbs = loadThumbs();
+  const hasData = Object.keys(links).length || Object.keys(thumbs).length;
+  if (!hasData) { showToast("⚠ Aucune donnée à exporter"); return; }
+  const date = new Date().toISOString().slice(0, 10);
+  const data = { version: 2, exportDate: date, links, thumbs };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = `conum-liens-${new Date().toISOString().slice(0,10)}.json`;
+  a.href = url; a.download = `conum-config-${date}.json`;
   a.click(); URL.revokeObjectURL(url);
-  const total = Object.values(links).reduce((s, v) => s + Object.keys(v).length, 0);
-  showToast(`✓ ${total} liens exportés`);
+  const totalLinks = Object.values(links).reduce((s, v) => s + Object.keys(v).length, 0);
+  const totalThumbs = Object.keys(thumbs).length;
+  showToast(`✓ ${totalLinks} liens + ${totalThumbs} images exportés`);
 }
 function importLinks(file) {
   if (!file) return;
@@ -679,23 +730,32 @@ function importLinks(file) {
       if (typeof data !== "object" || Array.isArray(data)) throw new Error();
       const validNums = new Set(CATALOGUE.map(a => a.num));
       const validKeys = new Set(FICHES.map(f => f.key));
+      const linksPayload = data.version === 2 ? (data.links || {}) : data;
       const merged = loadLinks();
-      let count = 0;
-      for (const [num, val] of Object.entries(data)) {
+      let linkCount = 0;
+      for (const [num, val] of Object.entries(linksPayload)) {
         if (!validNums.has(num)) continue;
         if (typeof val === "string") {
           if (!merged[num]) merged[num] = {};
-          merged[num].presentation = val; count++;
+          merged[num].presentation = val; linkCount++;
         } else if (typeof val === "object" && !Array.isArray(val)) {
           if (!merged[num]) merged[num] = {};
           for (const [k, v] of Object.entries(val)) {
-            if (validKeys.has(k) && typeof v === "string") { merged[num][k] = v; count++; }
+            if (validKeys.has(k) && typeof v === "string") { merged[num][k] = v; linkCount++; }
           }
         }
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      let thumbCount = 0;
+      if (data.version === 2 && data.thumbs && typeof data.thumbs === "object") {
+        const existingThumbs = loadThumbs();
+        for (const [num, src] of Object.entries(data.thumbs)) {
+          if (validNums.has(num) && typeof src === "string") { existingThumbs[num] = src; thumbCount++; }
+        }
+        localStorage.setItem(THUMBS_KEY, JSON.stringify(existingThumbs));
+      }
       renderMain();
-      showToast(`✓ ${count} liens importés`);
+      showToast(`✓ ${linkCount} liens + ${thumbCount} images importés`);
     } catch { showToast("⚠ Fichier JSON invalide"); }
   };
   reader.readAsText(file);
@@ -761,7 +821,7 @@ function renderMain() {
           <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}">
             <div class="card-thumb thumb-${a.chap}${hasImg ? ' has-img' : ''}" data-num="${a.num}">
               <span class="card-num">${a.num}</span>
-              ${n > 0 ? `<span class="card-link-badge">${n}/6</span>` : ''}
+              <span class="card-link-badge ${n===0?'badge-empty':n===6?'badge-full':''}">${n}/6</span>
               <span class="card-thumb-emoji">${a.emoji}</span>
             </div>
             <div class="card-body">
@@ -961,6 +1021,8 @@ document.getElementById("btn-save").addEventListener("click", () => {
   });
   closeEditModal(); renderMain();
   showToast(`✓ Liens enregistrés pour ${editAtelier.num}`);
+  const tok = getGhToken();
+  if (tok) pushLinksToRepo(tok).then(r => { if (r === "auth_error") showToast("⚠ Token expiré — ouvre 🖼️ pour le renouveler"); });
 });
 document.getElementById("btn-clear").addEventListener("click", () => {
   if (!editAtelier) return;
@@ -1059,7 +1121,11 @@ document.getElementById("img-save-btn").addEventListener("click", async () => {
     const pushed = await uploadToRepo(imgAtelier.num, repoName, pendingImgSrc, token);
     saveBtn.disabled = false;
     saveBtn.textContent = "✓ Appliquer";
-    if (pushed) {
+    if (pushed === "auth_error") {
+      showToast("⚠ Token GitHub invalide ou expiré — entre un nouveau token");
+      refreshTokenUI();
+      return;
+    } else if (pushed) {
       repoThumbs[imgAtelier.num] = `assets/thumbs/${repoName}`;
       showToast("✓ Image publiée et partagée avec tous");
     } else {
@@ -1127,7 +1193,8 @@ document.addEventListener("keydown", e => {
   }
 });
 
-loadManifest().then(() => renderMain());
+loadManifest().then(loadRepoLinks).then(() => renderMain());
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
 document.getElementById("main").addEventListener("click", e => {
   const card = e.target.closest(".card");
