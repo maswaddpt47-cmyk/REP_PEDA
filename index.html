@@ -569,6 +569,26 @@ function compressImage(dataUrl) {
 }
 function getThumb(num) { return loadThumbs()[num] || ""; }
 
+// ── REPO THUMBS (assets/thumbs/)
+const repoThumbs = {};
+async function loadManifest() {
+  try {
+    const res = await fetch("assets/thumbs/manifest.json");
+    if (!res.ok) return;
+    const data = await res.json();
+    for (const [num, file] of Object.entries(data)) {
+      if (typeof file === "string" && !num.startsWith("_")) {
+        repoThumbs[num] = `assets/thumbs/${file}`;
+      }
+    }
+  } catch {}
+}
+
+// localStorage prime sur repo, repo prime sur emoji
+function getEffectiveThumb(num) {
+  return getThumb(num) || repoThumbs[num] || "";
+}
+
 // ── EXPORT / IMPORT
 function exportLinks() {
   const links = loadLinks();
@@ -667,7 +687,7 @@ function renderMain() {
       <div class="grid">
         ${ateliers.map(a => {
           const n = countLinks(a.num);
-          const hasImg = !!getThumb(a.num);
+          const hasImg = !!getEffectiveThumb(a.num);
           return `
           <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}">
             <div class="card-thumb thumb-${a.chap}${hasImg ? ' has-img' : ''}" data-num="${a.num}">
@@ -694,7 +714,7 @@ function renderMain() {
 
 function applyThumbs() {
   document.querySelectorAll(".card-thumb[data-num]").forEach(el => {
-    const src = getThumb(el.dataset.num);
+    const src = getEffectiveThumb(el.dataset.num);
     if (src) {
       el.style.backgroundImage = `url(${JSON.stringify(src)})`;
       el.style.backgroundSize = "cover";
@@ -718,7 +738,7 @@ function openModal(num, e) {
   const thumb = document.getElementById("modal-thumb");
   thumb.className = `modal-thumb thumb-${a.chap}`;
   thumb.textContent = a.emoji;
-  const imgSrc = getThumb(num);
+  const imgSrc = getEffectiveThumb(num);
   if (imgSrc) {
     thumb.style.backgroundImage = `url(${JSON.stringify(imgSrc)})`;
     thumb.textContent = "";
@@ -791,7 +811,7 @@ function openImgModal(num, e) {
   if (e) e.stopPropagation();
   imgAtelier = CATALOGUE.find(x => x.num === num);
   if (!imgAtelier) return;
-  pendingImgSrc = getThumb(num);
+  pendingImgSrc = getEffectiveThumb(num);
 
   document.getElementById("img-modal-sub").textContent = `${imgAtelier.num} — ${imgAtelier.titre}`;
   document.getElementById("img-url-input").value = "";
@@ -908,7 +928,7 @@ document.getElementById("img-url-input").addEventListener("input", e => {
   if (val.startsWith("http://") || val.startsWith("https://")) {
     pendingImgSrc = val;
   } else {
-    pendingImgSrc = getThumb(imgAtelier?.num || "");
+    pendingImgSrc = getEffectiveThumb(imgAtelier?.num || "");
   }
   refreshImgPreview();
 });
@@ -976,7 +996,7 @@ document.addEventListener("keydown", e => {
   }
 });
 
-renderMain();
+loadManifest().then(() => renderMain());
 
 document.getElementById("main").addEventListener("click", e => {
   const card = e.target.closest(".card");
