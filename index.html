@@ -279,6 +279,15 @@
   .img-preview-label {
     font-size: 10px; color: var(--muted); text-align: center; margin-bottom: 12px;
   }
+  .img-repo-section {
+    border-top: 1px solid var(--border); margin-top: 14px; padding-top: 12px;
+  }
+  .repo-label-hint { font-weight: 400; text-transform: none; letter-spacing: 0; opacity: .65; }
+  .repo-token-ok { font-size: 12px; color: #22c55e; }
+  .repo-token-reset {
+    background: none; border: none; color: var(--muted); font-size: 11px;
+    cursor: pointer; text-decoration: underline; margin-left: 8px; padding: 0;
+  }
 
   .img-source-tabs {
     display: flex; gap: 0; margin-bottom: 14px;
@@ -444,6 +453,23 @@
       </div>
     </div>
 
+    <div class="img-repo-section">
+      <div class="field-group">
+        <div class="field-label">📂 Partager avec tous <span class="repo-label-hint">(nom du fichier dans assets/thumbs/)</span></div>
+        <input class="field-input" id="img-repo-name" type="text" placeholder="ex: E7.png — laisser vide pour usage local uniquement">
+      </div>
+      <div id="img-token-section" style="display:none">
+        <div class="field-group">
+          <div class="field-label">🔑 Token GitHub <span class="repo-label-hint">— requis une seule fois, stocké localement</span></div>
+          <input class="field-input" id="img-token-input" type="password" placeholder="ghp_…">
+        </div>
+      </div>
+      <div id="img-token-saved" style="display:none">
+        <span class="repo-token-ok">✓ Token enregistré</span>
+        <button class="repo-token-reset" id="img-token-reset">Changer</button>
+      </div>
+    </div>
+
     <div class="edit-actions">
       <button class="btn-save" id="img-save-btn">✓ Appliquer</button>
       <button class="btn-clear" id="img-clear-btn">✕ Supprimer l'image</button>
@@ -534,6 +560,36 @@ function saveLink(num, ficheKey, driveId) {
 }
 function getAtlierLinks(num) { return loadLinks()[num] || {}; }
 function countLinks(num) { return Object.values(getAtlierLinks(num)).filter(Boolean).length; }
+
+// ── GITHUB PUSH
+const GH_REPO    = "maswaddpt47-cmyk/REP_PEDA";
+const GH_MANIFEST = "assets/thumbs/manifest.json";
+const GH_TOKEN_KEY = "conum_gh_token";
+function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ""; }
+function saveGhToken(t) { if (t) localStorage.setItem(GH_TOKEN_KEY, t.trim()); }
+function clearGhToken() { localStorage.removeItem(GH_TOKEN_KEY); }
+
+async function pushToManifest(num, filename, token) {
+  try {
+    const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_MANIFEST}`;
+    const headers = {
+      "Authorization": `token ${token}`,
+      "Accept": "application/vnd.github.v3+json",
+      "Content-Type": "application/json"
+    };
+    const getRes = await fetch(url, { headers });
+    if (!getRes.ok) return false;
+    const current = await getRes.json();
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(current.content.replace(/\n/g, "")))));
+    decoded[num] = filename;
+    const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(decoded, null, 2) + "\n")));
+    const putRes = await fetch(url, {
+      method: "PUT", headers,
+      body: JSON.stringify({ message: `feat: ajout ${num} dans manifest`, content: newContent, sha: current.sha, branch: "main" })
+    });
+    return putRes.ok;
+  } catch { return false; }
+}
 
 // ── STORAGE IMAGES
 const THUMBS_KEY = "conum_thumbs_v1";
@@ -815,9 +871,22 @@ function openImgModal(num, e) {
 
   document.getElementById("img-modal-sub").textContent = `${imgAtelier.num} — ${imgAtelier.titre}`;
   document.getElementById("img-url-input").value = "";
+
+  // Pré-remplir le nom de fichier repo si déjà connu
+  const existingFile = repoThumbs[num] ? repoThumbs[num].replace("assets/thumbs/", "") : "";
+  document.getElementById("img-repo-name").value = existingFile;
+  refreshTokenUI();
+
   setActiveTab("upload");
   refreshImgPreview();
   document.getElementById("img-modal").classList.add("open");
+}
+
+function refreshTokenUI() {
+  const hasName = document.getElementById("img-repo-name").value.trim() !== "";
+  const hasToken = !!getGhToken();
+  document.getElementById("img-token-section").style.display = (hasName && !hasToken) ? "" : "none";
+  document.getElementById("img-token-saved").style.display  = (hasName && hasToken)  ? "" : "none";
 }
 function closeImgModal() {
   compressGen++;
@@ -933,12 +1002,45 @@ document.getElementById("img-url-input").addEventListener("input", e => {
   refreshImgPreview();
 });
 
-document.getElementById("img-save-btn").addEventListener("click", () => {
+document.getElementById("img-repo-name").addEventListener("input", refreshTokenUI);
+
+document.getElementById("img-token-reset").addEventListener("click", () => {
+  clearGhToken();
+  document.getElementById("img-token-input").value = "";
+  refreshTokenUI();
+});
+
+document.getElementById("img-save-btn").addEventListener("click", async () => {
   if (!imgAtelier) return;
+  const saveBtn = document.getElementById("img-save-btn");
+  const repoName = document.getElementById("img-repo-name").value.trim();
+
   const ok = saveThumb(imgAtelier.num, pendingImgSrc);
   if (!ok) { showToast("⚠ Stockage insuffisant — essaie une image plus petite"); return; }
+
+  if (repoName) {
+    let token = getGhToken();
+    if (!token) {
+      token = document.getElementById("img-token-input").value.trim();
+      if (!token) { showToast("⚠ Token GitHub manquant"); return; }
+      saveGhToken(token);
+    }
+    saveBtn.disabled = true;
+    saveBtn.textContent = "⏳ Publication…";
+    const pushed = await pushToManifest(imgAtelier.num, repoName, token);
+    saveBtn.disabled = false;
+    saveBtn.textContent = "✓ Appliquer";
+    if (pushed) {
+      repoThumbs[imgAtelier.num] = `assets/thumbs/${repoName}`;
+      showToast("✓ Image publiée et partagée avec tous");
+    } else {
+      showToast("⚠ Erreur GitHub — image sauvée localement seulement");
+    }
+  } else {
+    showToast("✓ Image enregistrée");
+  }
+
   closeImgModal(); renderMain();
-  showToast("✓ Image enregistrée");
 });
 
 document.getElementById("img-clear-btn").addEventListener("click", () => {
