@@ -268,17 +268,13 @@
   .modal-overlay.open .img-modal { transform: scale(1); }
 
   .img-preview-box {
-    width: 100%; height: 110px; border-radius: 10px;
+    height: 140px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 48px; overflow: hidden; margin-bottom: 4px;
+    font-size: 48px; overflow: hidden; margin-bottom: 16px;
     background-size: cover; background-position: center;
     border: 2px dashed var(--border); transition: border-color .2s;
-    position: relative;
   }
   .img-preview-box.has-img { border: 2px solid rgba(34,197,94,.4); }
-  .img-preview-label {
-    font-size: 10px; color: var(--muted); text-align: center; margin-bottom: 12px;
-  }
 
   .img-source-tabs {
     display: flex; gap: 0; margin-bottom: 14px;
@@ -421,7 +417,6 @@
     <div class="edit-modal-sub" id="img-modal-sub"></div>
 
     <div class="img-preview-box" id="img-preview-box"></div>
-    <div class="img-preview-label">Aperçu exact sur la tuile</div>
 
     <div class="img-source-tabs">
       <button class="img-tab active" data-tab="upload">📁 Depuis l'appareil</button>
@@ -625,7 +620,6 @@ function driveDownloadUrl(id) { return `https://drive.google.com/uc?export=downl
 let currentChap = "all", currentSearch = "";
 let modalAtelier = null, editAtelier = null, imgAtelier = null;
 let pendingImgSrc = "";
-let compressGen = 0;
 
 function filtered() {
   return CATALOGUE.filter(a => {
@@ -787,15 +781,7 @@ function openImgModal(num, e) {
   refreshImgPreview();
   document.getElementById("img-modal").classList.add("open");
 }
-function closeImgModal() {
-  compressGen++;
-  const saveBtn = document.getElementById("img-save-btn");
-  saveBtn.disabled = false;
-  saveBtn.textContent = "✓ Appliquer";
-  document.getElementById("img-modal").classList.remove("open");
-  imgAtelier = null;
-  pendingImgSrc = "";
-}
+function closeImgModal() { document.getElementById("img-modal").classList.remove("open"); imgAtelier = null; pendingImgSrc = ""; }
 
 function refreshImgPreview() {
   const box = document.getElementById("img-preview-box");
@@ -864,16 +850,8 @@ document.getElementById("img-file-input").addEventListener("change", e => {
   if (!file.type.startsWith("image/")) { showToast("⚠ Fichier non reconnu comme image"); return; }
   const reader = new FileReader();
   reader.onload = async ev => {
-    const gen = ++compressGen;
-    const saveBtn = document.getElementById("img-save-btn");
-    saveBtn.disabled = true;
-    saveBtn.textContent = "⏳ Chargement…";
-    const compressed = await compressImage(ev.target.result);
-    if (gen !== compressGen) return;
-    pendingImgSrc = compressed;
+    pendingImgSrc = await compressImage(ev.target.result);
     refreshImgPreview();
-    saveBtn.disabled = false;
-    saveBtn.textContent = "✓ Appliquer";
   };
   reader.readAsDataURL(file);
   e.target.value = "";
