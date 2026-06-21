@@ -29,12 +29,12 @@ Chaque modification distincte = un commit séparé. Prefixes obligatoires :
 
 Exemple : `git commit -m "feat: ajout du module de suivi des élèves"`
 
-## 4. Merge dans main
+## 4. Push direct sur main
 
-Après les commits sur la branche de travail, merger dans main :
+GitHub Pages ne sert que `main` — impossible de tester une branche en ligne avant de merger. On travaille donc directement sur `main` :
 
 ```bash
-git checkout main
-git merge <branche-de-travail>
 git push origin main
 ```
+
+Le backup daté (règle 2) et l'historique git constituent le filet de sécurité. En cas de problème : `git log --oneline index.html` pour identifier le bon commit, puis `git show <hash>:index.html > index.html` pour restaurer.
