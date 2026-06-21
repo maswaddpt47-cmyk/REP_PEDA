@@ -562,10 +562,6 @@ function renderMain() {
     </section>
   `).join("");
 
-  main.querySelectorAll(".card").forEach(card => {
-    card.addEventListener("keydown", e => { if (e.key === "Enter") openModal(card.dataset.id, e); });
-    card.addEventListener("click", e => { if (!e.target.closest("button")) openModal(card.dataset.id, e); });
-  });
 }
 
 // ── MODAL OUVERTURE
@@ -727,6 +723,18 @@ document.addEventListener("keydown", e => {
 });
 
 renderMain();
+
+// ── DÉLÉGATION UNIQUE SUR #main (évite les listeners orphelins après re-render)
+document.getElementById("main").addEventListener("click", e => {
+  const card = e.target.closest(".card");
+  if (!card) return;
+  if (!e.target.closest("button")) openModal(card.dataset.id, e);
+});
+document.getElementById("main").addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const card = e.target.closest(".card");
+  if (card) openModal(card.dataset.id, e);
+});
 </script>
 </body>
 </html>
