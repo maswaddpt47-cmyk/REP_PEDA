@@ -140,20 +140,17 @@
     position: absolute; top: 8px; left: 10px; z-index: 1;
     font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; color: rgba(255,255,255,.6);
   }
-  /* indicateur lien */
-  .card-link-dot {
-    position: absolute; top: 8px; right: 10px; z-index: 1;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #22c55e; box-shadow: 0 0 6px #22c55e;
-    display: none;
+  .card-link-badge {
+    position: absolute; top: 7px; right: 9px; z-index: 1;
+    background: rgba(34,197,94,.18); border: 1px solid rgba(34,197,94,.35);
+    color: #22c55e; font-size: 10px; font-weight: 700;
+    padding: 1px 7px; border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
   }
-  .card.has-link .card-link-dot { display: block; }
-
   .card-body { padding: 13px 15px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.35; }
   .card-actions { display: flex; gap: 6px; margin-top: auto; }
 
-  /* bouton édition sur la carte */
   .card-edit-btn {
     display: none;
     align-items: center; justify-content: center;
@@ -170,7 +167,6 @@
     border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity .15s;
   }
   .btn:hover { opacity: .82; }
-  .btn-ghost { background: var(--bg); color: var(--muted); border: 1px solid var(--border); flex: 0 0 34px; padding: 0; }
   .btn-A{background:var(--A);color:#fff;} .btn-B{background:var(--B);color:#fff;}
   .btn-C{background:var(--C);color:#fff;} .btn-D{background:var(--D);color:#fff;}
   .btn-E{background:var(--E);color:#fff;} .btn-F{background:var(--F);color:#fff;}
@@ -178,7 +174,7 @@
   .thumb-C{background:var(--C-bg);} .thumb-D{background:var(--D-bg);}
   .thumb-E{background:var(--E-bg);} .thumb-F{background:var(--F-bg);}
 
-  /* ── MODAL GÉNÉRIQUE */
+  /* ── MODAL OVERLAY */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,.78);
     backdrop-filter: blur(8px); z-index: 200;
@@ -186,72 +182,75 @@
     opacity: 0; pointer-events: none; transition: opacity .2s;
   }
   .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 18px; width: 480px; max-width: 90vw; padding: 28px;
-    transform: scale(.94); transition: transform .2s; position: relative;
-  }
-  .modal-overlay.open .modal { transform: scale(1); }
   .modal-close {
     position: absolute; top: 16px; right: 18px;
     background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer;
   }
-  .modal-thumb { height: 130px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 20px; }
-  .modal-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
-  .modal-title  { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 18px; line-height: 1.3; }
-  .modal-drive  {
+
+  /* ── MODAL FICHES */
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; width: 520px; max-width: 92vw; padding: 26px;
+    transform: scale(.94); transition: transform .2s; position: relative;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-thumb { height: 120px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 52px; margin-bottom: 14px; }
+  .modal-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+  .modal-title  { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; line-height: 1.3; }
+
+  /* FICHE LIST */
+  .fiche-list { display: flex; flex-direction: column; gap: 6px; }
+  .fiche-row {
     display: flex; align-items: center; gap: 10px;
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 9px; padding: 12px 14px; margin-bottom: 18px; font-size: 13px;
+    border-radius: 9px; padding: 9px 12px;
+    transition: border-color .15s;
   }
-  .modal-drive-icon { font-size: 20px; flex-shrink: 0; }
-  .modal-drive-info { flex: 1; }
-  .modal-drive-name { font-weight: 600; color: var(--text); }
-  .modal-drive-meta { color: var(--muted); font-size: 11px; margin-top: 2px; }
-  .modal-actions { display: flex; gap: 8px; }
-  .modal-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity .15s; }
-  .modal-btn:hover { opacity: .85; }
-  .modal-btn-ghost { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
-  .no-drive { display:inline-flex; align-items:center; gap:5px; background:rgba(217,119,6,.12); border:1px solid rgba(217,119,6,.25); color:#f59e0b; font-size:11px; font-weight:500; padding:3px 9px; border-radius:5px; }
+  .fiche-row.has-link { border-color: rgba(34,197,94,.2); }
+  .fiche-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+  .fiche-label { flex: 1; font-size: 13px; font-weight: 600; }
+  .fiche-actions { display: flex; gap: 5px; flex-shrink: 0; }
+  .fiche-open-btn {
+    padding: 5px 11px; border-radius: 7px; font-size: 11px; font-weight: 600;
+    border: none; cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: opacity .15s; background: #4f8ef7; color: #fff; white-space: nowrap;
+  }
+  .fiche-dl-btn {
+    padding: 5px 9px; border-radius: 7px; font-size: 12px;
+    border: 1px solid var(--border); cursor: pointer;
+    background: var(--surface); color: var(--muted); transition: all .15s;
+  }
+  .fiche-open-btn:disabled, .fiche-dl-btn:disabled { opacity: .25; cursor: not-allowed; }
+  .fiche-open-btn:not(:disabled):hover { opacity: .82; }
+  .fiche-dl-btn:not(:disabled):hover { border-color: #4f8ef7; color: #4f8ef7; }
 
   /* ── MODAL ÉDITION */
   .edit-modal {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 18px; width: 520px; max-width: 92vw; padding: 30px;
+    border-radius: 18px; width: 540px; max-width: 92vw; padding: 30px;
     transform: scale(.94); transition: transform .2s; position: relative;
+    max-height: 90vh; overflow-y: auto;
   }
   .modal-overlay.open .edit-modal { transform: scale(1); }
   .edit-modal-title {
     font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700;
     margin-bottom: 4px;
   }
-  .edit-modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 22px; }
+  .edit-modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
 
-  .field-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-  .field-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+  .field-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+  .field-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
   .field-input {
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 14px;
-    color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif;
+    border-radius: 8px; padding: 9px 13px;
+    color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif;
     outline: none; transition: border-color .2s; width: 100%;
   }
   .field-input:focus { border-color: #4f8ef7; }
   .field-input::placeholder { color: var(--muted); }
-  .field-hint { font-size: 11px; color: var(--muted); line-height: 1.5; }
-  .field-hint code {
-    background: var(--border); padding: 1px 5px; border-radius: 4px;
-    font-family: monospace; font-size: 11px; color: #93c5fd;
-  }
-
-  .url-preview {
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 7px; padding: 8px 12px;
-    font-size: 11px; color: var(--muted); font-family: monospace;
-    word-break: break-all; min-height: 32px;
-    transition: border-color .2s;
-  }
-  .url-preview.valid { border-color: #22c55e; color: #86efac; }
-  .url-preview.invalid { border-color: #ef4444; color: #fca5a5; }
+  .field-input.valid   { border-color: #22c55e; }
+  .field-input.invalid { border-color: #ef4444; }
 
   .edit-actions { display: flex; gap: 8px; margin-top: 20px; }
   .btn-save {
@@ -320,68 +319,51 @@
   <button class="chap-btn" data-chap="A"><span class="chap-pill pill-A">A</span>Par l'outil</button>
   <button class="chap-btn" data-chap="B"><span class="chap-pill pill-B">B</span>Pour le quotidien</button>
   <button class="chap-btn" data-chap="C"><span class="chap-pill pill-C">C</span>Pour le bureau</button>
-  <button class="chap-btn" data-chap="D"><span class="chap-pill pill-D">D</span>Emploi & mobilité</button>
+  <button class="chap-btn" data-chap="D"><span class="chap-pill pill-D">D</span>Emploi &amp; mobilité</button>
   <button class="chap-btn" data-chap="E"><span class="chap-pill pill-E">E</span>Bien vivre</button>
   <button class="chap-btn" data-chap="F"><span class="chap-pill pill-F">F</span>Se cultiver</button>
 </nav>
 
 <main id="main"></main>
 
-<!-- MODAL OUVERTURE -->
+<!-- MODAL FICHES -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <button class="modal-close" id="modal-close">✕</button>
     <div class="modal-thumb" id="modal-thumb"></div>
     <div class="modal-eyebrow" id="modal-eyebrow"></div>
     <div class="modal-title" id="modal-title"></div>
-    <div class="modal-drive">
-      <span class="modal-drive-icon">📁</span>
-      <div class="modal-drive-info">
-        <div class="modal-drive-name" id="modal-filename"></div>
-        <div class="modal-drive-meta">Google Drive · Format PPTX</div>
-      </div>
-      <span id="modal-drive-status"></span>
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn" id="modal-open">▶ Ouvrir dans Drive</button>
-      <button class="modal-btn modal-btn-ghost" id="modal-download">⬇ Télécharger</button>
-    </div>
+    <div class="fiche-list" id="modal-fiche-list"></div>
   </div>
 </div>
 
-<!-- MODAL ÉDITION LIEN -->
+<!-- MODAL ÉDITION LIENS -->
 <div class="modal-overlay" id="edit-modal">
   <div class="edit-modal">
     <button class="modal-close" id="edit-modal-close">✕</button>
     <div class="edit-modal-title" id="edit-modal-title"></div>
-    <div class="edit-modal-sub">Renseigne le lien Google Drive du fichier PPTX</div>
-
-    <div class="field-group">
-      <div class="field-label">Lien Google Drive</div>
-      <input class="field-input" id="edit-url-input" type="url"
-        placeholder="https://drive.google.com/file/d/…/view">
-      <div class="field-hint">
-        Colle le lien complet du fichier (clic droit → <strong>Obtenir le lien</strong>).<br>
-        Format attendu : <code>drive.google.com/file/d/[ID]/view</code>
-      </div>
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">Aperçu du lien détecté</div>
-      <div class="url-preview" id="url-preview">—</div>
-    </div>
-
+    <div class="edit-modal-sub">Renseigne les liens Google Drive pour chaque document</div>
+    <div id="edit-fields-container"></div>
     <div class="edit-actions">
       <button class="btn-save" id="btn-save">✓ Enregistrer</button>
-      <button class="btn-clear" id="btn-clear">✕ Effacer</button>
+      <button class="btn-clear" id="btn-clear">✕ Effacer tout</button>
       <button class="btn-cancel" id="btn-cancel">Annuler</button>
     </div>
   </div>
 </div>
 
-<div class="save-toast" id="toast">✓ Lien enregistré</div>
+<div class="save-toast" id="toast">✓ Liens enregistrés</div>
 
 <script>
+const FICHES = [
+  { key: "presentation",   label: "Présentation",   emoji: "📊" },
+  { key: "positionnement", label: "Positionnement", emoji: "📋" },
+  { key: "action",         label: "Action",          emoji: "🎯" },
+  { key: "memo",           label: "Mémo",            emoji: "📝" },
+  { key: "evaluation",     label: "Évaluation",      emoji: "✅" },
+  { key: "emargement",     label: "Émargement",      emoji: "✍️" },
+];
+
 const CHAPITRES = {
   A: { label: "Le numérique par l'outil" },
   B: { label: "Le numérique pour le quotidien" },
@@ -432,15 +414,33 @@ const CATALOGUE = [
 
 // ── STORAGE
 const STORAGE_KEY = "conum_links_v1";
+
 function loadLinks() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const out = {};
+    for (const [num, val] of Object.entries(raw)) {
+      // migration ancien format string → {presentation: id}
+      out[num] = (typeof val === "string") ? { presentation: val } : val;
+    }
+    return out;
+  } catch { return {}; }
 }
-function saveLink(num, driveId) {
+
+function saveLink(num, ficheKey, driveId) {
   const links = loadLinks();
-  if (driveId) links[num] = driveId; else delete links[num];
+  if (!links[num]) links[num] = {};
+  if (driveId) links[num][ficheKey] = driveId;
+  else delete links[num][ficheKey];
+  if (!Object.keys(links[num]).length) delete links[num];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
 }
-function getLink(num) { return loadLinks()[num] || ""; }
+
+function getAtlierLinks(num) { return loadLinks()[num] || {}; }
+
+function countLinks(num) {
+  return Object.values(getAtlierLinks(num)).filter(Boolean).length;
+}
 
 // ── EXPORT / IMPORT JSON
 function exportLinks() {
@@ -449,11 +449,10 @@ function exportLinks() {
   const blob = new Blob([JSON.stringify(links, null, 2)], { type: "application/json" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
-  a.href     = url;
-  a.download = `conum-liens-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast(`✓ ${Object.keys(links).length} liens exportés`);
+  a.href = url; a.download = `conum-liens-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  const total = Object.values(links).reduce((s, v) => s + Object.keys(v).length, 0);
+  showToast(`✓ ${total} liens exportés`);
 }
 
 function importLinks(file) {
@@ -463,19 +462,26 @@ function importLinks(file) {
     try {
       const data = JSON.parse(e.target.result);
       if (typeof data !== "object" || Array.isArray(data)) throw new Error();
-      // Validation : ne garder que les clés qui correspondent au catalogue
       const validNums = new Set(CATALOGUE.map(a => a.num));
-      const merged    = loadLinks();
+      const validKeys = new Set(FICHES.map(f => f.key));
+      const merged = loadLinks();
       let count = 0;
-      for (const [k, v] of Object.entries(data)) {
-        if (validNums.has(k) && typeof v === "string") { merged[k] = v; count++; }
+      for (const [num, val] of Object.entries(data)) {
+        if (!validNums.has(num)) continue;
+        if (typeof val === "string") {
+          if (!merged[num]) merged[num] = {};
+          merged[num].presentation = val; count++;
+        } else if (typeof val === "object" && !Array.isArray(val)) {
+          if (!merged[num]) merged[num] = {};
+          for (const [k, v] of Object.entries(val)) {
+            if (validKeys.has(k) && typeof v === "string") { merged[num][k] = v; count++; }
+          }
+        }
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
       renderMain();
       showToast(`✓ ${count} liens importés`);
-    } catch {
-      showToast("⚠ Fichier JSON invalide");
-    }
+    } catch { showToast("⚠ Fichier JSON invalide"); }
   };
   reader.readAsText(file);
 }
@@ -483,13 +489,10 @@ function importLinks(file) {
 // ── URL UTILS
 function extractDriveId(url) {
   if (!url) return "";
-  // Format /file/d/ID/  ou  /presentation/d/ID/  ou  /document/d/ID/
   const m = url.match(/\/(?:file|presentation|document|spreadsheets)\/d\/([a-zA-Z0-9_-]{10,})/);
   if (m) return m[1];
-  // Format id=ID dans les query params
   const q = url.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
   if (q) return q[1];
-  // ID brut collé directement
   if (/^[a-zA-Z0-9_-]{20,}$/.test(url.trim())) return url.trim();
   return "";
 }
@@ -515,11 +518,10 @@ function filtered() {
 function renderMain() {
   const main = document.getElementById("main");
   const list = filtered();
-  const links = loadLinks();
 
-  const linkedCount = CATALOGUE.filter(a => links[a.num]).length;
+  const configured = CATALOGUE.filter(a => countLinks(a.num) > 0).length;
   document.getElementById("count-badge").textContent =
-    linkedCount ? `${linkedCount} / ${CATALOGUE.length} liés` : `${CATALOGUE.length} ateliers`;
+    configured ? `${configured} / ${CATALOGUE.length} configurés` : `${CATALOGUE.length} ateliers`;
 
   if (!list.length) {
     main.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div>Aucun atelier trouvé.</div>`;
@@ -540,20 +542,19 @@ function renderMain() {
       </div>
       <div class="grid">
         ${ateliers.map(a => {
-          const hasLink = !!links[a.num];
+          const n = countLinks(a.num);
           return `
-          <div class="card ${hasLink ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}">
+          <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}">
             <div class="card-thumb thumb-${a.chap}">
               <span class="card-num">${a.num}</span>
-              <span class="card-link-dot"></span>
+              ${n > 0 ? `<span class="card-link-badge">${n}/6</span>` : ''}
               ${a.emoji}
             </div>
             <div class="card-body">
               <div class="card-title">${a.titre}</div>
               <div class="card-actions">
                 <button class="btn btn-${a.chap}" onclick="openModal('${a.num}',event)">▶ Ouvrir</button>
-                <button class="btn btn-ghost" title="Télécharger" onclick="downloadFile('${a.num}',event)">⬇</button>
-                <button class="card-edit-btn" title="Modifier le lien Drive" onclick="openEditModal('${a.num}',event)">✏️</button>
+                <button class="card-edit-btn" title="Modifier les liens Drive" onclick="openEditModal('${a.num}',event)">✏️</button>
               </div>
             </div>
           </div>`;
@@ -561,31 +562,42 @@ function renderMain() {
       </div>
     </section>
   `).join("");
-
 }
 
-// ── MODAL OUVERTURE
+// ── MODAL FICHES
 function openModal(num, e) {
   if (e) e.stopPropagation();
   const a = CATALOGUE.find(x => x.num === num);
   if (!a) return;
   modalAtelier = a;
-  const driveId = getLink(num);
+  const links = getAtlierLinks(num);
 
   const thumb = document.getElementById("modal-thumb");
   thumb.className = `modal-thumb thumb-${a.chap}`;
   thumb.textContent = a.emoji;
   document.getElementById("modal-eyebrow").textContent = `${a.num} · ${CHAPITRES[a.chap].label}`;
   document.getElementById("modal-title").textContent = a.titre;
-  document.getElementById("modal-filename").textContent = `${a.num} — ${a.titre}.pptx`;
 
-  const statusEl = document.getElementById("modal-drive-status");
-  statusEl.innerHTML = driveId
-    ? `<span style="color:#22c55e;font-size:12px;font-weight:600">● Disponible</span>`
-    : `<span class="no-drive">⚠ Lien manquant</span>`;
+  const list = document.getElementById("modal-fiche-list");
+  list.innerHTML = FICHES.map(f => {
+    const id = links[f.key] || "";
+    return `
+    <div class="fiche-row ${id ? 'has-link' : ''}">
+      <span class="fiche-icon">${f.emoji}</span>
+      <span class="fiche-label">${f.label}</span>
+      <div class="fiche-actions">
+        <button class="fiche-open-btn" data-id="${id}" ${!id ? 'disabled' : ''}>▶ Ouvrir</button>
+        <button class="fiche-dl-btn"  data-id="${id}" ${!id ? 'disabled' : ''}>⬇</button>
+      </div>
+    </div>`;
+  }).join("");
 
-  const openBtn = document.getElementById("modal-open");
-  openBtn.className = `modal-btn btn-${a.chap}`;
+  list.querySelectorAll(".fiche-open-btn").forEach(btn => {
+    btn.addEventListener("click", () => { if (btn.dataset.id) window.open(driveViewUrl(btn.dataset.id), "_blank"); });
+  });
+  list.querySelectorAll(".fiche-dl-btn").forEach(btn => {
+    btn.addEventListener("click", () => { if (btn.dataset.id) window.open(driveDownloadUrl(btn.dataset.id), "_blank"); });
+  });
 
   document.getElementById("modal").classList.add("open");
 }
@@ -599,88 +611,79 @@ function openEditModal(num, e) {
   if (!editAtelier) return;
 
   document.getElementById("edit-modal-title").textContent = `${editAtelier.num} — ${editAtelier.titre}`;
-  const existing = getLink(num);
-  const input = document.getElementById("edit-url-input");
-  input.value = existing ? driveViewUrl(existing) : "";
-  updatePreview(input.value);
+  const links = getAtlierLinks(num);
+
+  const container = document.getElementById("edit-fields-container");
+  container.innerHTML = FICHES.map(f => {
+    const id = links[f.key] || "";
+    return `
+    <div class="field-group">
+      <div class="field-label">${f.emoji} ${f.label}</div>
+      <input class="field-input" data-fiche="${f.key}" type="url"
+        placeholder="https://drive.google.com/file/d/…/view"
+        value="${id ? driveViewUrl(id) : ''}">
+    </div>`;
+  }).join("");
+
+  container.querySelectorAll(".field-input").forEach(input => {
+    input.addEventListener("input", () => {
+      const val = input.value.trim();
+      if (!val) { input.classList.remove("valid","invalid"); return; }
+      const ok = !!extractDriveId(val);
+      input.classList.toggle("valid", ok);
+      input.classList.toggle("invalid", !ok);
+    });
+  });
 
   document.getElementById("edit-modal").classList.add("open");
-  setTimeout(() => input.focus(), 200);
+  setTimeout(() => container.querySelector("input")?.focus(), 200);
 }
 
 function closeEditModal() { document.getElementById("edit-modal").classList.remove("open"); editAtelier = null; }
 
-function updatePreview(val) {
-  const preview = document.getElementById("url-preview");
-  if (!val) { preview.textContent = "—"; preview.className = "url-preview"; return; }
-  const id = extractDriveId(val);
-  if (id) {
-    preview.textContent = `ID : ${id}`;
-    preview.className = "url-preview valid";
-  } else {
-    preview.textContent = "Lien non reconnu — vérifie le format";
-    preview.className = "url-preview invalid";
-  }
-}
-
-function showToast(msg = "✓ Lien enregistré") {
+function showToast(msg = "✓ Liens enregistrés") {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2200);
-}
-
-function downloadFile(num, e) {
-  if (e) e.stopPropagation();
-  const id = getLink(num);
-  if (!id) { openEditModal(num, e); return; }
-  window.open(driveDownloadUrl(id), "_blank");
+  setTimeout(() => t.classList.remove("show"), 2400);
 }
 
 // ── EVENTS
-document.getElementById("edit-url-input").addEventListener("input", e => updatePreview(e.target.value));
-
 document.getElementById("btn-save").addEventListener("click", () => {
   if (!editAtelier) return;
-  const val = document.getElementById("edit-url-input").value.trim();
-  const id = extractDriveId(val) || (val.length > 4 && !val.includes("/") ? val : "");
-  if (val && !id) { alert("Lien non reconnu. Colle l'URL complète Google Drive."); return; }
-  saveLink(editAtelier.num, id);
+  const inputs = document.querySelectorAll("#edit-fields-container .field-input");
+  let hasInvalid = false;
+  inputs.forEach(input => { if (input.value.trim() && !extractDriveId(input.value.trim())) hasInvalid = true; });
+  if (hasInvalid) { showToast("⚠ Un ou plusieurs liens non reconnus"); return; }
+  inputs.forEach(input => {
+    const id = input.value.trim() ? extractDriveId(input.value.trim()) : "";
+    saveLink(editAtelier.num, input.dataset.fiche, id);
+  });
   closeEditModal();
   renderMain();
-  showToast(`✓ Lien enregistré pour ${editAtelier.num}`);
+  showToast(`✓ Liens enregistrés pour ${editAtelier.num}`);
 });
 
 document.getElementById("btn-clear").addEventListener("click", () => {
   if (!editAtelier) return;
-  if (!confirm("Supprimer le lien pour cet atelier ?")) return;
-  saveLink(editAtelier.num, "");
+  if (!confirm("Supprimer tous les liens pour cet atelier ?")) return;
+  FICHES.forEach(f => saveLink(editAtelier.num, f.key, ""));
   closeEditModal();
   renderMain();
-  showToast("✕ Lien supprimé");
+  showToast("✕ Liens supprimés");
 });
 
 document.getElementById("btn-cancel").addEventListener("click", closeEditModal);
 document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
-document.getElementById("edit-modal").addEventListener("click", e => { if (e.target === document.getElementById("edit-modal")) closeEditModal(); });
+document.getElementById("edit-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("edit-modal")) closeEditModal();
+});
 
 document.getElementById("modal-close").addEventListener("click", closeModal);
-document.getElementById("modal").addEventListener("click", e => { if (e.target === document.getElementById("modal")) closeModal(); });
-
-document.getElementById("modal-open").addEventListener("click", () => {
-  if (!modalAtelier) return;
-  const id = getLink(modalAtelier.num);
-  if (!id) { closeModal(); openEditModal(modalAtelier.num); return; }
-  window.open(driveViewUrl(id), "_blank");
-});
-document.getElementById("modal-download").addEventListener("click", () => {
-  if (!modalAtelier) return;
-  const id = getLink(modalAtelier.num);
-  if (!id) { closeModal(); openEditModal(modalAtelier.num); return; }
-  window.open(driveDownloadUrl(id), "_blank");
+document.getElementById("modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("modal")) closeModal();
 });
 
-// Toggle mode édition
 document.getElementById("edit-toggle").addEventListener("click", () => {
   editMode = !editMode;
   document.body.classList.toggle("edit-mode", editMode);
@@ -693,7 +696,7 @@ document.getElementById("btn-export").addEventListener("click", exportLinks);
 document.getElementById("btn-import").addEventListener("click", () => document.getElementById("import-file").click());
 document.getElementById("import-file").addEventListener("change", e => {
   importLinks(e.target.files[0]);
-  e.target.value = ""; // reset pour permettre re-import du même fichier
+  e.target.value = "";
 });
 
 document.querySelectorAll(".chap-btn").forEach(btn => {
@@ -724,7 +727,6 @@ document.addEventListener("keydown", e => {
 
 renderMain();
 
-// ── DÉLÉGATION UNIQUE SUR #main (évite les listeners orphelins après re-render)
 document.getElementById("main").addEventListener("click", e => {
   const card = e.target.closest(".card");
   if (!card) return;
