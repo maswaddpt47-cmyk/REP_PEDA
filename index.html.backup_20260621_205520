@@ -131,23 +131,14 @@
   .card[data-chap="D"]:hover,.card[data-chap="D"]:focus{border-color:var(--D);box-shadow:0 8px 30px rgba(124,58,237,.2);}
   .card[data-chap="E"]:hover,.card[data-chap="E"]:focus{border-color:var(--E);box-shadow:0 8px 30px rgba(220,38,38,.2);}
   .card[data-chap="F"]:hover,.card[data-chap="F"]:focus{border-color:var(--F);box-shadow:0 8px 30px rgba(8,145,178,.2);}
-
-  /* CARD THUMB */
   .card-thumb {
     height: 110px; display: flex; align-items: center; justify-content: center;
     font-size: 40px; position: relative;
-    background-size: cover; background-position: center;
   }
-  .card-thumb::after {
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.5));
-  }
-  .card-thumb.has-img::after {
-    background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.55) 100%);
-  }
+  .card-thumb::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.5)); }
   .card-num {
     position: absolute; top: 8px; left: 10px; z-index: 1;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; color: rgba(255,255,255,.8);
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 11px; color: rgba(255,255,255,.6);
   }
   .card-link-badge {
     position: absolute; top: 7px; right: 9px; z-index: 1;
@@ -156,20 +147,6 @@
     padding: 1px 7px; border-radius: 10px;
     font-family: 'Space Grotesk', sans-serif;
   }
-  .card-thumb-emoji { z-index: 1; }
-  .card-thumb.has-img .card-thumb-emoji { display: none; }
-
-  /* Bouton image en mode édition */
-  .card-img-btn {
-    display: none;
-    position: absolute; inset: 0; z-index: 2;
-    align-items: center; justify-content: center;
-    background: rgba(0,0,0,.42); border: none; cursor: pointer;
-    font-size: 24px; width: 100%; transition: background .15s;
-  }
-  .card-img-btn:hover { background: rgba(0,0,0,.62); }
-  body.edit-mode .card-img-btn { display: flex; }
-
   .card-body { padding: 13px 15px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.35; }
   .card-actions { display: flex; gap: 6px; margin-top: auto; }
@@ -218,7 +195,7 @@
     max-height: 90vh; overflow-y: auto;
   }
   .modal-overlay.open .modal { transform: scale(1); }
-  .modal-thumb { height: 120px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 52px; margin-bottom: 14px; background-size: cover; background-position: center; }
+  .modal-thumb { height: 120px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 52px; margin-bottom: 14px; }
   .modal-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
   .modal-title  { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 16px; line-height: 1.3; }
 
@@ -227,7 +204,8 @@
   .fiche-row {
     display: flex; align-items: center; gap: 10px;
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 9px; padding: 9px 12px; transition: border-color .15s;
+    border-radius: 9px; padding: 9px 12px;
+    transition: border-color .15s;
   }
   .fiche-row.has-link { border-color: rgba(34,197,94,.2); }
   .fiche-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
@@ -247,7 +225,7 @@
   .fiche-open-btn:not(:disabled):hover { opacity: .82; }
   .fiche-dl-btn:not(:disabled):hover { border-color: #4f8ef7; color: #4f8ef7; }
 
-  /* ── MODAL ÉDITION LIENS */
+  /* ── MODAL ÉDITION */
   .edit-modal {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 18px; width: 540px; max-width: 92vw; padding: 30px;
@@ -256,49 +234,10 @@
   }
   .modal-overlay.open .edit-modal { transform: scale(1); }
   .edit-modal-title {
-    font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 4px;
+    font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700;
+    margin-bottom: 4px;
   }
   .edit-modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
-
-  /* ── MODAL IMAGE TUILE */
-  .img-modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 18px; width: 420px; max-width: 92vw; padding: 28px;
-    transform: scale(.94); transition: transform .2s; position: relative;
-  }
-  .modal-overlay.open .img-modal { transform: scale(1); }
-
-  .img-preview-box {
-    height: 140px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 48px; overflow: hidden; margin-bottom: 16px;
-    background-size: cover; background-position: center;
-    border: 2px dashed var(--border); transition: border-color .2s;
-  }
-  .img-preview-box.has-img { border: 2px solid rgba(34,197,94,.4); }
-
-  .img-source-tabs {
-    display: flex; gap: 0; margin-bottom: 14px;
-    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
-  }
-  .img-tab {
-    flex: 1; padding: 7px; text-align: center; font-size: 12px; font-weight: 600;
-    cursor: pointer; color: var(--muted); background: var(--bg);
-    border: none; font-family: 'Inter', sans-serif; transition: all .15s;
-  }
-  .img-tab.active { background: var(--surface); color: var(--text); }
-  .img-tab:first-child { border-right: 1px solid var(--border); }
-
-  .img-panel { display: none; }
-  .img-panel.active { display: block; }
-
-  .img-upload-area {
-    border: 2px dashed var(--border); border-radius: 9px;
-    padding: 20px; text-align: center; cursor: pointer;
-    transition: border-color .2s; color: var(--muted); font-size: 13px;
-  }
-  .img-upload-area:hover { border-color: #4f8ef7; color: #4f8ef7; }
-  .img-upload-area .upload-icon { font-size: 28px; margin-bottom: 6px; }
 
   .field-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
   .field-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
@@ -339,8 +278,10 @@
 
   .save-toast {
     position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: #22c55e; color: #fff; padding: 10px 22px; border-radius: 10px;
-    font-size: 14px; font-weight: 600; opacity: 0; transition: all .3s; z-index: 999; pointer-events: none;
+    background: #22c55e; color: #fff;
+    padding: 10px 22px; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    opacity: 0; transition: all .3s; z-index: 999; pointer-events: none;
   }
   .save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -411,45 +352,7 @@
   </div>
 </div>
 
-<!-- MODAL IMAGE TUILE -->
-<div class="modal-overlay" id="img-modal">
-  <div class="img-modal">
-    <button class="modal-close" id="img-modal-close">✕</button>
-    <div class="edit-modal-title">Image de la tuile</div>
-    <div class="edit-modal-sub" id="img-modal-sub"></div>
-
-    <div class="img-preview-box" id="img-preview-box"></div>
-
-    <div class="img-source-tabs">
-      <button class="img-tab active" data-tab="upload">📁 Depuis l'appareil</button>
-      <button class="img-tab" data-tab="url">🔗 URL d'image</button>
-    </div>
-
-    <div class="img-panel active" id="img-panel-upload">
-      <div class="img-upload-area" id="img-upload-area">
-        <div class="upload-icon">🖼️</div>
-        Cliquer pour choisir une image<br>
-        <span style="font-size:11px;opacity:.6">JPG, PNG, WebP — max 2 Mo</span>
-      </div>
-      <input type="file" id="img-file-input" accept="image/*" style="display:none">
-    </div>
-
-    <div class="img-panel" id="img-panel-url">
-      <div class="field-group">
-        <div class="field-label">URL de l'image</div>
-        <input class="field-input" id="img-url-input" type="url" placeholder="https://…/image.jpg">
-      </div>
-    </div>
-
-    <div class="edit-actions">
-      <button class="btn-save" id="img-save-btn">✓ Appliquer</button>
-      <button class="btn-clear" id="img-clear-btn">✕ Supprimer l'image</button>
-      <button class="btn-cancel" id="img-cancel-btn">Annuler</button>
-    </div>
-  </div>
-</div>
-
-<div class="save-toast" id="toast"></div>
+<div class="save-toast" id="toast">✓ Liens enregistrés</div>
 
 <script>
 const FICHES = [
@@ -509,18 +412,21 @@ const CATALOGUE = [
   {chap:"F",num:"F5",emoji:"🏛️",titre:"Visites virtuelles (musées, opéras, théâtres…)"},
 ];
 
-// ── STORAGE LIENS
+// ── STORAGE
 const STORAGE_KEY = "conum_links_v1";
+
 function loadLinks() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     const out = {};
     for (const [num, val] of Object.entries(raw)) {
+      // migration ancien format string → {presentation: id}
       out[num] = (typeof val === "string") ? { presentation: val } : val;
     }
     return out;
   } catch { return {}; }
 }
+
 function saveLink(num, ficheKey, driveId) {
   const links = loadLinks();
   if (!links[num]) links[num] = {};
@@ -529,31 +435,26 @@ function saveLink(num, ficheKey, driveId) {
   if (!Object.keys(links[num]).length) delete links[num];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
 }
+
 function getAtlierLinks(num) { return loadLinks()[num] || {}; }
-function countLinks(num) { return Object.values(getAtlierLinks(num)).filter(Boolean).length; }
 
-// ── STORAGE IMAGES
-const THUMBS_KEY = "conum_thumbs_v1";
-function loadThumbs() { try { return JSON.parse(localStorage.getItem(THUMBS_KEY) || "{}"); } catch { return {}; } }
-function saveThumb(num, src) {
-  const t = loadThumbs();
-  if (src) t[num] = src; else delete t[num];
-  localStorage.setItem(THUMBS_KEY, JSON.stringify(t));
+function countLinks(num) {
+  return Object.values(getAtlierLinks(num)).filter(Boolean).length;
 }
-function getThumb(num) { return loadThumbs()[num] || ""; }
 
-// ── EXPORT / IMPORT
+// ── EXPORT / IMPORT JSON
 function exportLinks() {
   const links = loadLinks();
   if (!Object.keys(links).length) { showToast("⚠ Aucun lien à exporter"); return; }
   const blob = new Blob([JSON.stringify(links, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
   a.href = url; a.download = `conum-liens-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(url);
   const total = Object.values(links).reduce((s, v) => s + Object.keys(v).length, 0);
   showToast(`✓ ${total} liens exportés`);
 }
+
 function importLinks(file) {
   if (!file) return;
   const reader = new FileReader();
@@ -599,9 +500,11 @@ function driveViewUrl(id)     { return `https://drive.google.com/file/d/${id}/vi
 function driveDownloadUrl(id) { return `https://drive.google.com/uc?export=download&id=${id}`; }
 
 // ── STATE
-let currentChap = "all", currentSearch = "", editMode = false;
-let modalAtelier = null, editAtelier = null, imgAtelier = null;
-let pendingImgSrc = "";
+let currentChap = "all";
+let currentSearch = "";
+let editMode = false;
+let modalAtelier = null;
+let editAtelier = null;
 
 function filtered() {
   return CATALOGUE.filter(a => {
@@ -615,6 +518,7 @@ function filtered() {
 function renderMain() {
   const main = document.getElementById("main");
   const list = filtered();
+
   const configured = CATALOGUE.filter(a => countLinks(a.num) > 0).length;
   document.getElementById("count-badge").textContent =
     configured ? `${configured} / ${CATALOGUE.length} configurés` : `${CATALOGUE.length} ateliers`;
@@ -639,14 +543,12 @@ function renderMain() {
       <div class="grid">
         ${ateliers.map(a => {
           const n = countLinks(a.num);
-          const hasImg = !!getThumb(a.num);
           return `
           <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}">
-            <div class="card-thumb thumb-${a.chap}${hasImg ? ' has-img' : ''}" data-num="${a.num}">
+            <div class="card-thumb thumb-${a.chap}">
               <span class="card-num">${a.num}</span>
               ${n > 0 ? `<span class="card-link-badge">${n}/6</span>` : ''}
-              <span class="card-thumb-emoji">${a.emoji}</span>
-              <button class="card-img-btn" title="Personnaliser l'image" onclick="openImgModal('${a.num}',event)">🖼️</button>
+              ${a.emoji}
             </div>
             <div class="card-body">
               <div class="card-title">${a.titre}</div>
@@ -660,15 +562,6 @@ function renderMain() {
       </div>
     </section>
   `).join("");
-
-  applyThumbs();
-}
-
-function applyThumbs() {
-  document.querySelectorAll(".card-thumb[data-num]").forEach(el => {
-    const src = getThumb(el.dataset.num);
-    if (src) el.style.backgroundImage = `url(${JSON.stringify(src)})`;
-  });
 }
 
 // ── MODAL FICHES
@@ -682,14 +575,6 @@ function openModal(num, e) {
   const thumb = document.getElementById("modal-thumb");
   thumb.className = `modal-thumb thumb-${a.chap}`;
   thumb.textContent = a.emoji;
-  const imgSrc = getThumb(num);
-  if (imgSrc) {
-    thumb.style.backgroundImage = `url(${JSON.stringify(imgSrc)})`;
-    thumb.textContent = "";
-  } else {
-    thumb.style.backgroundImage = "";
-  }
-
   document.getElementById("modal-eyebrow").textContent = `${a.num} · ${CHAPITRES[a.chap].label}`;
   document.getElementById("modal-title").textContent = a.titre;
 
@@ -716,15 +601,18 @@ function openModal(num, e) {
 
   document.getElementById("modal").classList.add("open");
 }
+
 function closeModal() { document.getElementById("modal").classList.remove("open"); modalAtelier = null; }
 
-// ── MODAL ÉDITION LIENS
+// ── MODAL ÉDITION
 function openEditModal(num, e) {
   if (e) e.stopPropagation();
   editAtelier = CATALOGUE.find(x => x.num === num);
   if (!editAtelier) return;
+
   document.getElementById("edit-modal-title").textContent = `${editAtelier.num} — ${editAtelier.titre}`;
   const links = getAtlierLinks(num);
+
   const container = document.getElementById("edit-fields-container");
   container.innerHTML = FICHES.map(f => {
     const id = links[f.key] || "";
@@ -736,6 +624,7 @@ function openEditModal(num, e) {
         value="${id ? driveViewUrl(id) : ''}">
     </div>`;
   }).join("");
+
   container.querySelectorAll(".field-input").forEach(input => {
     input.addEventListener("input", () => {
       const val = input.value.trim();
@@ -745,53 +634,21 @@ function openEditModal(num, e) {
       input.classList.toggle("invalid", !ok);
     });
   });
+
   document.getElementById("edit-modal").classList.add("open");
   setTimeout(() => container.querySelector("input")?.focus(), 200);
 }
+
 function closeEditModal() { document.getElementById("edit-modal").classList.remove("open"); editAtelier = null; }
 
-// ── MODAL IMAGE TUILE
-function openImgModal(num, e) {
-  if (e) e.stopPropagation();
-  imgAtelier = CATALOGUE.find(x => x.num === num);
-  if (!imgAtelier) return;
-  pendingImgSrc = getThumb(num);
-
-  document.getElementById("img-modal-sub").textContent = `${imgAtelier.num} — ${imgAtelier.titre}`;
-  document.getElementById("img-url-input").value = "";
-  setActiveTab("upload");
-  refreshImgPreview();
-  document.getElementById("img-modal").classList.add("open");
-}
-function closeImgModal() { document.getElementById("img-modal").classList.remove("open"); imgAtelier = null; pendingImgSrc = ""; }
-
-function refreshImgPreview() {
-  const box = document.getElementById("img-preview-box");
-  if (pendingImgSrc) {
-    box.style.backgroundImage = `url(${JSON.stringify(pendingImgSrc)})`;
-    box.textContent = "";
-    box.classList.add("has-img");
-  } else {
-    box.style.backgroundImage = "";
-    box.textContent = imgAtelier?.emoji || "🖼️";
-    box.classList.remove("has-img");
-  }
-}
-
-function setActiveTab(tab) {
-  document.querySelectorAll(".img-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
-  document.querySelectorAll(".img-panel").forEach(p => p.classList.toggle("active", p.id === `img-panel-${tab}`));
-}
-
-// ── TOAST
-function showToast(msg) {
+function showToast(msg = "✓ Liens enregistrés") {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2400);
 }
 
-// ── EVENTS — liens
+// ── EVENTS
 document.getElementById("btn-save").addEventListener("click", () => {
   if (!editAtelier) return;
   const inputs = document.querySelectorAll("#edit-fields-container .field-input");
@@ -802,79 +659,31 @@ document.getElementById("btn-save").addEventListener("click", () => {
     const id = input.value.trim() ? extractDriveId(input.value.trim()) : "";
     saveLink(editAtelier.num, input.dataset.fiche, id);
   });
-  closeEditModal(); renderMain();
+  closeEditModal();
+  renderMain();
   showToast(`✓ Liens enregistrés pour ${editAtelier.num}`);
 });
+
 document.getElementById("btn-clear").addEventListener("click", () => {
   if (!editAtelier) return;
   if (!confirm("Supprimer tous les liens pour cet atelier ?")) return;
   FICHES.forEach(f => saveLink(editAtelier.num, f.key, ""));
-  closeEditModal(); renderMain(); showToast("✕ Liens supprimés");
+  closeEditModal();
+  renderMain();
+  showToast("✕ Liens supprimés");
 });
+
 document.getElementById("btn-cancel").addEventListener("click", closeEditModal);
 document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
 document.getElementById("edit-modal").addEventListener("click", e => {
   if (e.target === document.getElementById("edit-modal")) closeEditModal();
 });
 
-// ── EVENTS — image
-document.querySelectorAll(".img-tab").forEach(tab => {
-  tab.addEventListener("click", () => setActiveTab(tab.dataset.tab));
-});
-
-document.getElementById("img-upload-area").addEventListener("click", () => {
-  document.getElementById("img-file-input").click();
-});
-
-document.getElementById("img-file-input").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith("image/")) { showToast("⚠ Fichier non reconnu comme image"); return; }
-  if (file.size > 2 * 1024 * 1024) { showToast("⚠ Image trop lourde (max 2 Mo)"); return; }
-  const reader = new FileReader();
-  reader.onload = ev => { pendingImgSrc = ev.target.result; refreshImgPreview(); };
-  reader.readAsDataURL(file);
-  e.target.value = "";
-});
-
-document.getElementById("img-url-input").addEventListener("input", e => {
-  const val = e.target.value.trim();
-  if (val.startsWith("http://") || val.startsWith("https://")) {
-    pendingImgSrc = val;
-  } else {
-    pendingImgSrc = getThumb(imgAtelier?.num || "");
-  }
-  refreshImgPreview();
-});
-
-document.getElementById("img-save-btn").addEventListener("click", () => {
-  if (!imgAtelier) return;
-  saveThumb(imgAtelier.num, pendingImgSrc);
-  closeImgModal(); renderMain();
-  showToast("✓ Image enregistrée");
-});
-
-document.getElementById("img-clear-btn").addEventListener("click", () => {
-  if (!imgAtelier) return;
-  pendingImgSrc = "";
-  saveThumb(imgAtelier.num, "");
-  closeImgModal(); renderMain();
-  showToast("✕ Image supprimée");
-});
-
-document.getElementById("img-cancel-btn").addEventListener("click", closeImgModal);
-document.getElementById("img-modal-close").addEventListener("click", closeImgModal);
-document.getElementById("img-modal").addEventListener("click", e => {
-  if (e.target === document.getElementById("img-modal")) closeImgModal();
-});
-
-// ── EVENTS — modal fiches
 document.getElementById("modal-close").addEventListener("click", closeModal);
 document.getElementById("modal").addEventListener("click", e => {
   if (e.target === document.getElementById("modal")) closeModal();
 });
 
-// ── EVENTS — divers
 document.getElementById("edit-toggle").addEventListener("click", () => {
   editMode = !editMode;
   document.body.classList.toggle("edit-mode", editMode);
@@ -886,7 +695,8 @@ document.getElementById("edit-toggle").addEventListener("click", () => {
 document.getElementById("btn-export").addEventListener("click", exportLinks);
 document.getElementById("btn-import").addEventListener("click", () => document.getElementById("import-file").click());
 document.getElementById("import-file").addEventListener("change", e => {
-  importLinks(e.target.files[0]); e.target.value = "";
+  importLinks(e.target.files[0]);
+  e.target.value = "";
 });
 
 document.querySelectorAll(".chap-btn").forEach(btn => {
@@ -909,10 +719,8 @@ document.getElementById("search").addEventListener("input", e => {
 });
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { closeModal(); closeEditModal(); closeImgModal(); }
-  if (e.key === "/" && !document.getElementById("modal").classList.contains("open")
-    && !document.getElementById("edit-modal").classList.contains("open")
-    && !document.getElementById("img-modal").classList.contains("open")) {
+  if (e.key === "Escape") { closeModal(); closeEditModal(); }
+  if (e.key === "/" && !document.getElementById("modal").classList.contains("open") && !document.getElementById("edit-modal").classList.contains("open")) {
     document.getElementById("search").focus(); e.preventDefault();
   }
 });
