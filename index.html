@@ -569,21 +569,34 @@ function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ""; }
 function saveGhToken(t) { if (t) localStorage.setItem(GH_TOKEN_KEY, t.trim()); }
 function clearGhToken() { localStorage.removeItem(GH_TOKEN_KEY); }
 
-async function pushToManifest(num, filename, token) {
+async function uploadToRepo(num, filename, imageDataUrl, token) {
   try {
-    const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_MANIFEST}`;
     const headers = {
       "Authorization": `token ${token}`,
       "Accept": "application/vnd.github.v3+json",
       "Content-Type": "application/json"
     };
-    const getRes = await fetch(url, { headers });
+
+    // 1. Upload l'image dans assets/thumbs/
+    const fileUrl = `https://api.github.com/repos/${GH_REPO}/contents/assets/thumbs/${filename}`;
+    const base64 = imageDataUrl.replace(/^data:image\/[^;]+;base64,/, "");
+    let fileSha;
+    const checkRes = await fetch(fileUrl, { headers });
+    if (checkRes.ok) fileSha = (await checkRes.json()).sha;
+    const uploadBody = { message: `feat: image ${filename} pour tuile ${num}`, content: base64, branch: "main" };
+    if (fileSha) uploadBody.sha = fileSha;
+    const uploadRes = await fetch(fileUrl, { method: "PUT", headers, body: JSON.stringify(uploadBody) });
+    if (!uploadRes.ok) return false;
+
+    // 2. Met à jour manifest.json
+    const manifestUrl = `https://api.github.com/repos/${GH_REPO}/contents/${GH_MANIFEST}`;
+    const getRes = await fetch(manifestUrl, { headers });
     if (!getRes.ok) return false;
     const current = await getRes.json();
     const decoded = JSON.parse(decodeURIComponent(escape(atob(current.content.replace(/\n/g, "")))));
     decoded[num] = filename;
     const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(decoded, null, 2) + "\n")));
-    const putRes = await fetch(url, {
+    const putRes = await fetch(manifestUrl, {
       method: "PUT", headers,
       body: JSON.stringify({ message: `feat: ajout ${num} dans manifest`, content: newContent, sha: current.sha, branch: "main" })
     });
@@ -768,18 +781,29 @@ function renderMain() {
   applyThumbs();
 }
 
+function setThumbEl(el, src) {
+  el.style.backgroundImage = `url(${JSON.stringify(src)})`;
+  el.style.backgroundSize = "cover";
+  el.style.backgroundPosition = "center";
+  el.textContent = "";
+}
+function clearThumbEl(el) {
+  el.style.backgroundImage = "";
+  el.style.backgroundSize = "";
+  el.style.backgroundPosition = "";
+  const a = CATALOGUE.find(x => x.num === el.dataset.num);
+  if (a) el.textContent = a.emoji;
+}
 function applyThumbs() {
   document.querySelectorAll(".card-thumb[data-num]").forEach(el => {
     const src = getEffectiveThumb(el.dataset.num);
-    if (src) {
-      el.style.backgroundImage = `url(${JSON.stringify(src)})`;
-      el.style.backgroundSize = "cover";
-      el.style.backgroundPosition = "center";
-    } else {
-      el.style.backgroundImage = "";
-      el.style.backgroundSize = "";
-      el.style.backgroundPosition = "";
-    }
+    if (!src) { clearThumbEl(el); return; }
+    if (src.startsWith("data:")) { setThumbEl(el, src); return; }
+    // URL externe ou repo : vérifier que l'image existe avant d'appliquer
+    const img = new Image();
+    img.onload  = () => setThumbEl(el, src);
+    img.onerror = () => clearThumbEl(el);
+    img.src = src;
   });
 }
 
@@ -1019,6 +1043,11 @@ document.getElementById("img-save-btn").addEventListener("click", async () => {
   if (!ok) { showToast("⚠ Stockage insuffisant — essaie une image plus petite"); return; }
 
   if (repoName) {
+    if (!pendingImgSrc.startsWith("data:")) {
+      showToast("⚠ Le partage ne fonctionne qu'avec une image chargée depuis l'appareil");
+      closeImgModal(); renderMain();
+      return;
+    }
     let token = getGhToken();
     if (!token) {
       token = document.getElementById("img-token-input").value.trim();
@@ -1026,8 +1055,8 @@ document.getElementById("img-save-btn").addEventListener("click", async () => {
       saveGhToken(token);
     }
     saveBtn.disabled = true;
-    saveBtn.textContent = "⏳ Publication…";
-    const pushed = await pushToManifest(imgAtelier.num, repoName, token);
+    saveBtn.textContent = "⏳ Upload en cours…";
+    const pushed = await uploadToRepo(imgAtelier.num, repoName, pendingImgSrc, token);
     saveBtn.disabled = false;
     saveBtn.textContent = "✓ Appliquer";
     if (pushed) {
