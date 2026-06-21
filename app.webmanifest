@@ -1,0 +1,14 @@
+{
+  "name": "Ateliers Numériques — Supports CONUM 47",
+  "short_name": "CONUM 47",
+  "description": "Catalogue des supports ateliers numériques pour Conseillers Numériques · Lot-et-Garonne",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0c0e14",
+  "theme_color": "#0c0e14",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
