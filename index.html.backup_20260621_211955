@@ -549,21 +549,17 @@ function saveThumb(num, src) {
 
 function compressImage(dataUrl) {
   return new Promise(resolve => {
-    const timeout = setTimeout(() => resolve(dataUrl), 6000);
     const img = new Image();
     img.onload = () => {
-      clearTimeout(timeout);
-      const MAX = 500;
+      const MAX = 800;
       let w = img.width, h = img.height;
       if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
       const canvas = document.createElement("canvas");
       canvas.width = w; canvas.height = h;
-      try {
-        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.72));
-      } catch { resolve(dataUrl); }
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.80));
     };
-    img.onerror = () => { clearTimeout(timeout); resolve(dataUrl); };
+    img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
 }
@@ -695,15 +691,7 @@ function renderMain() {
 function applyThumbs() {
   document.querySelectorAll(".card-thumb[data-num]").forEach(el => {
     const src = getThumb(el.dataset.num);
-    if (src) {
-      el.style.backgroundImage = `url(${JSON.stringify(src)})`;
-      el.style.backgroundSize = "cover";
-      el.style.backgroundPosition = "center";
-    } else {
-      el.style.backgroundImage = "";
-      el.style.backgroundSize = "";
-      el.style.backgroundPosition = "";
-    }
+    if (src) el.style.backgroundImage = `url(${JSON.stringify(src)})`;
   });
 }
 
@@ -874,24 +862,12 @@ document.getElementById("img-file-input").addEventListener("change", e => {
   const file = e.target.files[0];
   if (!file) return;
   if (!file.type.startsWith("image/")) { showToast("⚠ Fichier non reconnu comme image"); return; }
-
-  // Prévisualisation immédiate via Object URL (sans attendre la compression)
-  const objectUrl = URL.createObjectURL(file);
-  const box = document.getElementById("img-preview-box");
-  box.style.backgroundImage = `url(${JSON.stringify(objectUrl)})`;
-  box.style.backgroundSize = "cover";
-  box.style.backgroundPosition = "center";
-  box.classList.add("has-img");
-  box.textContent = "";
-
-  const saveBtn = document.getElementById("img-save-btn");
-  saveBtn.disabled = true;
-  saveBtn.textContent = "⏳ Compression…";
-
   const reader = new FileReader();
   reader.onload = async ev => {
     const gen = ++compressGen;
-    URL.revokeObjectURL(objectUrl);
+    const saveBtn = document.getElementById("img-save-btn");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "⏳ Chargement…";
     const compressed = await compressImage(ev.target.result);
     if (gen !== compressGen) return;
     pendingImgSrc = compressed;
