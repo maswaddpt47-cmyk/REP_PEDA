@@ -71,16 +71,7 @@
   #search:focus { border-color: #4f8ef7; }
   .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .count-badge { background: var(--border); color: var(--muted); font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
-  .edit-toggle {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--bg); border: 1px solid var(--border);
-    color: var(--muted); padding: 6px 13px; border-radius: 8px;
-    font-size: 13px; font-weight: 500; cursor: pointer;
-    font-family: 'Inter', sans-serif; transition: all .18s;
-  }
-  .edit-toggle:hover { border-color: #4f8ef7; color: #4f8ef7; }
-  .edit-toggle.on { background: rgba(79,142,247,.12); border-color: #4f8ef7; color: #4f8ef7; }
-  .io-btn {
+.io-btn {
     display: flex; align-items: center; gap: 5px;
     background: var(--bg); border: 1px solid var(--border);
     color: var(--muted); padding: 6px 11px; border-radius: 8px;
@@ -652,7 +643,7 @@ async function ghGetFile(path, token) {
 async function ghPutFile(path, message, content, sha, token) {
   const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
     method: "PUT", headers: ghHeaders(token),
-    body: JSON.stringify({ message, content: btoa(unescape(encodeURIComponent(content))), sha, branch: "main" })
+    body: JSON.stringify({ message, content: btoa(String.fromCharCode(...new TextEncoder().encode(content))), sha, branch: "main" })
   });
   if (res.status === 401 || res.status === 403) { clearGhToken(); return "auth_error"; }
   return res.ok ? true : false;
@@ -674,7 +665,8 @@ async function uploadToRepo(num, filename, imageDataUrl, token) {
     // 2. Mise à jour manifest
     const manifest = await ghGetFile(GH_MANIFEST, token);
     if (!manifest || manifest === "auth_error") return manifest === "auth_error" ? "auth_error" : false;
-    const decoded = JSON.parse(decodeURIComponent(escape(atob(manifest.content.replace(/\n/g, "")))));
+    const bytes = Uint8Array.from(atob(manifest.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+    const decoded = JSON.parse(new TextDecoder().decode(bytes));
     decoded[num] = filename;
     return await ghPutFile(GH_MANIFEST, `feat: ajout ${num} dans manifest`, JSON.stringify(decoded, null, 2) + "\n", manifest.sha, token);
   } catch { return false; }
@@ -880,7 +872,7 @@ function renderMain() {
           <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}">
             <div class="card-thumb thumb-${a.chap}${hasImg ? ' has-img' : ''}" data-num="${a.num}">
               <span class="card-num">${a.num}</span>
-              <span class="card-link-badge ${n===0?'badge-empty':n===6?'badge-full':''}">${n}/6</span>
+              <span class="card-link-badge ${n===0?'badge-empty':n===FICHES.length?'badge-full':''}">${n}/${FICHES.length}</span>
               <span class="card-thumb-emoji">${a.emoji}</span>
             </div>
             <div class="card-body">
@@ -1223,6 +1215,7 @@ document.getElementById("img-save-btn").addEventListener("click", async () => {
 
 document.getElementById("img-clear-btn").addEventListener("click", () => {
   if (!imgAtelier) return;
+  if (!confirm(`Supprimer l'image de la tuile ${imgAtelier.num} ?`)) return;
   pendingImgSrc = "";
   saveThumb(imgAtelier.num, "");
   closeImgModal(); renderMain();
