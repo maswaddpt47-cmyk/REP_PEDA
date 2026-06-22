@@ -900,7 +900,7 @@ function filtered() {
     const matchChap = currentChap === "all" || a.chap === currentChap;
     const q = currentSearch.toLowerCase();
     const matchSearch = !q || a.titre.toLowerCase().includes(q) || a.num.toLowerCase().includes(q);
-    const matchTodo = !showTodoOnly || countLinks(a.num) === 0;
+    const matchTodo = !showTodoOnly || countLinks(a.num) < FICHES.length;
     return matchChap && matchSearch && matchTodo;
   });
 }
