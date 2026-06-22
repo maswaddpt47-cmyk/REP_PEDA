@@ -494,7 +494,7 @@
   <button class="chap-btn" data-chap="D"><span class="chap-pill pill-D">D</span>Emploi &amp; mobilité</button>
   <button class="chap-btn" data-chap="E"><span class="chap-pill pill-E">E</span>Bien vivre</button>
   <button class="chap-btn" data-chap="F"><span class="chap-pill pill-F">F</span>Se cultiver</button>
-  <button class="chap-btn todo-filter" id="btn-todo">⚪ À compléter</button>
+  <button class="chap-btn todo-filter" id="btn-todo" data-chap="all">⚪ À compléter</button>
 </nav>
 
 <main id="main"></main>
@@ -1321,6 +1321,11 @@ document.getElementById("import-file").addEventListener("change", e => {
 
 document.querySelectorAll(".chap-btn").forEach(btn => {
   btn.addEventListener("click", () => {
+    if (btn.id !== "btn-todo") {
+      showTodoOnly = false;
+      document.getElementById("btn-todo").classList.remove("active");
+      document.getElementById("btn-todo").textContent = "⚪ À compléter";
+    }
     document.querySelectorAll(".chap-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentChap = btn.dataset.chap;
@@ -1371,9 +1376,7 @@ document.getElementById("btn-refresh").addEventListener("click", async () => {
 // ── FILTRE À COMPLÉTER
 document.getElementById("btn-todo").addEventListener("click", () => {
   showTodoOnly = !showTodoOnly;
-  document.getElementById("btn-todo").classList.toggle("active", showTodoOnly);
   document.getElementById("btn-todo").textContent = showTodoOnly ? "🔴 À compléter" : "⚪ À compléter";
-  renderMain();
 });
 
 // ── QR CODE
