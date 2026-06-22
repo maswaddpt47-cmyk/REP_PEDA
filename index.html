@@ -621,9 +621,25 @@ function countLinks(num) { return Object.values(getAtlierLinks(num)).filter(Bool
 const GH_REPO    = "maswaddpt47-cmyk/REP_PEDA";
 const GH_MANIFEST = "assets/thumbs/manifest.json";
 const GH_TOKEN_KEY = "conum_gh_token";
-function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ""; }
-function saveGhToken(t) { if (t) localStorage.setItem(GH_TOKEN_KEY, t.trim()); }
-function clearGhToken() { localStorage.removeItem(GH_TOKEN_KEY); }
+function getGhToken() {
+  const ls = localStorage.getItem(GH_TOKEN_KEY);
+  if (ls) return ls;
+  const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${GH_TOKEN_KEY}=([^;]*)`));
+  const ck = m ? decodeURIComponent(m[1]) : "";
+  if (ck) localStorage.setItem(GH_TOKEN_KEY, ck);
+  return ck;
+}
+function saveGhToken(t) {
+  if (!t) return;
+  const v = t.trim();
+  localStorage.setItem(GH_TOKEN_KEY, v);
+  const exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
+  document.cookie = `${GH_TOKEN_KEY}=${encodeURIComponent(v)};expires=${exp.toUTCString()};path=/;SameSite=Strict`;
+}
+function clearGhToken() {
+  localStorage.removeItem(GH_TOKEN_KEY);
+  document.cookie = `${GH_TOKEN_KEY}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Strict`;
+}
 
 function ghHeaders(token) {
   return { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" };
