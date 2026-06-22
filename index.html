@@ -972,9 +972,11 @@ async function loadRepoLinks() {
     const res = await fetch("assets/links.json?_=" + Date.now());
     if (!res.ok) return;
     const data = await res.json();
+    const local = loadLinks();
     const validNums = new Set(CATALOGUE.map(a => a.num));
     const validKeys = new Set(FICHES.map(f => f.key));
-    const clean = {};
+    // Pour chaque num présent dans le repo, le repo gagne (écrase le local).
+    // Les nums locaux absents du repo sont préservés (pas encore synchronisés).
     for (const [num, val] of Object.entries(data)) {
       if (typeof val !== "object" || Array.isArray(val)) continue;
       if (!validNums.has(num)) continue;
@@ -982,9 +984,10 @@ async function loadRepoLinks() {
       for (const [k, v] of Object.entries(val)) {
         if (validKeys.has(k) && v) fiche[k] = v;
       }
-      if (Object.keys(fiche).length) clean[num] = fiche;
+      if (Object.keys(fiche).length) local[num] = fiche;
+      else delete local[num];
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
   } catch {}
 }
 
@@ -1638,14 +1641,16 @@ document.getElementById("btn-pres").addEventListener("click", () => {
   btn.textContent = on ? "✏️ Édition" : "👁 Présentation";
 });
 
-// ── REFRESH LIENS
+// ── REFRESH LIENS (push local → repo si token présent, puis pull)
 document.getElementById("btn-refresh").addEventListener("click", async () => {
   const btn = document.getElementById("btn-refresh");
   btn.textContent = "⏳"; btn.disabled = true;
+  const tok = getGhToken();
+  if (tok) await pushLinksToRepo(tok);
   await loadRepoLinks();
   renderMain();
   btn.textContent = "↻"; btn.disabled = false;
-  showToast("✓ Liens actualisés");
+  showToast("✓ Liens synchronisés");
 });
 
 // ── MODAL TOKEN
