@@ -1070,7 +1070,7 @@ function showToast(msg) {
 }
 
 // ── EVENTS — liens
-document.getElementById("btn-save").addEventListener("click", () => {
+document.getElementById("btn-save").addEventListener("click", async () => {
   if (!editAtelier) return;
   const inputs = document.querySelectorAll("#edit-fields-container .field-input");
   let hasInvalid = false;
@@ -1080,10 +1080,21 @@ document.getElementById("btn-save").addEventListener("click", () => {
     const id = input.value.trim() ? extractDriveId(input.value.trim()) : "";
     saveLink(editAtelier.num, input.dataset.fiche, id);
   });
-  closeEditModal(); renderMain();
-  showToast(`✓ Liens enregistrés pour ${editAtelier.num}`);
+  renderMain();
   const tok = getGhToken();
-  if (tok) pushLinksToRepo(tok).then(r => { if (r === "auth_error") showToast("⚠ Token expiré — ouvre 🖼️ pour le renouveler"); });
+  if (tok) {
+    const btn = document.getElementById("btn-save");
+    btn.textContent = "⏳ Sync…"; btn.disabled = true;
+    const result = await pushLinksToRepo(tok);
+    btn.textContent = "✓ Enregistrer"; btn.disabled = false;
+    closeEditModal();
+    if (result === "auth_error") showToast("⚠ Token expiré — ouvre 🖼️ pour le renouveler");
+    else if (result) showToast(`✓ Liens enregistrés et synchronisés`);
+    else showToast(`✓ Liens enregistrés (sync échouée)`);
+  } else {
+    closeEditModal();
+    showToast(`✓ Liens enregistrés pour ${editAtelier.num}`);
+  }
 });
 document.getElementById("btn-clear").addEventListener("click", () => {
   if (!editAtelier) return;
