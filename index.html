@@ -398,6 +398,13 @@
   /* Mode présentation */
   .presentation-mode .card-img-btn,
   .presentation-mode .card-edit-btn { display: none !important; }
+  /* Lecture seule (pas de token) */
+  body:not(.has-token) .card-img-btn,
+  body:not(.has-token) .card-edit-btn,
+  body:not(.has-token) #btn-export,
+  body:not(.has-token) #btn-import,
+  body:not(.has-token) #btn-refresh,
+  body:not(.has-token) .pres-btn { display: none !important; }
   .pres-btn {
     display: flex; align-items: center; justify-content: center;
     height: 34px; padding: 0 12px; border-radius: 8px;
@@ -682,16 +689,21 @@ function getGhToken() {
   if (ck) localStorage.setItem(GH_TOKEN_KEY, ck);
   return ck;
 }
+function applyTokenClass() {
+  document.body.classList.toggle("has-token", !!getGhToken());
+}
 function saveGhToken(t) {
   if (!t) return;
   const v = t.trim();
   localStorage.setItem(GH_TOKEN_KEY, v);
   const exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
   document.cookie = `${GH_TOKEN_KEY}=${encodeURIComponent(v)};expires=${exp.toUTCString()};path=/;SameSite=Strict`;
+  applyTokenClass();
 }
 function clearGhToken() {
   localStorage.removeItem(GH_TOKEN_KEY);
   document.cookie = `${GH_TOKEN_KEY}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Strict`;
+  applyTokenClass();
 }
 
 function ghHeaders(token) {
@@ -1352,6 +1364,7 @@ document.addEventListener("keydown", e => {
   }
 });
 
+applyTokenClass();
 loadManifest().then(loadRepoLinks).then(() => renderMain());
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
