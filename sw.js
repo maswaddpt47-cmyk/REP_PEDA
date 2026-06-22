@@ -1,5 +1,5 @@
-const CACHE = "conum47-v3";
-const STATIC = ["./assets/icon.svg", "./assets/links.json", "./assets/thumbs/manifest.json"];
+const CACHE = "conum47-v4";
+const STATIC = ["./assets/icon.svg", "./assets/thumbs/manifest.json"];
 
 self.addEventListener("install", e => {
   e.waitUntil(
@@ -20,8 +20,8 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.url.includes("api.github.com")) return;
 
-  // HTML : toujours réseau (jamais en cache)
-  if (e.request.mode === "navigate") {
+  // HTML et links.json : toujours réseau (données dynamiques)
+  if (e.request.mode === "navigate" || e.request.url.includes("links.json")) {
     e.respondWith(
       fetch(e.request).catch(() => caches.match("./index.html"))
     );
