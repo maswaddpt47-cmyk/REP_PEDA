@@ -969,9 +969,20 @@ async function pushLinksToRepo(token) {
 // ── REPO LIENS (assets/links.json) — le repo est la source de vérité
 async function loadRepoLinks() {
   try {
-    const res = await fetch("assets/links.json?_=" + Date.now());
-    if (!res.ok) return;
-    const data = await res.json();
+    let data;
+    const tok = getGhToken();
+    if (tok) {
+      // API GitHub directe : pas de CDN, toujours la version fraîche
+      const file = await ghGetFile("assets/links.json", tok);
+      if (!file || file === "auth_error") return;
+      const bytes = Uint8Array.from(atob(file.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+      data = JSON.parse(new TextDecoder().decode(bytes));
+    } else {
+      // GitHub Pages : cache-busting + no-store
+      const res = await fetch("assets/links.json?_=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) return;
+      data = await res.json();
+    }
     const local = loadLinks();
     const validNums = new Set(CATALOGUE.map(a => a.num));
     const validKeys = new Set(FICHES.map(f => f.key));
@@ -1029,9 +1040,18 @@ function getThumb(num) { return loadThumbs()[num] || ""; }
 const repoThumbs = {};
 async function loadManifest() {
   try {
-    const res = await fetch("assets/thumbs/manifest.json?_=" + Date.now());
-    if (!res.ok) return;
-    const data = await res.json();
+    let data;
+    const tok = getGhToken();
+    if (tok) {
+      const file = await ghGetFile(GH_MANIFEST, tok);
+      if (!file || file === "auth_error") return;
+      const bytes = Uint8Array.from(atob(file.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+      data = JSON.parse(new TextDecoder().decode(bytes));
+    } else {
+      const res = await fetch("assets/thumbs/manifest.json?_=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) return;
+      data = await res.json();
+    }
     for (const [num, file] of Object.entries(data)) {
       if (typeof file === "string" && !num.startsWith("_")) {
         repoThumbs[num] = `assets/thumbs/${file}`;
