@@ -642,7 +642,6 @@
   body:not(.has-token) .card-edit-btn,
   body:not(.has-token) #btn-export,
   body:not(.has-token) #btn-import,
-  body:not(.has-token) #btn-refresh,
   body:not(.has-token) .pres-btn { display: none !important; }
 </style>
 </head>
@@ -967,24 +966,25 @@ async function pushLinksToRepo(token) {
   } catch { return false; }
 }
 
-// ── REPO LIENS (assets/links.json)
+// ── REPO LIENS (assets/links.json) — le repo est la source de vérité
 async function loadRepoLinks() {
   try {
     const res = await fetch("assets/links.json?_=" + Date.now());
     if (!res.ok) return;
     const data = await res.json();
-    const local = loadLinks();
-    let changed = false;
+    const validNums = new Set(CATALOGUE.map(a => a.num));
     const validKeys = new Set(FICHES.map(f => f.key));
+    const clean = {};
     for (const [num, val] of Object.entries(data)) {
       if (typeof val !== "object" || Array.isArray(val)) continue;
-      if (!CATALOGUE.find(a => a.num === num)) continue;
-      if (!local[num]) { local[num] = {}; }
+      if (!validNums.has(num)) continue;
+      const fiche = {};
       for (const [k, v] of Object.entries(val)) {
-        if (validKeys.has(k) && v && !local[num][k]) { local[num][k] = v; changed = true; }
+        if (validKeys.has(k) && v) fiche[k] = v;
       }
+      if (Object.keys(fiche).length) clean[num] = fiche;
     }
-    if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
   } catch {}
 }
 
