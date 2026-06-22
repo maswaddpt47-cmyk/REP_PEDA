@@ -1026,7 +1026,7 @@ function getThumb(num) { return loadThumbs()[num] || ""; }
 const repoThumbs = {};
 async function loadManifest() {
   try {
-    const res = await fetch("assets/thumbs/manifest.json");
+    const res = await fetch("assets/thumbs/manifest.json?_=" + Date.now());
     if (!res.ok) return;
     const data = await res.json();
     for (const [num, file] of Object.entries(data)) {
