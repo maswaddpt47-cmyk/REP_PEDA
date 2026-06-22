@@ -395,13 +395,68 @@
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+  /* Mode présentation */
+  .presentation-mode .card-img-btn,
+  .presentation-mode .card-edit-btn { display: none !important; }
+  .pres-btn {
+    display: flex; align-items: center; justify-content: center;
+    height: 34px; padding: 0 12px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all .18s; flex-shrink: 0; font-family: 'Inter', sans-serif; white-space: nowrap;
+  }
+  .pres-btn:hover { border-color: #7c3aed; color: #7c3aed; }
+  .pres-btn.on { background: rgba(124,58,237,.12); border-color: #7c3aed; color: #7c3aed; }
+  /* Refresh */
+  .refresh-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); font-size: 17px; cursor: pointer;
+    transition: all .18s; flex-shrink: 0;
+  }
+  .refresh-btn:hover { border-color: #22c55e; color: #22c55e; }
+  /* Filtre À compléter */
+  .todo-filter { margin-left: auto; }
+  .todo-filter.active { background: rgba(248,113,113,.1); border-color: #ef4444; color: #ef4444; }
+  /* Copier lien */
+  .fiche-copy-btn {
+    padding: 5px 9px; border-radius: 7px; font-size: 12px;
+    border: 1px solid var(--border); cursor: pointer;
+    background: var(--surface); color: var(--muted); transition: all .15s;
+  }
+  .fiche-copy-btn:disabled { opacity: .25; cursor: not-allowed; }
+  .fiche-copy-btn:not(:disabled):hover { border-color: #22c55e; color: #22c55e; }
+  /* QR code */
+  .modal-qr-btn {
+    display: block; margin: 14px auto 0;
+    padding: 7px 18px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    border: 1px solid var(--border); cursor: pointer;
+    background: var(--surface); color: var(--muted);
+    font-family: 'Inter', sans-serif; transition: all .15s;
+  }
+  .modal-qr-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .modal-qr-btn:not(:disabled):hover { border-color: #f59e0b; color: #f59e0b; }
+  .modal-qr-box {
+    text-align: center; margin-top: 14px; padding: 14px 14px 10px;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: #fff; display: none;
+  }
+  .modal-qr-box img { width: 160px; height: 160px; display: block; margin: 0 auto; }
+  .modal-qr-close {
+    font-size: 11px; color: #888; cursor: pointer; margin-top: 8px;
+    display: block; text-decoration: underline;
+  }
+
   @media (max-width: 520px) {
     header { padding: 12px 14px; gap: 8px; }
     .logo-text { font-size: 13px; }
     .logo-sub  { display: none; }
     .count-badge { display: none; }
     #btn-export, #btn-import { display: none; }
+    .pres-btn { padding: 0 8px; font-size: 12px; }
     .theme-btn { width: 30px; height: 30px; font-size: 14px; }
+    .refresh-btn { width: 30px; height: 30px; font-size: 14px; }
     main { padding: 16px 12px 40px; }
     .chapitres-nav { padding: 10px 12px; }
   }
@@ -425,6 +480,8 @@
     <button class="io-btn" id="btn-export" title="Exporter la configuration">⬆ Export</button>
     <button class="io-btn import" id="btn-import" title="Importer une configuration">⬇ Import</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
+    <button class="refresh-btn" id="btn-refresh" title="Recharger les liens depuis GitHub">↻</button>
+    <button class="pres-btn" id="btn-pres" title="Mode présentation">👁 Présentation</button>
     <button class="theme-btn" id="btn-theme" title="Basculer mode clair / sombre">🌙</button>
   </div>
 </header>
@@ -437,6 +494,7 @@
   <button class="chap-btn" data-chap="D"><span class="chap-pill pill-D">D</span>Emploi &amp; mobilité</button>
   <button class="chap-btn" data-chap="E"><span class="chap-pill pill-E">E</span>Bien vivre</button>
   <button class="chap-btn" data-chap="F"><span class="chap-pill pill-F">F</span>Se cultiver</button>
+  <button class="chap-btn todo-filter" id="btn-todo">⚪ À compléter</button>
 </nav>
 
 <main id="main"></main>
@@ -449,6 +507,11 @@
     <div class="modal-eyebrow" id="modal-eyebrow"></div>
     <div class="modal-title" id="modal-title"></div>
     <div class="fiche-list" id="modal-fiche-list"></div>
+    <button class="modal-qr-btn" id="modal-qr-btn" disabled>📱 QR code présentation</button>
+    <div class="modal-qr-box" id="modal-qr-box">
+      <img id="modal-qr-img" src="" alt="QR code">
+      <span class="modal-qr-close" id="modal-qr-close">Fermer</span>
+    </div>
   </div>
 </div>
 
@@ -831,11 +894,14 @@ let modalAtelier = null, editAtelier = null, imgAtelier = null;
 let pendingImgSrc = "";
 let compressGen = 0;
 
+let showTodoOnly = false;
 function filtered() {
   return CATALOGUE.filter(a => {
     const matchChap = currentChap === "all" || a.chap === currentChap;
     const q = currentSearch.toLowerCase();
-    return matchChap && (!q || a.titre.toLowerCase().includes(q) || a.num.toLowerCase().includes(q));
+    const matchSearch = !q || a.titre.toLowerCase().includes(q) || a.num.toLowerCase().includes(q);
+    const matchTodo = !showTodoOnly || countLinks(a.num) === 0;
+    return matchChap && matchSearch && matchTodo;
   });
 }
 
@@ -950,7 +1016,8 @@ function openModal(num, e) {
       <span class="fiche-label">${f.label}</span>
       <div class="fiche-actions">
         <button class="fiche-open-btn" data-id="${id}" ${!id ? 'disabled' : ''}>▶ Ouvrir</button>
-        <button class="fiche-dl-btn"  data-id="${id}" ${!id ? 'disabled' : ''}>⬇</button>
+        <button class="fiche-dl-btn"   data-id="${id}" ${!id ? 'disabled' : ''}>⬇</button>
+        <button class="fiche-copy-btn" data-id="${id}" ${!id ? 'disabled' : ''}>📋</button>
       </div>
     </div>`;
   }).join("");
@@ -961,6 +1028,17 @@ function openModal(num, e) {
   list.querySelectorAll(".fiche-dl-btn").forEach(btn => {
     btn.addEventListener("click", () => { if (btn.dataset.id) window.open(driveDownloadUrl(btn.dataset.id), "_blank"); });
   });
+  list.querySelectorAll(".fiche-copy-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!btn.dataset.id) return;
+      try { await navigator.clipboard.writeText(driveViewUrl(btn.dataset.id)); showToast("✓ Lien copié"); }
+      catch { showToast("⚠ Copie non supportée"); }
+    });
+  });
+
+  const qrBtn = document.getElementById("modal-qr-btn");
+  document.getElementById("modal-qr-box").style.display = "none";
+  qrBtn.disabled = !links.presentation;
 
   document.getElementById("modal").classList.add("open");
 }
@@ -1271,6 +1349,46 @@ document.addEventListener("keydown", e => {
 
 loadManifest().then(loadRepoLinks).then(() => renderMain());
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+
+// ── MODE PRÉSENTATION
+document.getElementById("btn-pres").addEventListener("click", () => {
+  const btn = document.getElementById("btn-pres");
+  const on = document.body.classList.toggle("presentation-mode");
+  btn.classList.toggle("on", on);
+  btn.textContent = on ? "✏️ Édition" : "👁 Présentation";
+});
+
+// ── REFRESH LIENS
+document.getElementById("btn-refresh").addEventListener("click", async () => {
+  const btn = document.getElementById("btn-refresh");
+  btn.textContent = "⏳"; btn.disabled = true;
+  await loadRepoLinks();
+  renderMain();
+  btn.textContent = "↻"; btn.disabled = false;
+  showToast("✓ Liens actualisés");
+});
+
+// ── FILTRE À COMPLÉTER
+document.getElementById("btn-todo").addEventListener("click", () => {
+  showTodoOnly = !showTodoOnly;
+  document.getElementById("btn-todo").classList.toggle("active", showTodoOnly);
+  document.getElementById("btn-todo").textContent = showTodoOnly ? "🔴 À compléter" : "⚪ À compléter";
+  renderMain();
+});
+
+// ── QR CODE
+document.getElementById("modal-qr-btn").addEventListener("click", () => {
+  const box = document.getElementById("modal-qr-box");
+  if (box.style.display === "block") { box.style.display = "none"; return; }
+  const id = modalAtelier ? getAtlierLinks(modalAtelier.num).presentation : "";
+  if (!id) return;
+  document.getElementById("modal-qr-img").src =
+    `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(driveViewUrl(id))}`;
+  box.style.display = "block";
+});
+document.getElementById("modal-qr-close").addEventListener("click", () => {
+  document.getElementById("modal-qr-box").style.display = "none";
+});
 
 // ── THEME
 const THEME_KEY = "conum_theme";
