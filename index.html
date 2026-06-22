@@ -523,6 +523,7 @@
       <div id="img-token-saved" style="display:none">
         <span class="repo-token-ok">✓ Token enregistré</span>
         <button class="repo-token-reset" id="img-token-reset">Changer</button>
+        <button class="repo-token-reset" id="img-sync-links" style="color:#4f8ef7">↑ Sync liens</button>
       </div>
     </div>
 
@@ -1017,7 +1018,7 @@ function openImgModal(num, e) {
   document.getElementById("img-url-input").value = "";
 
   // Pré-remplir le nom de fichier repo si déjà connu
-  const existingFile = repoThumbs[num] ? repoThumbs[num].replace("assets/thumbs/", "") : "";
+  const existingFile = repoThumbs[num] ? repoThumbs[num].replace("assets/thumbs/", "") : `${num}.png`;
   document.getElementById("img-repo-name").value = existingFile;
   refreshTokenUI();
 
@@ -1154,6 +1155,18 @@ document.getElementById("img-token-reset").addEventListener("click", () => {
   clearGhToken();
   document.getElementById("img-token-input").value = "";
   refreshTokenUI();
+});
+
+document.getElementById("img-sync-links").addEventListener("click", async () => {
+  const btn = document.getElementById("img-sync-links");
+  const token = getGhToken();
+  if (!token) { showToast("⚠ Token manquant"); return; }
+  btn.textContent = "⏳ Sync…"; btn.disabled = true;
+  const result = await pushLinksToRepo(token);
+  btn.textContent = "↑ Sync liens"; btn.disabled = false;
+  if (result === "auth_error") showToast("⚠ Token expiré");
+  else if (result) showToast("✓ Liens synchronisés sur GitHub");
+  else showToast("⚠ Erreur de synchronisation");
 });
 
 document.getElementById("img-save-btn").addEventListener("click", async () => {
