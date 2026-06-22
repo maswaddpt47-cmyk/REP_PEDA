@@ -620,6 +620,23 @@
     main { padding: 16px 12px 40px; }
     .chapitres-nav { padding: 10px 12px; }
   }
+  /* Bouton token dans l'en-tête */
+  .token-btn {
+    display: flex; align-items: center; justify-content: center;
+    height: 34px; padding: 0 11px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); font-size: 14px; cursor: pointer;
+    transition: all .18s; flex-shrink: 0; font-family: 'Inter', sans-serif;
+  }
+  .token-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+  .token-btn.has   { border-color: #22c55e; color: #22c55e; }
+  /* Modal token */
+  .token-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; width: 420px; max-width: 92vw; padding: 28px;
+    transform: scale(.94); transition: transform .2s; position: relative;
+  }
+  .modal-overlay.open .token-modal { transform: scale(1); }
   /* Contrôle d'accès — masquer les contrôles admin sans token */
   body:not(.has-token) .card-img-btn,
   body:not(.has-token) .card-edit-btn,
@@ -649,6 +666,7 @@
     <input type="file" id="import-file" accept=".json" style="display:none">
     <button class="refresh-btn" id="btn-refresh" title="Recharger les liens depuis GitHub">↻</button>
     <button class="pres-btn" id="btn-pres" title="Mode présentation">👁 Présentation</button>
+    <button class="token-btn" id="btn-token" title="Accès administration">🔑</button>
     <div class="amb-wrap">
       <button class="theme-btn" id="btn-theme" title="Choisir l'ambiance">🎨</button>
       <div class="amb-pop" id="amb-pop">
@@ -761,6 +779,29 @@
       <button class="btn-save" id="img-save-btn">✓ Appliquer</button>
       <button class="btn-clear" id="img-clear-btn">✕ Supprimer l'image</button>
       <button class="btn-cancel" id="img-cancel-btn">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TOKEN -->
+<div class="modal-overlay" id="token-modal">
+  <div class="token-modal">
+    <button class="modal-close" id="token-modal-close">✕</button>
+    <div class="edit-modal-title">Accès administration</div>
+    <div id="token-saved-section" style="display:none">
+      <div style="font-size:13px;color:#22c55e;margin-bottom:14px">✓ Token enregistré — contrôles admin actifs</div>
+    </div>
+    <div id="token-entry-section">
+      <div class="edit-modal-sub">Entre ton token GitHub pour activer les contrôles d'édition sur tous tes appareils.</div>
+      <div class="field-group">
+        <div class="field-label">🔑 Token GitHub</div>
+        <input class="field-input" id="token-input" type="password" placeholder="ghp_…" autocomplete="off">
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-save" id="token-save-btn">✓ Enregistrer</button>
+      <button class="btn-clear" id="token-clear-btn" style="display:none">✕ Supprimer le token</button>
+      <button class="btn-cancel" id="token-cancel-btn">Annuler</button>
     </div>
   </div>
 </div>
@@ -1576,7 +1617,7 @@ document.getElementById("search").addEventListener("input", e => {
 });
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { closeModal(); closeEditModal(); closeImgModal(); document.getElementById("amb-pop").classList.remove("open"); }
+  if (e.key === "Escape") { closeModal(); closeEditModal(); closeImgModal(); closeTokenModal(); document.getElementById("amb-pop").classList.remove("open"); }
   if (e.key === "/" && !document.getElementById("modal").classList.contains("open")
     && !document.getElementById("edit-modal").classList.contains("open")
     && !document.getElementById("img-modal").classList.contains("open")) {
@@ -1585,6 +1626,7 @@ document.addEventListener("keydown", e => {
 });
 
 applyTokenClass();
+updateTokenBtn();
 loadManifest().then(loadRepoLinks).then(() => renderMain());
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
@@ -1604,6 +1646,46 @@ document.getElementById("btn-refresh").addEventListener("click", async () => {
   renderMain();
   btn.textContent = "↻"; btn.disabled = false;
   showToast("✓ Liens actualisés");
+});
+
+// ── MODAL TOKEN
+function updateTokenBtn() {
+  const btn = document.getElementById("btn-token");
+  const has = !!getGhToken();
+  btn.classList.toggle("has", has);
+  btn.title = has ? "Token actif — cliquer pour gérer" : "Accès administration";
+}
+function openTokenModal() {
+  const has = !!getGhToken();
+  document.getElementById("token-saved-section").style.display = has ? "" : "none";
+  document.getElementById("token-entry-section").style.display = has ? "none" : "";
+  document.getElementById("token-save-btn").style.display = has ? "none" : "";
+  document.getElementById("token-clear-btn").style.display = has ? "" : "none";
+  document.getElementById("token-input").value = "";
+  document.getElementById("token-modal").classList.add("open");
+  if (!has) setTimeout(() => document.getElementById("token-input")?.focus(), 200);
+}
+function closeTokenModal() { document.getElementById("token-modal").classList.remove("open"); }
+document.getElementById("btn-token").addEventListener("click", openTokenModal);
+document.getElementById("token-cancel-btn").addEventListener("click", closeTokenModal);
+document.getElementById("token-modal-close").addEventListener("click", closeTokenModal);
+document.getElementById("token-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("token-modal")) closeTokenModal();
+});
+document.getElementById("token-save-btn").addEventListener("click", () => {
+  const val = document.getElementById("token-input").value.trim();
+  if (!val) { showToast("⚠ Token vide"); return; }
+  saveGhToken(val);
+  updateTokenBtn();
+  closeTokenModal();
+  showToast("✓ Token enregistré — contrôles admin activés");
+});
+document.getElementById("token-clear-btn").addEventListener("click", () => {
+  if (!confirm("Supprimer le token ? Les contrôles admin seront masqués.")) return;
+  clearGhToken();
+  updateTokenBtn();
+  closeTokenModal();
+  showToast("✕ Token supprimé");
 });
 
 // ── FILTRE À COMPLÉTER
