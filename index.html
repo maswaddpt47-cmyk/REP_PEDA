@@ -937,14 +937,24 @@ async function ghPutFile(path, message, content, sha, token) {
 
 async function uploadToRepo(num, filename, imageDataUrl, token) {
   try {
-    // 1. Upload l'image
     const base64 = imageDataUrl.replace(/^data:image\/[^;]+;base64,/, "");
-    const existing = await ghGetFile(`assets/thumbs/${filename}`, token);
+
+    // 1. Upload image — retry automatique si conflit SHA (image déjà modifiée récemment)
+    let existing = await ghGetFile(`assets/thumbs/${filename}`, token);
     if (existing === "auth_error") return "auth_error";
-    const imgRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/assets/thumbs/${filename}`, {
+    let imgRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/assets/thumbs/${filename}`, {
       method: "PUT", headers: ghHeaders(token),
       body: JSON.stringify({ message: `feat: image ${filename} pour tuile ${num}`, content: base64, sha: existing?.sha, branch: "main" })
     });
+    if (imgRes.status === 409 || imgRes.status === 422) {
+      // SHA périmé — re-fetch et réessaie une fois
+      existing = await ghGetFile(`assets/thumbs/${filename}`, token);
+      if (existing === "auth_error") return "auth_error";
+      imgRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/assets/thumbs/${filename}`, {
+        method: "PUT", headers: ghHeaders(token),
+        body: JSON.stringify({ message: `feat: image ${filename} pour tuile ${num}`, content: base64, sha: existing?.sha, branch: "main" })
+      });
+    }
     if (imgRes.status === 401 || imgRes.status === 403) { clearGhToken(); return "auth_error"; }
     if (!imgRes.ok) return false;
 
@@ -1052,9 +1062,10 @@ async function loadManifest() {
       if (!res.ok) return;
       data = await res.json();
     }
+    const ts = Date.now();
     for (const [num, file] of Object.entries(data)) {
       if (typeof file === "string" && !num.startsWith("_")) {
-        repoThumbs[num] = `assets/thumbs/${file}`;
+        repoThumbs[num] = `assets/thumbs/${file}?_=${ts}`;
       }
     }
   } catch {}
@@ -1652,6 +1663,18 @@ applyTokenClass();
 updateTokenBtn();
 loadManifest().then(loadRepoLinks).then(() => renderMain());
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+
+// ── AUTO-REFRESH toutes les 3 min sur les appareils sans token
+setInterval(async () => {
+  if (getGhToken()) return;
+  const before = localStorage.getItem(STORAGE_KEY);
+  const beforeThumbs = JSON.stringify(repoThumbs);
+  await loadManifest();
+  await loadRepoLinks();
+  const after = localStorage.getItem(STORAGE_KEY);
+  const afterThumbs = JSON.stringify(repoThumbs);
+  if (before !== after || beforeThumbs !== afterThumbs) renderMain();
+}, 3 * 60 * 1000);
 
 // ── MODE PRÉSENTATION
 document.getElementById("btn-pres").addEventListener("click", () => {
