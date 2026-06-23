@@ -1170,13 +1170,15 @@ function renderOverview() {
   const total = CATALOGUE.length;
   const ready = CATALOGUE.filter(a => countLinks(a.num) === FICHES.length).length;
   const started = CATALOGUE.filter(a => countLinks(a.num) > 0).length;
-  const pct = total ? Math.round((ready / total) * 100) : 0;
+  const totalFilled = CATALOGUE.reduce((s, a) => s + countLinks(a.num), 0);
+  const pct = total ? Math.round((totalFilled / (total * FICHES.length)) * 100) : 0;
   const order = ["A","B","C","D","E","F"];
   const SHORT = { A:"Par l'outil", B:"Pour le quotidien", C:"Pour le bureau", D:"Emploi & mobilité", E:"Bien vivre", F:"Se cultiver" };
   const chapsHTML = order.map(ch => {
     const ats = CATALOGUE.filter(a => a.chap === ch);
     const done = ats.filter(a => countLinks(a.num) === FICHES.length).length;
-    const p = ats.length ? Math.round((done / ats.length) * 100) : 0;
+    const chapFilled = ats.reduce((s, a) => s + countLinks(a.num), 0);
+    const p = ats.length ? Math.round((chapFilled / (ats.length * FICHES.length)) * 100) : 0;
     const active = currentChap === ch ? " style=\"border-color:var(--" + ch + ")\"" : "";
     return `
       <div class="ov-chap" data-chap="${ch}"${active}>
@@ -1191,7 +1193,7 @@ function renderOverview() {
   ov.innerHTML = `
     <div class="ov-grid">
       <div class="ov-hero">
-        <div class="ov-ring" style="--p:${pct}"><div class="ov-ring-num">${pct}%<small>PRÊTS</small></div></div>
+        <div class="ov-ring" style="--p:${pct}"><div class="ov-ring-num">${pct}%<small>FICHES</small></div></div>
         <div class="ov-hero-txt">
           <div class="ov-hero-title">${ready} atelier${ready>1?'s':''} prêt${ready>1?'s':''} sur ${total}</div>
           <div class="ov-hero-sub">${started} en cours de préparation · ${total - started} à démarrer.<br>Choisis un thème ci-dessous ou une tuile pour lancer un atelier.</div>
