@@ -779,6 +779,14 @@
     <div class="edit-modal-title" id="edit-modal-title"></div>
     <div class="edit-modal-sub">Renseigne les liens Google Drive pour chaque document</div>
     <div id="edit-fields-container"></div>
+    <button class="modal-add-fiche-btn" id="edit-add-fiche-btn">＋ Ajouter une fiche</button>
+    <div id="edit-add-fiche-form" style="display:none">
+      <div class="add-fiche-row">
+        <input class="field-input add-fiche-emoji-input" id="edit-add-fiche-emoji" type="text" placeholder="📄" maxlength="8">
+        <input class="field-input" id="edit-add-fiche-label" type="text" placeholder="Nom de la fiche…" maxlength="60">
+        <button class="add-fiche-confirm" id="edit-add-fiche-confirm">＋ Ajouter</button>
+      </div>
+    </div>
     <div class="edit-actions">
       <button class="btn-save" id="btn-save">✓ Enregistrer</button>
       <button class="btn-clear" id="btn-clear">✕ Effacer tout</button>
@@ -1598,6 +1606,11 @@ function openEditModal(num, e) {
       input.classList.toggle("invalid", !ok);
     });
   });
+  // Réinitialiser formulaire ajout fiche
+  document.getElementById("edit-add-fiche-form").style.display = "none";
+  document.getElementById("edit-add-fiche-btn").style.display = "";
+  document.getElementById("edit-add-fiche-emoji").value = "";
+  document.getElementById("edit-add-fiche-label").value = "";
   document.getElementById("edit-modal").classList.add("open");
   setTimeout(() => container.querySelector("input")?.focus(), 200);
 }
@@ -1692,11 +1705,20 @@ document.getElementById("btn-save").addEventListener("click", async () => {
     showToast(`✓ Liens enregistrés pour ${editAtelier.num}`);
   }
 });
-document.getElementById("btn-clear").addEventListener("click", () => {
+document.getElementById("btn-clear").addEventListener("click", async () => {
   if (!editAtelier) return;
   if (!confirm("Supprimer tous les liens pour cet atelier ?")) return;
-  FICHES.forEach(f => saveLink(editAtelier.num, f.key, ""));
-  closeEditModal(); renderMain(); showToast("✕ Liens supprimés");
+  const num = editAtelier.num;
+  getFichesForAtelier(num).forEach(f => saveLink(num, f.key, ""));
+  closeEditModal(); renderMain();
+  const tok = getGhToken();
+  if (tok) {
+    const result = await pushLinksToRepo(tok);
+    if (result === "auth_error") showToast("⚠ Token expiré");
+    else showToast("✕ Liens supprimés et synchronisés");
+  } else {
+    showToast("✕ Liens supprimés");
+  }
 });
 document.getElementById("btn-cancel").addEventListener("click", closeEditModal);
 document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
@@ -1962,6 +1984,30 @@ document.getElementById("add-fiche-confirm").addEventListener("click", async () 
   if (tok) await pushFichesToRepo(cf, tok);
   const num = modalAtelier.num;
   openModal(num);
+  showToast(`✓ Fiche "${label}" ajoutée`);
+});
+
+// Bouton ajout fiche dans modal ÉDITION
+document.getElementById("edit-add-fiche-btn").addEventListener("click", () => {
+  document.getElementById("edit-add-fiche-form").style.display = "";
+  document.getElementById("edit-add-fiche-btn").style.display = "none";
+  setTimeout(() => document.getElementById("edit-add-fiche-label").focus(), 100);
+});
+
+document.getElementById("edit-add-fiche-confirm").addEventListener("click", async () => {
+  if (!editAtelier) return;
+  const emoji = document.getElementById("edit-add-fiche-emoji").value.trim() || "📄";
+  const label = document.getElementById("edit-add-fiche-label").value.trim();
+  if (!label) { document.getElementById("edit-add-fiche-label").focus(); return; }
+  const key = `cf_${Date.now().toString(36)}`;
+  const cf = loadCustomFiches();
+  if (!cf[editAtelier.num]) cf[editAtelier.num] = [];
+  cf[editAtelier.num].push({ key, label, emoji });
+  saveCustomFiches(cf);
+  const tok = getGhToken();
+  if (tok) await pushFichesToRepo(cf, tok);
+  // Recharger la modal édition pour afficher le nouveau champ
+  openEditModal(editAtelier.num);
   showToast(`✓ Fiche "${label}" ajoutée`);
 });
 
