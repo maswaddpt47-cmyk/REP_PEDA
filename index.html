@@ -552,6 +552,7 @@
   .presentation-mode .todo-filter,
   .presentation-mode #btn-export,
   .presentation-mode #btn-import,
+  .presentation-mode #btn-add-tile,
   .presentation-mode #btn-refresh { display: none !important; }
   .presentation-mode .grid { grid-template-columns: repeat(auto-fill, minmax(284px, 1fr)); gap: 26px; }
   .presentation-mode .card-thumb { height: 150px; font-size: 54px; }
@@ -640,9 +641,35 @@
   /* Contrôle d'accès — masquer les contrôles admin sans token */
   body:not(.has-token) .card-img-btn,
   body:not(.has-token) .card-edit-btn,
+  body:not(.has-token) .card-cat-btn,
   body:not(.has-token) #btn-export,
   body:not(.has-token) #btn-import,
+  body:not(.has-token) #btn-add-tile,
+  body:not(.has-token) .card-add,
   body:not(.has-token) .pres-btn { display: none !important; }
+
+  /* ── CATALOGUE MODAL — sélecteur de chapitre */
+  .cat-chap-btn { padding: 5px 13px; border-radius: 7px; border: 2px solid var(--border); font-size: 13px; font-weight: 700; cursor: pointer; background: var(--surface-2); color: var(--muted); font-family: 'Space Grotesk', sans-serif; transition: all .15s; }
+  .cat-chap-btn:hover { border-color: var(--text); color: var(--text); }
+  .cat-chap-btn.sel-A { border-color: var(--A); background: var(--A); color: #fff; }
+  .cat-chap-btn.sel-B { border-color: var(--B); background: var(--B); color: #fff; }
+  .cat-chap-btn.sel-C { border-color: var(--C); background: var(--C); color: #fff; }
+  .cat-chap-btn.sel-D { border-color: var(--D); background: var(--D); color: #fff; }
+  .cat-chap-btn.sel-E { border-color: var(--E); background: var(--E); color: #fff; }
+  .cat-chap-btn.sel-F { border-color: var(--F); background: var(--F); color: #fff; }
+
+  /* ── CARTE AJOUT */
+  .card-add { border: 2px dashed var(--border) !important; background: transparent !important; box-shadow: none !important; opacity: .55; }
+  .card-add:hover { opacity: 1; border-color: var(--text) !important; }
+  .card-add .card-add-icon { font-size: 40px; line-height: 1; color: var(--muted); }
+  .card-add .card-body { padding: 12px 14px; }
+
+  /* ── BADGE TUILE PERSO */
+  .card-custom-badge { position: absolute; bottom: 28px; left: 13px; z-index: 10; background: rgba(245,158,11,.85); color: #fff; font-size: 8px; font-weight: 800; padding: 1px 5px; border-radius: 3px; letter-spacing: .6px; }
+
+  /* ── BOUTON ÉDITER TUILE PERSO */
+  .card-cat-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font-size: 14px; cursor: pointer; transition: all .15s; flex-shrink: 0; }
+  .card-cat-btn:hover { border-color: #f59e0b; color: #f59e0b; }
 </style>
 </head>
 <body>
@@ -660,6 +687,7 @@
   </div>
   <div class="header-right">
     <span class="count-badge" id="count-badge">32 ateliers</span>
+    <button class="io-btn" id="btn-add-tile" title="Ajouter une tuile personnalisée">＋ Tuile</button>
     <button class="io-btn" id="btn-export" title="Exporter la configuration">⬆ Export</button>
     <button class="io-btn import" id="btn-import" title="Importer une configuration">⬇ Import</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
@@ -782,6 +810,38 @@
   </div>
 </div>
 
+<!-- MODAL CATALOGUE PERSONNALISÉ -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="token-modal">
+    <button class="modal-close" id="cat-modal-close">✕</button>
+    <div class="edit-modal-title" id="cat-modal-title">Nouvelle tuile</div>
+    <div class="field-group">
+      <div class="field-label">Grande catégorie</div>
+      <div id="cat-chap-btns" style="display:flex;gap:7px;flex-wrap:wrap;margin-top:6px"></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="field-group" style="flex:0 0 90px">
+        <div class="field-label">Numéro</div>
+        <input class="field-input" id="cat-num" type="text" placeholder="A7" maxlength="6" autocomplete="off">
+      </div>
+      <div class="field-group" style="flex:0 0 90px">
+        <div class="field-label">Emoji</div>
+        <input class="field-input" id="cat-emoji" type="text" placeholder="🔧" maxlength="8">
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">Titre de l'atelier</div>
+      <input class="field-input" id="cat-titre" type="text" placeholder="Nom de l'atelier…" maxlength="120">
+    </div>
+    <div id="cat-err" style="color:#ef4444;font-size:12px;min-height:16px;margin-bottom:4px"></div>
+    <div class="edit-actions">
+      <button class="btn-save" id="cat-save-btn">✓ Enregistrer</button>
+      <button class="btn-clear" id="cat-delete-btn" style="display:none">✕ Supprimer la tuile</button>
+      <button class="btn-cancel" id="cat-cancel-btn">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TOKEN -->
 <div class="modal-overlay" id="token-modal">
   <div class="token-modal">
@@ -826,7 +886,7 @@ const CHAPITRES = {
   F: { label: "Le numérique pour se cultiver" },
 };
 
-const CATALOGUE = [
+const BASE_CATALOGUE = [
   {chap:"A",num:"A1",emoji:"🖥️",titre:"Prendre en main l'ordinateur"},
   {chap:"A",num:"A2",emoji:"📱",titre:"Prendre en main la tablette"},
   {chap:"A",num:"A3",emoji:"📲",titre:"Prendre en main le smartphone"},
@@ -864,6 +924,7 @@ const CATALOGUE = [
   {chap:"F",num:"F4",emoji:"🧠",titre:"Apprendre et s'informer (autoformation, presse)"},
   {chap:"F",num:"F5",emoji:"🏛️",titre:"Visites virtuelles (musées, opéras, théâtres…)"},
 ];
+let CATALOGUE = [...BASE_CATALOGUE];
 
 // ── STORAGE LIENS
 const STORAGE_KEY = "conum_links_v1";
@@ -887,6 +948,54 @@ function saveLink(num, ficheKey, driveId) {
 }
 function getAtlierLinks(num) { return loadLinks()[num] || {}; }
 function countLinks(num) { return Object.values(getAtlierLinks(num)).filter(Boolean).length; }
+
+// ── CATALOGUE PERSONNALISÉ
+const GH_CATALOGUE = "assets/catalogue.json";
+const CUSTOM_CAT_KEY = "conum_custom_v1";
+
+function loadCustomAteliers() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_CAT_KEY) || "[]"); } catch { return []; }
+}
+function saveCustomAteliers(arr) {
+  localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(arr));
+}
+function rebuildCatalogue() {
+  const baseNums = new Set(BASE_CATALOGUE.map(a => a.num));
+  const custom = loadCustomAteliers().filter(a => a.num && a.chap && a.titre && !baseNums.has(a.num));
+  CATALOGUE = [...BASE_CATALOGUE, ...custom];
+}
+function nextNum(chap) {
+  const max = CATALOGUE.filter(a => a.chap === chap)
+    .map(a => { const m = a.num.match(/^[A-F](\d+)$/i); return m ? parseInt(m[1]) : 0; })
+    .reduce((a, b) => Math.max(a, b), 0);
+  return `${chap}${max + 1}`;
+}
+async function loadRepoCatalogue() {
+  try {
+    let data;
+    const tok = getGhToken();
+    if (tok) {
+      const file = await ghGetFile(GH_CATALOGUE, tok);
+      if (!file || file === "auth_error") { rebuildCatalogue(); return; }
+      const bytes = Uint8Array.from(atob(file.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+      data = JSON.parse(new TextDecoder().decode(bytes));
+    } else {
+      const res = await fetch("assets/catalogue.json?_=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) { rebuildCatalogue(); return; }
+      data = await res.json();
+    }
+    if (!Array.isArray(data)) { rebuildCatalogue(); return; }
+    saveCustomAteliers(data);
+    rebuildCatalogue();
+  } catch { rebuildCatalogue(); }
+}
+async function pushCatalogueToRepo(arr, tok) {
+  try {
+    const existing = await ghGetFile(GH_CATALOGUE, tok);
+    if (existing === "auth_error") { clearGhToken(); return "auth_error"; }
+    return await ghPutFile(GH_CATALOGUE, "feat: catalogue personnalisé", JSON.stringify(arr, null, 2) + "\n", existing?.sha, tok);
+  } catch { return false; }
+}
 
 // ── GITHUB PUSH
 const GH_REPO    = "maswaddpt47-cmyk/REP_PEDA";
@@ -1242,12 +1351,14 @@ function renderMain() {
         ${ateliers.map(a => {
           const n = countLinks(a.num);
           const hasImg = !!getEffectiveThumb(a.num);
+          const isCustom = !BASE_CATALOGUE.some(b => b.num === a.num);
           return `
           <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}" style="animation-delay:${Math.min(cardI++, 24) * 192}ms">
             <div class="card-thumb thumb-${a.chap}${hasImg ? ' has-img' : ''}" data-num="${a.num}">
               <span class="card-num">${a.num}</span>
               <span class="card-link-badge ${n===0?'badge-empty':n===FICHES.length?'badge-full':''}">${n}/${FICHES.length}</span>
               <span class="card-thumb-emoji">${a.emoji}</span>
+              ${isCustom ? '<span class="card-custom-badge">PERSO</span>' : ''}
               <div class="card-progress"><i style="width:${Math.round((n/FICHES.length)*100)}%"></i></div>
             </div>
             <div class="card-body">
@@ -1256,10 +1367,17 @@ function renderMain() {
                 <button class="btn btn-${a.chap}" onclick="openModal('${a.num}',event)">▶ Ouvrir</button>
                 <button class="card-img-btn" title="Personnaliser l'image" onclick="openImgModal('${a.num}',event)">🖼️</button>
                 <button class="card-edit-btn" title="Modifier les liens Drive" onclick="openEditModal('${a.num}',event)">✏️</button>
+                ${isCustom ? `<button class="card-cat-btn" title="Modifier cette tuile" onclick="openCatModal('${a.num}',event)">⚙</button>` : ''}
               </div>
             </div>
           </div>`;
         }).join("")}
+        <div class="card card-add" tabindex="0" data-chap="${chap}" onclick="openCatModal(null,null,'${chap}')">
+          <div class="card-thumb thumb-${chap}" style="display:flex;align-items:center;justify-content:center">
+            <span class="card-add-icon">＋</span>
+          </div>
+          <div class="card-body"><div class="card-title" style="color:var(--muted);font-size:13px">Ajouter un atelier</div></div>
+        </div>
       </div>
     </section>
   `).join("");
@@ -1679,7 +1797,8 @@ document.addEventListener("keydown", e => {
 
 applyTokenClass();
 updateTokenBtn();
-loadManifest().then(loadRepoLinks).then(() => renderMain());
+rebuildCatalogue();
+loadManifest().then(loadRepoLinks).then(loadRepoCatalogue).then(() => renderMain());
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
 // ── AUTO-REFRESH toutes les 3 min sur les appareils sans token
@@ -1687,11 +1806,14 @@ setInterval(async () => {
   if (getGhToken()) return;
   const before = localStorage.getItem(STORAGE_KEY);
   const beforeThumbs = JSON.stringify(repoThumbs);
+  const beforeCat = localStorage.getItem(CUSTOM_CAT_KEY);
   await loadManifest();
   await loadRepoLinks();
+  await loadRepoCatalogue();
   const after = localStorage.getItem(STORAGE_KEY);
   const afterThumbs = JSON.stringify(repoThumbs);
-  if (before !== after || beforeThumbs !== afterThumbs) renderMain();
+  const afterCat = localStorage.getItem(CUSTOM_CAT_KEY);
+  if (before !== after || beforeThumbs !== afterThumbs || beforeCat !== afterCat) renderMain();
 }, 3 * 60 * 1000);
 
 // ── MODE PRÉSENTATION
@@ -1709,9 +1831,105 @@ document.getElementById("btn-refresh").addEventListener("click", async () => {
   const tok = getGhToken();
   if (tok) await pushLinksToRepo(tok);
   await loadRepoLinks();
+  await loadRepoCatalogue();
   renderMain();
   btn.textContent = "↻"; btn.disabled = false;
-  showToast("✓ Liens synchronisés");
+  showToast("✓ Synchronisation complète");
+});
+
+// ── MODAL CATALOGUE PERSONNALISÉ
+const CHAP_LABELS = { A:"A — Outils", B:"B — Quotidien", C:"C — Bureau", D:"D — Emploi", E:"E — Bien vivre", F:"F — Culture" };
+let catSelectedChap = "A";
+let catEditNum = null;
+
+function renderCatChapBtns() {
+  document.getElementById("cat-chap-btns").innerHTML = ["A","B","C","D","E","F"].map(ch =>
+    `<button type="button" class="cat-chap-btn${catSelectedChap===ch?' sel-'+ch:''}" onclick="selectCatChap('${ch}')">${CHAP_LABELS[ch]}</button>`
+  ).join("");
+}
+function selectCatChap(ch) {
+  catSelectedChap = ch;
+  renderCatChapBtns();
+  const numEl = document.getElementById("cat-num");
+  if (!catEditNum && (!numEl.value || /^[A-F]\d+$/i.test(numEl.value.trim()))) {
+    numEl.value = nextNum(ch);
+  }
+}
+function openCatModal(editNum, ev, defaultChap) {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  catEditNum = editNum || null;
+  catSelectedChap = defaultChap || (editNum ? (CATALOGUE.find(a => a.num === editNum)?.chap || "A") : "A");
+  document.getElementById("cat-modal-title").textContent = catEditNum ? "Modifier la tuile" : "Nouvelle tuile";
+  document.getElementById("cat-save-btn").style.display = "";
+  document.getElementById("cat-delete-btn").style.display = catEditNum ? "" : "none";
+  document.getElementById("cat-err").textContent = "";
+  renderCatChapBtns();
+  if (catEditNum) {
+    const a = CATALOGUE.find(x => x.num === catEditNum);
+    document.getElementById("cat-num").value = a?.num || "";
+    document.getElementById("cat-emoji").value = a?.emoji || "";
+    document.getElementById("cat-titre").value = a?.titre || "";
+  } else {
+    document.getElementById("cat-num").value = nextNum(catSelectedChap);
+    document.getElementById("cat-emoji").value = "";
+    document.getElementById("cat-titre").value = "";
+  }
+  document.getElementById("cat-modal").classList.add("open");
+  setTimeout(() => document.getElementById("cat-titre").focus(), 200);
+}
+function closeCatModal() { document.getElementById("cat-modal").classList.remove("open"); }
+
+document.getElementById("btn-add-tile").addEventListener("click", () => openCatModal(null, null, "A"));
+document.getElementById("cat-modal-close").addEventListener("click", closeCatModal);
+document.getElementById("cat-cancel-btn").addEventListener("click", closeCatModal);
+document.getElementById("cat-modal").addEventListener("click", e => { if (e.target === document.getElementById("cat-modal")) closeCatModal(); });
+
+document.getElementById("cat-save-btn").addEventListener("click", async () => {
+  const num = document.getElementById("cat-num").value.trim().toUpperCase();
+  const emoji = document.getElementById("cat-emoji").value.trim() || "📌";
+  const titre = document.getElementById("cat-titre").value.trim();
+  const errEl = document.getElementById("cat-err");
+  errEl.textContent = "";
+  if (!num || !/^[A-F]\d{1,3}$/i.test(num)) { errEl.textContent = "Numéro invalide (ex: A7, B10)"; return; }
+  if (num.charAt(0).toUpperCase() !== catSelectedChap) { errEl.textContent = `Le numéro doit commencer par ${catSelectedChap}`; return; }
+  if (!titre) { errEl.textContent = "Le titre est obligatoire"; return; }
+  const baseNums = new Set(BASE_CATALOGUE.map(a => a.num));
+  if (baseNums.has(num) && num !== catEditNum) { errEl.textContent = "Ce numéro appartient au catalogue de base"; return; }
+  const custom = loadCustomAteliers();
+  const existingIdx = custom.findIndex(a => a.num === (catEditNum || num));
+  const entry = { chap: catSelectedChap, num, emoji, titre };
+  if (catEditNum) {
+    if (existingIdx >= 0) custom[existingIdx] = entry;
+    else custom.push(entry);
+  } else {
+    if (custom.some(a => a.num === num)) { errEl.textContent = "Ce numéro existe déjà"; return; }
+    custom.push(entry);
+  }
+  saveCustomAteliers(custom);
+  rebuildCatalogue();
+  const tok = getGhToken();
+  if (tok) {
+    const btn = document.getElementById("cat-save-btn");
+    btn.textContent = "⏳"; btn.disabled = true;
+    await pushCatalogueToRepo(custom, tok);
+    btn.textContent = "✓ Enregistrer"; btn.disabled = false;
+  }
+  closeCatModal();
+  renderMain();
+  showToast(`✓ Tuile ${num} ${catEditNum ? 'modifiée' : 'ajoutée'}`);
+});
+
+document.getElementById("cat-delete-btn").addEventListener("click", async () => {
+  if (!catEditNum) return;
+  if (!confirm(`Supprimer la tuile ${catEditNum} du catalogue ?`)) return;
+  const custom = loadCustomAteliers().filter(a => a.num !== catEditNum);
+  saveCustomAteliers(custom);
+  rebuildCatalogue();
+  const tok = getGhToken();
+  if (tok) await pushCatalogueToRepo(custom, tok);
+  closeCatModal();
+  renderMain();
+  showToast(`✕ Tuile ${catEditNum} supprimée`);
 });
 
 // ── MODAL TOKEN
