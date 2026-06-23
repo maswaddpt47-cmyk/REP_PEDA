@@ -1598,11 +1598,27 @@ document.getElementById("img-save-btn").addEventListener("click", async () => {
   closeImgModal(); renderMain();
 });
 
-document.getElementById("img-clear-btn").addEventListener("click", () => {
+document.getElementById("img-clear-btn").addEventListener("click", async () => {
   if (!imgAtelier) return;
   if (!confirm(`Supprimer l'image de la tuile ${imgAtelier.num} ?`)) return;
+  const num = imgAtelier.num;
+  const btn = document.getElementById("img-clear-btn");
+  btn.disabled = true; btn.textContent = "⏳ Suppression…";
   pendingImgSrc = "";
-  saveThumb(imgAtelier.num, "");
+  saveThumb(num, "");
+  delete repoThumbs[num];
+  const tok = getGhToken();
+  if (tok) {
+    try {
+      const manifest = await ghGetFile(GH_MANIFEST, tok);
+      if (manifest && manifest !== "auth_error") {
+        const bytes = Uint8Array.from(atob(manifest.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+        const decoded = JSON.parse(new TextDecoder().decode(bytes));
+        delete decoded[num];
+        await ghPutFile(GH_MANIFEST, `fix: suppression image tuile ${num}`, JSON.stringify(decoded, null, 2) + "\n", manifest.sha, tok);
+      }
+    } catch {}
+  }
   closeImgModal(); renderMain();
   showToast("✕ Image supprimée");
 });
