@@ -970,6 +970,7 @@ let CATALOGUE = [...BASE_CATALOGUE];
 
 // ── STORAGE LIENS
 const STORAGE_KEY = "conum_links_v1";
+const DIRTY_KEY   = "conum_dirty_v1"; // set quand des liens ont été modifiés localement sans push réussi
 function loadLinks() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
@@ -987,6 +988,7 @@ function saveLink(num, ficheKey, driveId) {
   else delete links[num][ficheKey];
   if (!Object.keys(links[num]).length) delete links[num];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+  localStorage.setItem(DIRTY_KEY, "1"); // signale qu'un push est nécessaire
 }
 function getAtlierLinks(num) { return loadLinks()[num] || {}; }
 function countLinks(num) {
@@ -1119,10 +1121,16 @@ async function ghGetFile(path, token) {
   if (!res.ok) return null;
   return res.json();
 }
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
 async function ghPutFile(path, message, content, sha, token) {
   const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
     method: "PUT", headers: ghHeaders(token),
-    body: JSON.stringify({ message, content: btoa(String.fromCharCode(...new TextEncoder().encode(content))), sha, branch: "main" })
+    body: JSON.stringify({ message, content: utf8ToBase64(content), sha, branch: "main" })
   });
   if (res.status === 401 || res.status === 403) { clearGhToken(); return "auth_error"; }
   return res.ok ? true : false;
@@ -1163,9 +1171,19 @@ async function uploadToRepo(num, filename, imageDataUrl, token) {
 
 async function pushLinksToRepo(token) {
   try {
-    const file = await ghGetFile("assets/links.json", token);
+    localStorage.setItem(DIRTY_KEY, "1"); // marquer dirty jusqu'à confirmation
+    let file = await ghGetFile("assets/links.json", token);
     if (!file || file === "auth_error") return file === "auth_error" ? "auth_error" : false;
-    return await ghPutFile("assets/links.json", "feat: mise à jour des liens ateliers", JSON.stringify(loadLinks(), null, 2) + "\n", file.sha, token);
+    const payload = JSON.stringify(loadLinks(), null, 2) + "\n";
+    let res = await ghPutFile("assets/links.json", "feat: mise à jour des liens ateliers", payload, file.sha, token);
+    if (res === false) {
+      // Retry avec SHA frais (conflit possible)
+      file = await ghGetFile("assets/links.json", token);
+      if (!file || file === "auth_error") return false;
+      res = await ghPutFile("assets/links.json", "feat: mise à jour des liens ateliers", payload, file.sha, token);
+    }
+    if (res === true) localStorage.removeItem(DIRTY_KEY); // push confirmé
+    return res;
   } catch { return false; }
 }
 
@@ -1920,7 +1938,17 @@ document.addEventListener("keydown", e => {
 applyTokenClass();
 updateTokenBtn();
 rebuildCatalogue();
-loadManifest().then(loadRepoLinks).then(loadRepoFiches).then(loadRepoCatalogue).then(() => renderMain());
+(async () => {
+  await loadManifest();
+  // Si des suppressions/modifs n'ont pas été poussées (dirty), on pousse d'abord
+  // avant de tirer depuis le repo — pour protéger l'état local
+  const tok = getGhToken();
+  if (tok && localStorage.getItem(DIRTY_KEY)) await pushLinksToRepo(tok);
+  await loadRepoLinks();
+  await loadRepoFiches();
+  await loadRepoCatalogue();
+  renderMain();
+})();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
 // ── AUTO-REFRESH toutes les 3 min sur les appareils sans token
