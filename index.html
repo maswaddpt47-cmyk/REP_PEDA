@@ -588,6 +588,32 @@
   }
   .fiche-copy-btn:disabled { opacity: .25; cursor: not-allowed; }
   .fiche-copy-btn:not(:disabled):hover { border-color: #22c55e; color: #22c55e; }
+  /* Supprimer fiche custom */
+  .fiche-del-btn {
+    padding: 5px 9px; border-radius: 7px; font-size: 12px;
+    border: 1px solid var(--border); cursor: pointer;
+    background: var(--surface); color: var(--muted); transition: all .15s;
+  }
+  .fiche-del-btn:hover { border-color: #ef4444; color: #ef4444; }
+  body:not(.has-token) .fiche-del-btn { display: none !important; }
+  /* Fiche custom — légère distinction */
+  .fiche-row.custom { border-style: dashed; }
+  /* Bouton + ajouter fiche */
+  .modal-add-fiche-btn {
+    display: block; width: 100%; margin-top: 8px;
+    padding: 8px 14px; border-radius: 9px; font-size: 12px; font-weight: 600;
+    border: 2px dashed var(--border); cursor: pointer;
+    background: transparent; color: var(--muted); text-align: center;
+    font-family: 'Inter', sans-serif; transition: all .15s;
+  }
+  .modal-add-fiche-btn:hover { border-color: var(--text); color: var(--text); }
+  body:not(.has-token) .modal-add-fiche-btn { display: none !important; }
+  /* Formulaire inline ajout fiche */
+  .add-fiche-row { display: flex; gap: 7px; align-items: center; margin-top: 8px; }
+  .add-fiche-row .field-input { flex: 1; font-size: 12px; padding: 7px 10px; }
+  .add-fiche-row .add-fiche-emoji-input { flex: 0 0 52px; text-align: center; }
+  .add-fiche-confirm { padding: 7px 14px; font-size: 13px; font-weight: 700; border-radius: 8px; border: none; background: #22c55e; color: #fff; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+  .add-fiche-confirm:hover { opacity: .85; }
   /* QR code */
   .modal-qr-btn {
     display: block; margin: 14px auto 0;
@@ -730,6 +756,14 @@
     <div class="modal-eyebrow" id="modal-eyebrow"></div>
     <div class="modal-title" id="modal-title"></div>
     <div class="fiche-list" id="modal-fiche-list"></div>
+    <button class="modal-add-fiche-btn" id="modal-add-fiche-btn">＋ Ajouter une fiche</button>
+    <div id="modal-add-fiche-form" style="display:none">
+      <div class="add-fiche-row">
+        <input class="field-input add-fiche-emoji-input" id="add-fiche-emoji" type="text" placeholder="📄" maxlength="8">
+        <input class="field-input" id="add-fiche-label" type="text" placeholder="Nom de la fiche…" maxlength="60">
+        <button class="add-fiche-confirm" id="add-fiche-confirm">＋ Ajouter</button>
+      </div>
+    </div>
     <button class="modal-qr-btn" id="modal-qr-btn" disabled>📱 QR code présentation</button>
     <div class="modal-qr-box" id="modal-qr-box">
       <img id="modal-qr-img" alt="QR code">
@@ -947,7 +981,49 @@ function saveLink(num, ficheKey, driveId) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
 }
 function getAtlierLinks(num) { return loadLinks()[num] || {}; }
-function countLinks(num) { return Object.values(getAtlierLinks(num)).filter(Boolean).length; }
+function countLinks(num) {
+  const links = getAtlierLinks(num);
+  return FICHES.filter(f => links[f.key]).length;
+}
+
+// ── FICHES PERSONNALISÉES PAR ATELIER
+const GH_FICHES = "assets/fiches.json";
+const CUSTOM_FICHES_KEY = "conum_custom_fiches_v1";
+
+function loadCustomFiches() {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_FICHES_KEY) || "{}"); } catch { return {}; }
+}
+function saveCustomFiches(obj) {
+  localStorage.setItem(CUSTOM_FICHES_KEY, JSON.stringify(obj));
+}
+function getFichesForAtelier(num) {
+  return [...FICHES, ...(loadCustomFiches()[num] || [])];
+}
+async function loadRepoFiches() {
+  try {
+    let data;
+    const tok = getGhToken();
+    if (tok) {
+      const file = await ghGetFile(GH_FICHES, tok);
+      if (!file || file === "auth_error") return;
+      const bytes = Uint8Array.from(atob(file.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+      data = JSON.parse(new TextDecoder().decode(bytes));
+    } else {
+      const res = await fetch("assets/fiches.json?_=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) return;
+      data = await res.json();
+    }
+    if (typeof data !== "object" || Array.isArray(data)) return;
+    saveCustomFiches(data);
+  } catch {}
+}
+async function pushFichesToRepo(obj, tok) {
+  try {
+    const existing = await ghGetFile(GH_FICHES, tok);
+    if (existing === "auth_error") { clearGhToken(); return "auth_error"; }
+    return await ghPutFile(GH_FICHES, "feat: fiches personnalisées", JSON.stringify(obj, null, 2) + "\n", existing?.sha, tok);
+  } catch { return false; }
+}
 
 // ── CATALOGUE PERSONNALISÉ
 const GH_CATALOGUE = "assets/catalogue.json";
@@ -1104,7 +1180,6 @@ async function loadRepoLinks() {
     }
     const local = loadLinks();
     const validNums = new Set(CATALOGUE.map(a => a.num));
-    const validKeys = new Set(FICHES.map(f => f.key));
     // Pour chaque num présent dans le repo, le repo gagne (écrase le local).
     // Les nums locaux absents du repo sont préservés (pas encore synchronisés).
     for (const [num, val] of Object.entries(data)) {
@@ -1112,7 +1187,7 @@ async function loadRepoLinks() {
       if (!validNums.has(num)) continue;
       const fiche = {};
       for (const [k, v] of Object.entries(val)) {
-        if (validKeys.has(k) && v) fiche[k] = v;
+        if (typeof k === "string" && k && v && typeof v === "string") fiche[k] = v;
       }
       if (Object.keys(fiche).length) local[num] = fiche;
       else delete local[num];
@@ -1210,7 +1285,6 @@ function importLinks(file) {
       const data = JSON.parse(e.target.result);
       if (typeof data !== "object" || Array.isArray(data)) throw new Error();
       const validNums = new Set(CATALOGUE.map(a => a.num));
-      const validKeys = new Set(FICHES.map(f => f.key));
       const linksPayload = data.version === 2 ? (data.links || {}) : data;
       const merged = loadLinks();
       let linkCount = 0;
@@ -1222,7 +1296,7 @@ function importLinks(file) {
         } else if (typeof val === "object" && !Array.isArray(val)) {
           if (!merged[num]) merged[num] = {};
           for (const [k, v] of Object.entries(val)) {
-            if (validKeys.has(k) && typeof v === "string") { merged[num][k] = v; linkCount++; }
+            if (typeof k === "string" && k && typeof v === "string") { merged[num][k] = v; linkCount++; }
           }
         }
       }
@@ -1434,17 +1508,20 @@ function openModal(num, e) {
   document.getElementById("modal-eyebrow").textContent = `${a.num} · ${CHAPITRES[a.chap].label}`;
   document.getElementById("modal-title").textContent = a.titre;
 
+  const allFiches = getFichesForAtelier(num);
   const list = document.getElementById("modal-fiche-list");
-  list.innerHTML = FICHES.map(f => {
+  list.innerHTML = allFiches.map(f => {
     const id = links[f.key] || "";
+    const isCustom = f.key.startsWith("cf_");
     return `
-    <div class="fiche-row ${id ? 'has-link' : ''}">
+    <div class="fiche-row ${id ? 'has-link' : ''}${isCustom ? ' custom' : ''}">
       <span class="fiche-icon">${f.emoji}</span>
       <span class="fiche-label">${f.label}</span>
       <div class="fiche-actions">
         <button class="fiche-open-btn" data-id="${id}" ${!id ? 'disabled' : ''}>▶ Ouvrir</button>
         <button class="fiche-dl-btn"   data-id="${id}" ${!id ? 'disabled' : ''}>⬇</button>
         <button class="fiche-copy-btn" data-id="${id}" ${!id ? 'disabled' : ''}>📋</button>
+        ${isCustom ? `<button class="fiche-del-btn" data-key="${f.key}" data-num="${num}" title="Supprimer cette fiche">✕</button>` : ''}
       </div>
     </div>`;
   }).join("");
@@ -1462,6 +1539,29 @@ function openModal(num, e) {
       catch { showToast("⚠ Copie non supportée"); }
     });
   });
+  list.querySelectorAll(".fiche-del-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const key = btn.dataset.key;
+      const atelierNum = btn.dataset.num;
+      if (!confirm("Supprimer cette fiche personnalisée ?")) return;
+      const cf = loadCustomFiches();
+      if (cf[atelierNum]) cf[atelierNum] = cf[atelierNum].filter(f => f.key !== key);
+      if (cf[atelierNum] && !cf[atelierNum].length) delete cf[atelierNum];
+      saveCustomFiches(cf);
+      // Remove link too
+      saveLink(atelierNum, key, "");
+      const tok = getGhToken();
+      if (tok) { await pushFichesToRepo(cf, tok); await pushLinksToRepo(tok); }
+      openModal(atelierNum);
+      showToast("✕ Fiche supprimée");
+    });
+  });
+
+  // Réinitialiser le formulaire ajout fiche
+  document.getElementById("modal-add-fiche-form").style.display = "none";
+  document.getElementById("modal-add-fiche-btn").style.display = "";
+  document.getElementById("add-fiche-emoji").value = "";
+  document.getElementById("add-fiche-label").value = "";
 
   const qrBtn = document.getElementById("modal-qr-btn");
   document.getElementById("modal-qr-box").style.display = "none";
@@ -1479,7 +1579,7 @@ function openEditModal(num, e) {
   document.getElementById("edit-modal-title").textContent = `${editAtelier.num} — ${editAtelier.titre}`;
   const links = getAtlierLinks(num);
   const container = document.getElementById("edit-fields-container");
-  container.innerHTML = FICHES.map(f => {
+  container.innerHTML = getFichesForAtelier(num).map(f => {
     const id = links[f.key] || "";
     return `
     <div class="field-group">
@@ -1798,7 +1898,7 @@ document.addEventListener("keydown", e => {
 applyTokenClass();
 updateTokenBtn();
 rebuildCatalogue();
-loadManifest().then(loadRepoLinks).then(loadRepoCatalogue).then(() => renderMain());
+loadManifest().then(loadRepoLinks).then(loadRepoFiches).then(loadRepoCatalogue).then(() => renderMain());
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
 // ── AUTO-REFRESH toutes les 3 min sur les appareils sans token
@@ -1807,13 +1907,16 @@ setInterval(async () => {
   const before = localStorage.getItem(STORAGE_KEY);
   const beforeThumbs = JSON.stringify(repoThumbs);
   const beforeCat = localStorage.getItem(CUSTOM_CAT_KEY);
+  const beforeFiches = localStorage.getItem(CUSTOM_FICHES_KEY);
   await loadManifest();
   await loadRepoLinks();
+  await loadRepoFiches();
   await loadRepoCatalogue();
   const after = localStorage.getItem(STORAGE_KEY);
   const afterThumbs = JSON.stringify(repoThumbs);
   const afterCat = localStorage.getItem(CUSTOM_CAT_KEY);
-  if (before !== after || beforeThumbs !== afterThumbs || beforeCat !== afterCat) renderMain();
+  const afterFiches = localStorage.getItem(CUSTOM_FICHES_KEY);
+  if (before !== after || beforeThumbs !== afterThumbs || beforeCat !== afterCat || beforeFiches !== afterFiches) renderMain();
 }, 3 * 60 * 1000);
 
 // ── MODE PRÉSENTATION
@@ -1831,10 +1934,35 @@ document.getElementById("btn-refresh").addEventListener("click", async () => {
   const tok = getGhToken();
   if (tok) await pushLinksToRepo(tok);
   await loadRepoLinks();
+  await loadRepoFiches();
   await loadRepoCatalogue();
   renderMain();
   btn.textContent = "↻"; btn.disabled = false;
   showToast("✓ Synchronisation complète");
+});
+
+// ── AJOUT FICHE PERSONNALISÉE
+document.getElementById("modal-add-fiche-btn").addEventListener("click", () => {
+  document.getElementById("modal-add-fiche-form").style.display = "";
+  document.getElementById("modal-add-fiche-btn").style.display = "none";
+  setTimeout(() => document.getElementById("add-fiche-label").focus(), 100);
+});
+
+document.getElementById("add-fiche-confirm").addEventListener("click", async () => {
+  if (!modalAtelier) return;
+  const emoji = document.getElementById("add-fiche-emoji").value.trim() || "📄";
+  const label = document.getElementById("add-fiche-label").value.trim();
+  if (!label) { document.getElementById("add-fiche-label").focus(); return; }
+  const key = `cf_${Date.now().toString(36)}`;
+  const cf = loadCustomFiches();
+  if (!cf[modalAtelier.num]) cf[modalAtelier.num] = [];
+  cf[modalAtelier.num].push({ key, label, emoji });
+  saveCustomFiches(cf);
+  const tok = getGhToken();
+  if (tok) await pushFichesToRepo(cf, tok);
+  const num = modalAtelier.num;
+  openModal(num);
+  showToast(`✓ Fiche "${label}" ajoutée`);
 });
 
 // ── MODAL CATALOGUE PERSONNALISÉ
