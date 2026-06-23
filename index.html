@@ -292,6 +292,8 @@
   .card-img-btn:hover { background: rgba(139,92,246,.25); }
 
   .card-body { padding: 14px 16px 15px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .card-id { font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: -4px; }
+  .card.has-link .card-id { color: inherit; opacity: .55; }
   .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; font-weight: 700; line-height: 1.38; text-wrap: pretty; }
   .card-actions { display: flex; gap: 7px; margin-top: auto; }
 
@@ -1462,6 +1464,7 @@ function renderMain() {
               <div class="card-progress"><i style="width:${Math.round((n/FICHES.length)*100)}%"></i></div>
             </div>
             <div class="card-body">
+              <div class="card-id">${a.num}</div>
               <div class="card-title">${a.titre}</div>
               <div class="card-actions">
                 <button class="btn btn-${a.chap}" onclick="openModal('${a.num}',event)">▶ Ouvrir</button>
