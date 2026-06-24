@@ -597,6 +597,35 @@
   }
   .fiche-del-btn:hover { border-color: #ef4444; color: #ef4444; }
   body:not(.has-token) .fiche-del-btn { display: none !important; }
+  /* ── GESTION FICHES dans modal d'édition */
+  .edit-fiche-row { margin-bottom: 10px; }
+  .edit-fiche-ctrl { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .fiche-reorder { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+  .fiche-up-btn, .fiche-dn-btn {
+    padding: 1px 6px; border-radius: 4px; font-size: 10px; line-height: 1.6;
+    border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+    cursor: pointer; transition: all .12s;
+  }
+  .fiche-up-btn:not(:disabled):hover, .fiche-dn-btn:not(:disabled):hover { border-color: #4f8ef7; color: #4f8ef7; }
+  .fiche-up-btn:disabled, .fiche-dn-btn:disabled { opacity: .25; cursor: not-allowed; }
+  .ef-emoji {
+    cursor: text; min-width: 22px; font-size: 16px; border-radius: 4px;
+    padding: 1px 3px; user-select: text; flex-shrink: 0;
+  }
+  .ef-label {
+    flex: 1; cursor: text; font-size: 12px; font-weight: 600; color: var(--muted);
+    padding: 2px 5px; border-radius: 5px; border: 1px solid transparent;
+    user-select: text; word-break: break-word; min-width: 0;
+  }
+  .ef-emoji[contenteditable]:focus, .ef-label[contenteditable]:focus {
+    outline: none; border-color: #4f8ef7; background: var(--bg); color: var(--text);
+  }
+  .ef-del-btn {
+    padding: 3px 8px; border-radius: 6px; font-size: 12px; flex-shrink: 0;
+    border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+    cursor: pointer; transition: all .15s;
+  }
+  .ef-del-btn:hover { border-color: #ef4444; color: #ef4444; }
   /* Fiche custom — légère distinction */
   .fiche-row.custom { border-style: dashed; }
   /* Bouton + ajouter fiche */
@@ -1008,7 +1037,38 @@ function loadCustomFiches() {
 function saveCustomFiches(obj) {
   localStorage.setItem(CUSTOM_FICHES_KEY, JSON.stringify(obj));
 }
+const GH_FICHE_CONFIG = "assets/fiche-config.json";
+const FICHE_CONFIG_KEY = "conum_fiche_config_v1";
+function loadFicheConfig() {
+  try { return JSON.parse(localStorage.getItem(FICHE_CONFIG_KEY) || "{}"); } catch { return {}; }
+}
+function saveFicheConfigForAtelier(num, list) {
+  const config = loadFicheConfig();
+  config[num] = list.map(f => ({ key: f.key, label: f.label, emoji: f.emoji }));
+  localStorage.setItem(FICHE_CONFIG_KEY, JSON.stringify(config));
+}
+async function loadRepoFicheConfig() {
+  const tok = getGhToken();
+  if (!tok) return;
+  try {
+    const file = await ghGetFile(GH_FICHE_CONFIG, tok);
+    if (!file || file === "auth_error") return;
+    const bytes = Uint8Array.from(atob(file.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+    const data = JSON.parse(new TextDecoder().decode(bytes));
+    if (data && typeof data === "object") localStorage.setItem(FICHE_CONFIG_KEY, JSON.stringify(data));
+  } catch {}
+}
+async function pushFicheConfigToRepo(config, tok) {
+  try {
+    const existing = await ghGetFile(GH_FICHE_CONFIG, tok);
+    if (existing === "auth_error") { clearGhToken(); return "auth_error"; }
+    const payload = JSON.stringify(config, null, 2) + "\n";
+    return await ghPutFile(GH_FICHE_CONFIG, "feat: configuration fiches ateliers", payload, existing ? existing.sha : undefined, tok);
+  } catch { return false; }
+}
 function getFichesForAtelier(num) {
+  const config = loadFicheConfig();
+  if (config[num]) return config[num];
   return [...FICHES, ...(loadCustomFiches()[num] || [])];
 }
 async function loadRepoFiches() {
@@ -1596,60 +1656,101 @@ function openModal(num, e) {
 function closeModal() { document.getElementById("modal").classList.remove("open"); modalAtelier = null; }
 
 // ── MODAL ÉDITION LIENS
-function openEditModal(num, e) {
-  if (e) e.stopPropagation();
-  editAtelier = CATALOGUE.find(x => x.num === num);
+let editFiches = [];
+
+function captureEditFicheLabels() {
+  document.querySelectorAll("#edit-fields-container .ef-emoji").forEach(el => {
+    const idx = +el.dataset.idx;
+    if (editFiches[idx]) editFiches[idx].emoji = el.textContent.trim() || editFiches[idx].emoji;
+  });
+  document.querySelectorAll("#edit-fields-container .ef-label").forEach(el => {
+    const idx = +el.dataset.idx;
+    if (editFiches[idx]) editFiches[idx].label = el.textContent.trim() || editFiches[idx].label;
+  });
+}
+
+function renderEditFields() {
   if (!editAtelier) return;
-  document.getElementById("edit-modal-title").textContent = `${editAtelier.num} — ${editAtelier.titre}`;
-  const links = getAtlierLinks(num);
+  const links = getAtlierLinks(editAtelier.num);
   const container = document.getElementById("edit-fields-container");
-  container.innerHTML = getFichesForAtelier(num).map(f => {
+  const total = editFiches.length;
+  container.innerHTML = editFiches.map((f, idx) => {
     const id = links[f.key] || "";
-    const isCustom = f.key.startsWith("cf_");
-    return `
-    <div class="field-group">
-      <div class="field-label" style="display:flex;align-items:center;justify-content:space-between">
-        <span>${f.emoji} ${f.label}</span>
-        ${isCustom ? `<button class="fiche-del-btn edit-del-btn" data-key="${f.key}" title="Supprimer cette fiche">✕</button>` : ""}
+    const safeEmoji = f.emoji.replace(/</g, "&lt;");
+    const safeLabel = f.label.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const safeKey   = f.key.replace(/"/g, "");
+    const safeVal   = id ? driveViewUrl(id).replace(/"/g, "&quot;") : "";
+    return `<div class="edit-fiche-row" data-idx="${idx}">
+      <div class="edit-fiche-ctrl">
+        <div class="fiche-reorder">
+          <button class="fiche-up-btn" data-idx="${idx}" ${idx === 0 ? "disabled" : ""}>▲</button>
+          <button class="fiche-dn-btn" data-idx="${idx}" ${idx === total - 1 ? "disabled" : ""}>▼</button>
+        </div>
+        <span class="ef-emoji" contenteditable="true" spellcheck="false" data-idx="${idx}">${safeEmoji}</span>
+        <span class="ef-label" contenteditable="true" spellcheck="false" data-idx="${idx}">${safeLabel}</span>
+        <button class="ef-del-btn" data-idx="${idx}" title="Supprimer cette fiche">✕</button>
       </div>
-      <input class="field-input" data-fiche="${f.key}" type="url"
+      <input class="field-input" data-fiche="${safeKey}" type="url"
         placeholder="https://drive.google.com/file/d/…/view"
-        value="${id ? driveViewUrl(id) : ''}">
+        value="${safeVal}">
     </div>`;
   }).join("");
+
+  container.querySelectorAll(".fiche-up-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = +btn.dataset.idx;
+      if (idx === 0) return;
+      captureEditFicheLabels();
+      [editFiches[idx - 1], editFiches[idx]] = [editFiches[idx], editFiches[idx - 1]];
+      renderEditFields();
+    });
+  });
+  container.querySelectorAll(".fiche-dn-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = +btn.dataset.idx;
+      if (idx >= editFiches.length - 1) return;
+      captureEditFicheLabels();
+      [editFiches[idx], editFiches[idx + 1]] = [editFiches[idx + 1], editFiches[idx]];
+      renderEditFields();
+    });
+  });
+  container.querySelectorAll(".ef-del-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = +btn.dataset.idx;
+      captureEditFicheLabels();
+      editFiches.splice(idx, 1);
+      renderEditFields();
+    });
+  });
   container.querySelectorAll(".field-input").forEach(input => {
     input.addEventListener("input", () => {
       const val = input.value.trim();
-      if (!val) { input.classList.remove("valid","invalid"); return; }
+      if (!val) { input.classList.remove("valid", "invalid"); return; }
       const ok = !!extractDriveId(val);
       input.classList.toggle("valid", ok);
       input.classList.toggle("invalid", !ok);
     });
   });
-  container.querySelectorAll(".edit-del-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const key = btn.dataset.key;
-      const cf = loadCustomFiches();
-      if (cf[num]) {
-        cf[num] = cf[num].filter(f => f.key !== key);
-        if (!cf[num].length) delete cf[num];
-        saveCustomFiches(cf);
-      }
-      saveLink(num, key, "");
-      const tok = getGhToken();
-      if (tok) { await pushFichesToRepo(cf, tok); await pushLinksToRepo(tok); }
-      openEditModal(num);
-      showToast("✕ Fiche supprimée");
-    });
-  });
+}
+
+function openEditModal(num, e) {
+  if (e) e.stopPropagation();
+  editAtelier = CATALOGUE.find(x => x.num === num);
+  if (!editAtelier) return;
+  editFiches = getFichesForAtelier(num).map(f => ({ ...f }));
+  document.getElementById("edit-modal-title").textContent = `${editAtelier.num} — ${editAtelier.titre}`;
+  renderEditFields();
   document.getElementById("edit-add-fiche-form").style.display = "none";
   document.getElementById("edit-add-fiche-btn").style.display = "";
   document.getElementById("edit-add-fiche-emoji").value = "";
   document.getElementById("edit-add-fiche-label").value = "";
   document.getElementById("edit-modal").classList.add("open");
-  setTimeout(() => container.querySelector("input")?.focus(), 200);
+  setTimeout(() => document.getElementById("edit-fields-container").querySelector("input")?.focus(), 200);
 }
-function closeEditModal() { document.getElementById("edit-modal").classList.remove("open"); editAtelier = null; }
+function closeEditModal() {
+  document.getElementById("edit-modal").classList.remove("open");
+  editAtelier = null; editFiches = [];
+}
 
 // ── MODAL IMAGE TUILE
 function openImgModal(num, e) {
@@ -1716,6 +1817,7 @@ function showToast(msg) {
 // ── EVENTS — liens
 document.getElementById("btn-save").addEventListener("click", async () => {
   if (!editAtelier) return;
+  captureEditFicheLabels();
   const inputs = document.querySelectorAll("#edit-fields-container .field-input");
   let hasInvalid = false;
   inputs.forEach(input => { if (input.value.trim() && !extractDriveId(input.value.trim())) hasInvalid = true; });
@@ -1724,20 +1826,22 @@ document.getElementById("btn-save").addEventListener("click", async () => {
     const id = input.value.trim() ? extractDriveId(input.value.trim()) : "";
     saveLink(editAtelier.num, input.dataset.fiche, id);
   });
+  saveFicheConfigForAtelier(editAtelier.num, editFiches);
   renderMain();
   const tok = getGhToken();
   if (tok) {
     const btn = document.getElementById("btn-save");
     btn.textContent = "⏳ Sync…"; btn.disabled = true;
+    await pushFicheConfigToRepo(loadFicheConfig(), tok);
     const result = await pushLinksToRepo(tok);
     btn.textContent = "✓ Enregistrer"; btn.disabled = false;
     closeEditModal();
     if (result === "auth_error") showToast("⚠ Token expiré — ouvre 🖼️ pour le renouveler");
-    else if (result) showToast(`✓ Liens enregistrés et synchronisés`);
-    else showToast(`✓ Liens enregistrés (sync échouée)`);
+    else if (result) showToast(`✓ Enregistré et synchronisé`);
+    else showToast(`✓ Enregistré (sync échouée)`);
   } else {
     closeEditModal();
-    showToast(`✓ Liens enregistrés pour ${editAtelier.num}`);
+    showToast(`✓ Enregistré pour ${editAtelier.num}`);
   }
 });
 document.getElementById("btn-clear").addEventListener("click", async () => {
@@ -1764,21 +1868,19 @@ document.getElementById("edit-add-fiche-btn").addEventListener("click", () => {
   setTimeout(() => document.getElementById("edit-add-fiche-label").focus(), 100);
 });
 
-document.getElementById("edit-add-fiche-confirm").addEventListener("click", async () => {
+document.getElementById("edit-add-fiche-confirm").addEventListener("click", () => {
   if (!editAtelier) return;
   const emoji = document.getElementById("edit-add-fiche-emoji").value.trim() || "📄";
   const label = document.getElementById("edit-add-fiche-label").value.trim();
   if (!label) { document.getElementById("edit-add-fiche-label").focus(); return; }
-  const key = `cf_${Date.now().toString(36)}`;
-  const cf = loadCustomFiches();
-  if (!cf[editAtelier.num]) cf[editAtelier.num] = [];
-  cf[editAtelier.num].push({ key, label, emoji });
-  saveCustomFiches(cf);
-  const num = editAtelier.num;
-  const tok = getGhToken();
-  if (tok) await pushFichesToRepo(cf, tok);
-  openEditModal(num);
-  showToast(`✓ Fiche "${label}" ajoutée`);
+  captureEditFicheLabels();
+  editFiches.push({ key: `cf_${Date.now().toString(36)}`, label, emoji });
+  document.getElementById("edit-add-fiche-form").style.display = "none";
+  document.getElementById("edit-add-fiche-btn").style.display = "";
+  document.getElementById("edit-add-fiche-emoji").value = "";
+  document.getElementById("edit-add-fiche-label").value = "";
+  renderEditFields();
+  showToast(`✓ Fiche "${label}" ajoutée — clique Enregistrer pour sauvegarder`);
 });
 document.getElementById("edit-modal").addEventListener("click", e => {
   if (e.target === document.getElementById("edit-modal")) closeEditModal();
@@ -1987,6 +2089,7 @@ rebuildCatalogue();
   await loadRepoLinks();
   await loadRepoFiches();
   await loadRepoCatalogue();
+  await loadRepoFicheConfig();
   renderMain();
 })();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -1998,15 +2101,18 @@ setInterval(async () => {
   const beforeThumbs = JSON.stringify(repoThumbs);
   const beforeCat = localStorage.getItem(CUSTOM_CAT_KEY);
   const beforeFiches = localStorage.getItem(CUSTOM_FICHES_KEY);
+  const beforeFicheConfig = localStorage.getItem(FICHE_CONFIG_KEY);
   await loadManifest();
   await loadRepoLinks();
   await loadRepoFiches();
   await loadRepoCatalogue();
+  await loadRepoFicheConfig();
   const after = localStorage.getItem(STORAGE_KEY);
   const afterThumbs = JSON.stringify(repoThumbs);
   const afterCat = localStorage.getItem(CUSTOM_CAT_KEY);
   const afterFiches = localStorage.getItem(CUSTOM_FICHES_KEY);
-  if (before !== after || beforeThumbs !== afterThumbs || beforeCat !== afterCat || beforeFiches !== afterFiches) renderMain();
+  const afterFicheConfig = localStorage.getItem(FICHE_CONFIG_KEY);
+  if (before !== after || beforeThumbs !== afterThumbs || beforeCat !== afterCat || beforeFiches !== afterFiches || beforeFicheConfig !== afterFicheConfig) renderMain();
 }, 3 * 60 * 1000);
 
 // ── MODE PRÉSENTATION
@@ -2026,6 +2132,7 @@ document.getElementById("btn-refresh").addEventListener("click", async () => {
   await loadRepoLinks();
   await loadRepoFiches();
   await loadRepoCatalogue();
+  await loadRepoFicheConfig();
   renderMain();
   btn.textContent = "↻"; btn.disabled = false;
   showToast("✓ Synchronisation complète");
