@@ -609,6 +609,7 @@
   }
   .modal-add-fiche-btn:hover { border-color: var(--text); color: var(--text); }
   body:not(.has-token) .modal-add-fiche-btn { display: none !important; }
+  body:not(.has-token) #edit-add-fiche-btn { display: none !important; }
   /* Formulaire inline ajout fiche */
   .add-fiche-row { display: flex; gap: 7px; align-items: center; margin-top: 8px; }
   .add-fiche-row .field-input { flex: 1; font-size: 12px; padding: 7px 10px; }
@@ -780,6 +781,14 @@
     <div class="edit-modal-title" id="edit-modal-title"></div>
     <div class="edit-modal-sub">Renseigne les liens Google Drive pour chaque document</div>
     <div id="edit-fields-container"></div>
+    <button class="modal-add-fiche-btn" id="edit-add-fiche-btn">＋ Ajouter une fiche</button>
+    <div id="edit-add-fiche-form" style="display:none">
+      <div class="add-fiche-row">
+        <input class="field-input add-fiche-emoji-input" id="edit-add-fiche-emoji" type="text" placeholder="📄" maxlength="8">
+        <input class="field-input" id="edit-add-fiche-label" type="text" placeholder="Nom de la fiche…" maxlength="60">
+        <button class="add-fiche-confirm" id="edit-add-fiche-confirm">＋</button>
+      </div>
+    </div>
     <div class="edit-actions">
       <button class="btn-save" id="btn-save">✓ Enregistrer</button>
       <button class="btn-clear" id="btn-clear">✕ Effacer tout</button>
@@ -1596,9 +1605,13 @@ function openEditModal(num, e) {
   const container = document.getElementById("edit-fields-container");
   container.innerHTML = getFichesForAtelier(num).map(f => {
     const id = links[f.key] || "";
+    const isCustom = f.key.startsWith("cf_");
     return `
     <div class="field-group">
-      <div class="field-label">${f.emoji} ${f.label}</div>
+      <div class="field-label" style="display:flex;align-items:center;justify-content:space-between">
+        <span>${f.emoji} ${f.label}</span>
+        ${isCustom ? `<button class="fiche-del-btn edit-del-btn" data-key="${f.key}" title="Supprimer cette fiche">✕</button>` : ""}
+      </div>
       <input class="field-input" data-fiche="${f.key}" type="url"
         placeholder="https://drive.google.com/file/d/…/view"
         value="${id ? driveViewUrl(id) : ''}">
@@ -1613,6 +1626,26 @@ function openEditModal(num, e) {
       input.classList.toggle("invalid", !ok);
     });
   });
+  container.querySelectorAll(".edit-del-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const key = btn.dataset.key;
+      const cf = loadCustomFiches();
+      if (cf[num]) {
+        cf[num] = cf[num].filter(f => f.key !== key);
+        if (!cf[num].length) delete cf[num];
+        saveCustomFiches(cf);
+      }
+      saveLink(num, key, "");
+      const tok = getGhToken();
+      if (tok) { await pushFichesToRepo(cf, tok); await pushLinksToRepo(tok); }
+      openEditModal(num);
+      showToast("✕ Fiche supprimée");
+    });
+  });
+  document.getElementById("edit-add-fiche-form").style.display = "none";
+  document.getElementById("edit-add-fiche-btn").style.display = "";
+  document.getElementById("edit-add-fiche-emoji").value = "";
+  document.getElementById("edit-add-fiche-label").value = "";
   document.getElementById("edit-modal").classList.add("open");
   setTimeout(() => container.querySelector("input")?.focus(), 200);
 }
@@ -1724,6 +1757,29 @@ document.getElementById("btn-clear").addEventListener("click", async () => {
 });
 document.getElementById("btn-cancel").addEventListener("click", closeEditModal);
 document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
+
+document.getElementById("edit-add-fiche-btn").addEventListener("click", () => {
+  document.getElementById("edit-add-fiche-form").style.display = "";
+  document.getElementById("edit-add-fiche-btn").style.display = "none";
+  setTimeout(() => document.getElementById("edit-add-fiche-label").focus(), 100);
+});
+
+document.getElementById("edit-add-fiche-confirm").addEventListener("click", async () => {
+  if (!editAtelier) return;
+  const emoji = document.getElementById("edit-add-fiche-emoji").value.trim() || "📄";
+  const label = document.getElementById("edit-add-fiche-label").value.trim();
+  if (!label) { document.getElementById("edit-add-fiche-label").focus(); return; }
+  const key = `cf_${Date.now().toString(36)}`;
+  const cf = loadCustomFiches();
+  if (!cf[editAtelier.num]) cf[editAtelier.num] = [];
+  cf[editAtelier.num].push({ key, label, emoji });
+  saveCustomFiches(cf);
+  const num = editAtelier.num;
+  const tok = getGhToken();
+  if (tok) await pushFichesToRepo(cf, tok);
+  openEditModal(num);
+  showToast(`✓ Fiche "${label}" ajoutée`);
+});
 document.getElementById("edit-modal").addEventListener("click", e => {
   if (e.target === document.getElementById("edit-modal")) closeEditModal();
 });
