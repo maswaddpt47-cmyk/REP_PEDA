@@ -1323,8 +1323,10 @@
   </div>
   <div class="partner-sticky">
     <div class="partner-fields">
-      <input type="text"  id="partner-name"    class="partner-field" placeholder="Votre nom ou organisation *" autocomplete="name">
-      <input type="email" id="partner-contact" class="partner-field" placeholder="Votre email (optionnel)"     autocomplete="email">
+      <input type="text"  id="partner-name"    class="partner-field" placeholder="Votre nom ou organisation *" autocomplete="organization">
+      <input type="email" id="partner-contact" class="partner-field" placeholder="Votre email *"               autocomplete="email">
+      <input type="tel"   id="partner-phone"   class="partner-field" placeholder="Téléphone *"                autocomplete="tel">
+      <input type="text"  id="partner-address" class="partner-field" placeholder="Adresse *"                  autocomplete="street-address">
     </div>
     <div class="partner-sticky-bottom">
       <div class="partner-count" id="partner-count"><em>0</em> atelier sélectionné</div>
@@ -3218,13 +3220,19 @@ function partnerCopy() {
 async function partnerSubmit() {
   const sel = getPartnerSel();
   if (!sel.length) return;
-  const name = document.getElementById("partner-name").value.trim();
-  if (!name) { showToast("⚠ Merci d'indiquer votre nom ou organisation"); document.getElementById("partner-name").focus(); return; }
+  const name    = document.getElementById("partner-name").value.trim();
+  const email   = document.getElementById("partner-contact").value.trim();
+  const phone   = document.getElementById("partner-phone").value.trim();
+  const address = document.getElementById("partner-address").value.trim();
+  if (!name)    { showToast("⚠ Nom ou organisation obligatoire");  document.getElementById("partner-name").focus();    return; }
+  if (!email)   { showToast("⚠ Email obligatoire");                document.getElementById("partner-contact").focus(); return; }
+  if (!phone)   { showToast("⚠ Téléphone obligatoire");            document.getElementById("partner-phone").focus();   return; }
+  if (!address) { showToast("⚠ Adresse obligatoire");              document.getElementById("partner-address").focus(); return; }
 
   if (!FORMSPREE_ENDPOINT) {
     const text = buildSelText(sel);
     const sub = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
-    const body = encodeURIComponent(`De : ${name}\n\n${text}`);
+    const body = encodeURIComponent(`De : ${name}\nEmail : ${email}\nTél : ${phone}\nAdresse : ${address}\n\n${text}`);
     window.location.href = `mailto:m.aswad.dpt47@gmail.com?subject=${sub}&body=${body}`;
     return;
   }
@@ -3239,7 +3247,9 @@ async function partnerSubmit() {
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({
         nom: name,
-        email_contact: document.getElementById("partner-contact").value.trim() || "(non renseigné)",
+        email_contact: email,
+        telephone: phone,
+        adresse: address,
         selection: buildSelText(sel),
         nb_ateliers: sel.length,
       })
