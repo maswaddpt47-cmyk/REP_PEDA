@@ -1014,12 +1014,22 @@
   .patelier-title { font-size:13px; font-weight:600; color:var(--text); flex:1; }
   .partner-sticky {
     position:fixed; bottom:0; left:0; right:0; background:var(--surface);
-    border-top:1px solid var(--border); padding:13px 20px;
-    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    border-top:1px solid var(--border); padding:12px 20px;
+    display:flex; flex-direction:column; gap:10px;
     z-index:950; box-shadow:0 -8px 30px rgba(0,0,0,.4);
   }
+  .partner-fields { display:flex; gap:10px; }
+  .partner-field {
+    flex:1; height:38px; padding:0 13px; border-radius:9px;
+    border:1px solid var(--border); background:var(--bg); color:var(--text);
+    font-size:13px; font-family:'Inter',sans-serif; outline:none; transition:border-color .15s;
+    min-width:0;
+  }
+  .partner-field::placeholder { color:var(--muted); }
+  .partner-field:focus { border-color:#4f8ef7; }
+  .partner-sticky-bottom { display:flex; align-items:center; justify-content:space-between; gap:14px; }
   .partner-count {
-    font-size:14px; font-weight:700; color:var(--text);
+    font-size:13px; font-weight:700; color:var(--text);
     font-family:'Space Grotesk',sans-serif; flex-shrink:0;
   }
   .partner-count em { font-style:normal; color:#4f8ef7; }
@@ -1032,11 +1042,13 @@
     background:var(--surface-2); border:1px solid var(--border); color:var(--text);
   }
   .partner-btn.p-copy:hover { border-color:#4f8ef7; color:#4f8ef7; }
-  .partner-btn.p-email { background:#4f8ef7; color:#fff; border:1px solid #3b7ae8; }
-  .partner-btn.p-email:hover { background:#3b7ae8; }
-  .partner-btn:disabled { opacity:.35; cursor:not-allowed; }
-  @media(max-width:520px) {
-    .partner-sticky { flex-direction:column; gap:10px; padding:12px 14px; }
+  .partner-btn.p-submit { background:#4f8ef7; color:#fff; border:1px solid #3b7ae8; }
+  .partner-btn.p-submit:hover:not(:disabled) { background:#3b7ae8; }
+  .partner-btn.p-submit.sent { background:#10b981; border-color:#0d9e6e; cursor:default; }
+  .partner-btn:disabled { opacity:.4; cursor:not-allowed; }
+  @media(max-width:560px) {
+    .partner-fields { flex-direction:column; gap:6px; }
+    .partner-sticky-bottom { flex-direction:column; align-items:stretch; gap:8px; }
     .partner-btns { width:100%; }
     .partner-btn { flex:1; text-align:center; }
     .pchap-desc { display:none; }
@@ -1310,10 +1322,16 @@
     <div class="partner-chapters" id="partner-chapters"></div>
   </div>
   <div class="partner-sticky">
-    <div class="partner-count" id="partner-count"><em>0</em> atelier sélectionné</div>
-    <div class="partner-btns">
-      <button class="partner-btn p-copy" id="partner-copy" disabled>📋 Copier ma sélection</button>
-      <button class="partner-btn p-email" id="partner-email" disabled>✉ Envoyer par email</button>
+    <div class="partner-fields">
+      <input type="text"  id="partner-name"    class="partner-field" placeholder="Votre nom ou organisation *" autocomplete="name">
+      <input type="email" id="partner-contact" class="partner-field" placeholder="Votre email (optionnel)"     autocomplete="email">
+    </div>
+    <div class="partner-sticky-bottom">
+      <div class="partner-count" id="partner-count"><em>0</em> atelier sélectionné</div>
+      <div class="partner-btns">
+        <button class="partner-btn p-copy"   id="partner-copy"   disabled>📋 Copier</button>
+        <button class="partner-btn p-submit" id="partner-submit" disabled>✉ Envoyer ma sélection</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3150,7 +3168,7 @@ function initPartnerMode() {
   });
 
   document.getElementById("partner-copy").addEventListener("click", partnerCopy);
-  document.getElementById("partner-email").addEventListener("click", partnerEmail);
+  document.getElementById("partner-submit").addEventListener("click", partnerSubmit);
   updatePartnerCount();
 }
 
@@ -3172,7 +3190,8 @@ function updatePartnerCount() {
     else { badge.textContent = ""; badge.classList.remove("visible"); }
   });
   document.getElementById("partner-copy").disabled = n === 0;
-  document.getElementById("partner-email").disabled = n === 0;
+  const submitBtn = document.getElementById("partner-submit");
+  if (submitBtn && !submitBtn.classList.contains("sent")) submitBtn.disabled = n === 0;
 }
 
 function buildSelText(sel) {
@@ -3187,17 +3206,57 @@ function buildSelText(sel) {
   return lines.join("\n").trim();
 }
 
+// Remplacer par l'URL Formspree après création du compte : https://formspree.io/f/XXXXXXXX
+const FORMSPREE_ENDPOINT = "";
+
 function partnerCopy() {
   const text = buildSelText(getPartnerSel());
   navigator.clipboard.writeText(text)
     .then(() => showToast("✓ Sélection copiée dans le presse-papier"))
     .catch(() => showToast("⚠ Impossible de copier automatiquement"));
 }
-function partnerEmail() {
-  const text = buildSelText(getPartnerSel());
-  const sub = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
-  const body = encodeURIComponent(text);
-  window.location.href = `mailto:aldayaa47@gmail.com?subject=${sub}&body=${body}`;
+
+async function partnerSubmit() {
+  const sel = getPartnerSel();
+  if (!sel.length) return;
+  const name = document.getElementById("partner-name").value.trim();
+  if (!name) { showToast("⚠ Merci d'indiquer votre nom ou organisation"); document.getElementById("partner-name").focus(); return; }
+
+  if (!FORMSPREE_ENDPOINT) {
+    const text = buildSelText(sel);
+    const sub = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
+    const body = encodeURIComponent(`De : ${name}\n\n${text}`);
+    window.location.href = `mailto:aldayaa47@gmail.com?subject=${sub}&body=${body}`;
+    return;
+  }
+
+  const btn = document.getElementById("partner-submit");
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+
+  try {
+    const res = await fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        nom: name,
+        email_contact: document.getElementById("partner-contact").value.trim() || "(non renseigné)",
+        selection: buildSelText(sel),
+        nb_ateliers: sel.length,
+      })
+    });
+    if (res.ok) {
+      btn.textContent = "✓ Envoyé !";
+      btn.classList.add("sent");
+      showToast("✓ Sélection envoyée — merci !");
+    } else {
+      throw new Error();
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = "✉ Envoyer ma sélection";
+    showToast("⚠ Erreur d'envoi — utilisez 📋 Copier");
+  }
 }
 
 document.getElementById("btn-partner-share").addEventListener("click", () => {
