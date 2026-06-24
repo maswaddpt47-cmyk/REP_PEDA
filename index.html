@@ -792,12 +792,6 @@
 
 <nav class="chapitres-nav">
   <button class="chap-btn active" data-chap="all"><span class="chap-pill" style="background:#4f8ef7">Tout</span>Catalogue complet</button>
-  <button class="chap-btn" data-chap="A"><span class="chap-pill pill-A">A</span>Par l'outil</button>
-  <button class="chap-btn" data-chap="B"><span class="chap-pill pill-B">B</span>Pour le quotidien</button>
-  <button class="chap-btn" data-chap="C"><span class="chap-pill pill-C">C</span>Pour le bureau</button>
-  <button class="chap-btn" data-chap="D"><span class="chap-pill pill-D">D</span>Emploi &amp; mobilité</button>
-  <button class="chap-btn" data-chap="E"><span class="chap-pill pill-E">E</span>Bien vivre</button>
-  <button class="chap-btn" data-chap="F"><span class="chap-pill pill-F">F</span>Se cultiver</button>
   <button class="chap-btn todo-filter" id="btn-todo" data-chap="all">⚪ À compléter</button>
 </nav>
 
@@ -1533,8 +1527,12 @@ function renderOverview() {
   ov.querySelectorAll(".ov-chap").forEach(el => {
     el.addEventListener("click", () => {
       const ch = el.dataset.chap;
-      const navBtn = document.querySelector(`.chap-btn[data-chap="${ch}"]:not(#btn-todo)`);
-      if (navBtn) navBtn.click();
+      document.querySelectorAll(".chap-btn").forEach(b => b.classList.remove("active"));
+      document.querySelector('[data-chap="all"]').classList.add("active");
+      showTodoOnly = false;
+      document.getElementById("btn-todo").textContent = "⚪ À compléter";
+      currentChap = ch;
+      renderMain();
       const main = document.getElementById("main");
       if (main) window.scrollTo({ top: main.offsetTop - 78, behavior: "smooth" });
     });
