@@ -753,6 +753,179 @@
   /* ── BOUTON ÉDITER TUILE PERSO */
   .card-cat-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); font-size: 14px; cursor: pointer; transition: all .15s; flex-shrink: 0; }
   .card-cat-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+
+  /* ── VUE LISTE COMPACTE */
+  .view-toggle {
+    display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:8px;
+    background:var(--bg); border:1px solid var(--border);
+    color:var(--muted); font-size:15px; cursor:pointer;
+    transition:all .18s; flex-shrink:0;
+  }
+  .view-toggle:hover { border-color:#4f8ef7; color:#4f8ef7; }
+  .view-toggle.active { background:rgba(79,142,247,.12); border-color:#4f8ef7; color:#4f8ef7; }
+  body.list-view .grid { display:flex; flex-direction:column; gap:5px; }
+  body.list-view .card { flex-direction:row; animation:none; }
+  body.list-view .card-thumb { width:58px; height:58px; flex-shrink:0; border-radius:var(--radius) 0 0 var(--radius); font-size:22px; }
+  body.list-view .card-thumb::after { display:none; }
+  body.list-view .card-progress, body.list-view .card-link-badge { display:none; }
+  body.list-view .card-num { font-size:9px; padding:1px 5px; }
+  body.list-view .card-body { padding:7px 12px; flex-direction:row; align-items:center; gap:10px; flex:1; }
+  body.list-view .card-id { margin:0; min-width:30px; }
+  body.list-view .card-title { font-size:12.5px; }
+  body.list-view .card-actions { margin-top:0; flex-shrink:0; }
+  body.list-view .chap-section { margin-bottom:22px; }
+
+  /* ── TRI */
+  .sort-wrap { position:relative; }
+  .sort-btn {
+    display:flex; align-items:center; gap:5px;
+    height:32px; padding:0 10px; border-radius:8px;
+    background:var(--bg); border:1px solid var(--border);
+    color:var(--muted); font-size:12px; font-weight:500; cursor:pointer;
+    font-family:'Inter',sans-serif; transition:all .18s; white-space:nowrap;
+  }
+  .sort-btn:hover, .sort-btn.active { border-color:#4f8ef7; color:#4f8ef7; }
+  .sort-pop {
+    position:absolute; top:38px; left:0; z-index:300;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:5px; width:172px; box-shadow:var(--shadow-pop);
+    display:none; flex-direction:column; gap:1px;
+  }
+  .sort-pop.open { display:flex; }
+  .sort-opt {
+    padding:7px 10px; border-radius:7px; border:none; background:none;
+    color:var(--text); font-size:12.5px; font-weight:500; cursor:pointer;
+    text-align:left; font-family:'Inter',sans-serif; transition:background .12s;
+  }
+  .sort-opt:hover { background:var(--surface-2); }
+  .sort-opt.active { color:#4f8ef7; font-weight:700; }
+  .sort-opt.active::before { content:"✓ "; }
+
+  /* ── FILTRE RÉCENTS */
+  .recent-filter.active { background:rgba(251,191,36,.1); border-color:#fbbf24; color:#fbbf24; }
+
+  /* ── INDICATEUR SYNC */
+  .sync-dot {
+    width:8px; height:8px; border-radius:50%; flex-shrink:0;
+    transition:background .4s, box-shadow .4s, opacity .4s; opacity:0;
+  }
+  .sync-dot.dirty  { opacity:1; background:#f59e0b; box-shadow:0 0 6px rgba(245,158,11,.7); }
+  .sync-dot.syncing{ opacity:1; background:#4f8ef7; animation:syncPulse .8s infinite; }
+  .sync-dot.ok     { opacity:1; background:#22c55e; }
+  @keyframes syncPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.6)} }
+
+  /* ── DIAPORAMA */
+  .slideshow-btn {
+    display:flex; align-items:center; gap:5px;
+    height:34px; padding:0 12px; border-radius:8px;
+    background:var(--bg); border:1px solid var(--border);
+    color:var(--muted); font-size:13px; font-weight:500; cursor:pointer;
+    transition:all .18s; flex-shrink:0; font-family:'Inter',sans-serif;
+  }
+  .slideshow-btn:hover { border-color:#8b5cf6; color:#8b5cf6; }
+  body:not(.has-token) .slideshow-btn { display:none !important; }
+  .slideshow-overlay {
+    position:fixed; inset:0; background:rgba(5,7,15,.96);
+    z-index:600; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:22px;
+    opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  .slideshow-overlay.open { opacity:1; pointer-events:all; }
+  .slideshow-close-btn {
+    position:absolute; top:18px; right:22px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+    color:#fff; font-size:16px; cursor:pointer; border-radius:8px;
+    width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+    transition:background .15s;
+  }
+  .slideshow-close-btn:hover { background:rgba(255,255,255,.18); }
+  .sli-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:20px; width:500px; max-width:88vw;
+    overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,.7);
+    animation:sliIn .3s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes sliIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  .sli-thumb { height:160px; display:flex; align-items:center; justify-content:center; font-size:64px; position:relative; background-size:cover; background-position:center; }
+  .sli-body { padding:18px 22px; }
+  .sli-eyebrow { font-size:10.5px; font-weight:700; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:5px; }
+  .sli-title { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; line-height:1.3; margin-bottom:13px; }
+  .sli-fiches { display:flex; flex-direction:column; gap:4px; max-height:200px; overflow-y:auto; }
+  .sli-fiche { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:7px; background:var(--bg); border:1px solid var(--border); }
+  .sli-fiche.has-link { border-color:rgba(34,197,94,.25); }
+  .sli-fiche .sf-icon { font-size:14px; flex-shrink:0; }
+  .sli-fiche .sf-lbl { flex:1; font-size:12.5px; font-weight:600; color:var(--muted); }
+  .sli-fiche.has-link .sf-lbl { color:var(--text); }
+  .sli-fiche .sf-open { padding:3px 9px; border-radius:5px; font-size:11px; font-weight:600; border:none; cursor:pointer; background:#4f8ef7; color:#fff; }
+  .sli-fiche .sf-open:disabled { opacity:.2; cursor:not-allowed; }
+  .sli-nav { display:flex; align-items:center; justify-content:center; gap:18px; }
+  .sli-arrow {
+    width:48px; height:48px; border-radius:50%;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+    color:#fff; font-size:22px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .15s;
+  }
+  .sli-arrow:hover { background:rgba(255,255,255,.18); }
+  .sli-arrow:disabled { opacity:.2; cursor:not-allowed; }
+  .sli-counter { font-size:14px; color:rgba(255,255,255,.5); font-weight:700; font-family:'Space Grotesk',sans-serif; min-width:70px; text-align:center; }
+
+  /* ── COPIER CONFIG FICHE */
+  .copy-config-btn {
+    display:block; width:100%; margin-top:5px;
+    padding:7px 14px; border-radius:9px; font-size:12px; font-weight:600;
+    border:1px solid var(--border); cursor:pointer;
+    background:var(--surface-2); color:var(--muted); text-align:center;
+    font-family:'Inter',sans-serif; transition:all .15s;
+  }
+  .copy-config-btn:hover { border-color:#4f8ef7; color:#4f8ef7; }
+  body:not(.has-token) .copy-config-btn { display:none !important; }
+  .pick-modal {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:18px; width:360px; max-width:92vw; padding:22px;
+    transform:scale(.94); transition:transform .2s; position:relative;
+    max-height:70vh; overflow-y:auto;
+  }
+  .modal-overlay.open .pick-modal { transform:scale(1); }
+  .pick-list { display:flex; flex-direction:column; gap:4px; margin-top:10px; max-height:340px; overflow-y:auto; }
+  .pick-item {
+    display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px;
+    border:1px solid var(--border); background:var(--bg); cursor:pointer; transition:all .12s;
+  }
+  .pick-item:hover { border-color:#4f8ef7; background:rgba(79,142,247,.06); }
+  .pick-num { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; min-width:30px; }
+  .pick-title { font-size:12.5px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* ── LIEN RAPIDE */
+  .modal-link-btn {
+    display:block; margin:8px auto 0; width:fit-content;
+    padding:7px 18px; border-radius:8px; font-size:12px; font-weight:600;
+    border:1px solid var(--border); cursor:pointer;
+    background:var(--surface); color:var(--muted);
+    font-family:'Inter',sans-serif; transition:all .15s;
+  }
+  .modal-link-btn:hover { border-color:#4f8ef7; color:#4f8ef7; }
+
+  /* ── VUE SYNTHÈSE AMÉLIORÉE */
+  .ov-report {
+    margin-top:10px; background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; overflow:hidden;
+  }
+  .ov-report-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 16px; cursor:pointer; transition:background .15s; user-select:none;
+  }
+  .ov-report-head:hover { background:var(--surface-2); }
+  .ov-report-label { font-size:12.5px; font-weight:700; }
+  .ov-report-chevron { color:var(--muted); font-size:12px; transition:transform .2s; }
+  .ov-report-chevron.open { transform:rotate(180deg); }
+  .ov-report-body { display:none; padding:0 16px 12px; }
+  .ov-report-body.open { display:block; }
+  .ov-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .ov-table th { text-align:left; color:var(--muted); font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; padding:6px 0 5px; border-bottom:1px solid var(--border); }
+  .ov-table td { padding:7px 0; border-bottom:1px solid var(--border-soft); }
+  .ov-table tr:last-child td { border-bottom:none; }
+  .ov-table .ch-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
 </style>
 </head>
 <body>
@@ -775,7 +948,10 @@
     <button class="io-btn import" id="btn-import" title="Importer une configuration">⬇ Import</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
     <button class="refresh-btn" id="btn-refresh" title="Recharger les liens depuis GitHub">↻</button>
+    <span class="sync-dot" id="sync-dot"></span>
     <button class="pres-btn" id="btn-pres" title="Mode présentation">👁 Présentation</button>
+    <button class="pres-btn" id="btn-fullscreen" title="Plein écran">⛶</button>
+    <button class="slideshow-btn" id="btn-slideshow" title="Mode diaporama">▶ Diaporama</button>
     <button class="token-btn" id="btn-token" title="Accès administration">🔑</button>
     <div class="amb-wrap">
       <button class="theme-btn" id="btn-theme" title="Choisir l'ambiance">🎨</button>
@@ -793,6 +969,17 @@
 <nav class="chapitres-nav">
   <button class="chap-btn active" data-chap="all"><span class="chap-pill" style="background:#4f8ef7">Tout</span>Catalogue complet</button>
   <button class="chap-btn todo-filter" id="btn-todo" data-chap="all">⚪ À compléter</button>
+  <button class="chap-btn recent-filter" id="btn-recent" data-chap="all">⏱ Récents</button>
+  <div class="sort-wrap" style="margin-left:auto">
+    <button class="sort-btn" id="btn-sort">⇅ Trier</button>
+    <div class="sort-pop" id="sort-pop">
+      <button class="sort-opt active" data-sort="default">Par défaut</button>
+      <button class="sort-opt" data-sort="az">Alphabétique A→Z</button>
+      <button class="sort-opt" data-sort="progress-asc">Progression ↑</button>
+      <button class="sort-opt" data-sort="progress-desc">Progression ↓</button>
+    </div>
+  </div>
+  <button class="view-toggle" id="btn-list-view" title="Vue liste compacte">☰</button>
 </nav>
 
 <section class="overview" id="overview"></section>
@@ -820,6 +1007,7 @@
       <img id="modal-qr-img" alt="QR code">
       <span class="modal-qr-close" id="modal-qr-close">Fermer</span>
     </div>
+    <button class="modal-link-btn" id="modal-link-btn">🔗 Lien rapide</button>
   </div>
 </div>
 
@@ -838,6 +1026,7 @@
         <button class="add-fiche-confirm" id="edit-add-fiche-confirm">＋</button>
       </div>
     </div>
+    <button class="copy-config-btn" id="copy-config-btn">⤵ Copier la configuration depuis un autre atelier</button>
     <div class="edit-actions">
       <button class="btn-save" id="btn-save">✓ Enregistrer</button>
       <button class="btn-clear" id="btn-clear">✕ Effacer tout</button>
@@ -958,6 +1147,34 @@
       <button class="btn-clear" id="token-clear-btn" style="display:none">✕ Supprimer le token</button>
       <button class="btn-cancel" id="token-cancel-btn">Annuler</button>
     </div>
+  </div>
+</div>
+
+<!-- DIAPORAMA -->
+<div class="slideshow-overlay" id="slideshow-overlay">
+  <button class="slideshow-close-btn" id="slideshow-close">✕</button>
+  <div class="sli-card" id="sli-card">
+    <div class="sli-thumb" id="sli-thumb"></div>
+    <div class="sli-body">
+      <div class="sli-eyebrow" id="sli-eyebrow"></div>
+      <div class="sli-title" id="sli-title"></div>
+      <div class="sli-fiches" id="sli-fiches"></div>
+    </div>
+  </div>
+  <div class="sli-nav">
+    <button class="sli-arrow" id="sli-prev">‹</button>
+    <div class="sli-counter" id="sli-counter">1 / 1</div>
+    <button class="sli-arrow" id="sli-next">›</button>
+  </div>
+</div>
+
+<!-- MODAL PICKLIST (copier config) -->
+<div class="modal-overlay" id="pick-modal">
+  <div class="pick-modal">
+    <button class="modal-close" id="pick-modal-close">✕</button>
+    <div class="edit-modal-title">Copier la configuration depuis…</div>
+    <div class="edit-modal-sub">Choisir l'atelier dont tu veux reprendre les fiches</div>
+    <div class="pick-list" id="pick-list"></div>
   </div>
 </div>
 
@@ -1404,10 +1621,14 @@ function getEffectiveThumb(num) {
 function exportLinks() {
   const links = loadLinks();
   const thumbs = loadThumbs();
-  const hasData = Object.keys(links).length || Object.keys(thumbs).length;
+  const customFiches = loadCustomFiches();
+  const customCat = loadCustomAteliers();
+  const ficheConfig = loadFicheConfig();
+  const hasData = Object.keys(links).length || Object.keys(thumbs).length ||
+    Object.keys(customFiches).length || customCat.length || Object.keys(ficheConfig).length;
   if (!hasData) { showToast("⚠ Aucune donnée à exporter"); return; }
   const date = new Date().toISOString().slice(0, 10);
-  const data = { version: 2, exportDate: date, links, thumbs };
+  const data = { version: 3, exportDate: date, links, thumbs, customFiches, customCat, ficheConfig };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -1415,7 +1636,8 @@ function exportLinks() {
   a.click(); URL.revokeObjectURL(url);
   const totalLinks = Object.values(links).reduce((s, v) => s + Object.keys(v).length, 0);
   const totalThumbs = Object.keys(thumbs).length;
-  showToast(`✓ ${totalLinks} liens + ${totalThumbs} images exportés`);
+  const totalFiches = Object.values(customFiches).reduce((s, a) => s + a.length, 0);
+  showToast(`✓ ${totalLinks} liens · ${totalThumbs} images · ${totalFiches} fiches custom · ${customCat.length} tuiles exportés`);
 }
 function importLinks(file) {
   if (!file) return;
@@ -1424,8 +1646,14 @@ function importLinks(file) {
     try {
       const data = JSON.parse(e.target.result);
       if (typeof data !== "object" || Array.isArray(data)) throw new Error();
-      const validNums = new Set(CATALOGUE.map(a => a.num));
-      const linksPayload = data.version === 2 ? (data.links || {}) : data;
+      const validNums = new Set([...BASE_CATALOGUE.map(a => a.num)]);
+      // Import catalogue perso (v3)
+      if (data.version === 3 && Array.isArray(data.customCat) && data.customCat.length) {
+        saveCustomAteliers(data.customCat);
+        rebuildCatalogue();
+        data.customCat.forEach(a => validNums.add(a.num));
+      }
+      const linksPayload = (data.version >= 2) ? (data.links || {}) : data;
       const merged = loadLinks();
       let linkCount = 0;
       for (const [num, val] of Object.entries(linksPayload)) {
@@ -1442,12 +1670,16 @@ function importLinks(file) {
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
       let thumbCount = 0;
-      if (data.version === 2 && data.thumbs && typeof data.thumbs === "object") {
+      if (data.thumbs && typeof data.thumbs === "object") {
         const existingThumbs = loadThumbs();
         for (const [num, src] of Object.entries(data.thumbs)) {
-          if (validNums.has(num) && typeof src === "string") { existingThumbs[num] = src; thumbCount++; }
+          if (typeof src === "string") { existingThumbs[num] = src; thumbCount++; }
         }
         localStorage.setItem(THUMBS_KEY, JSON.stringify(existingThumbs));
+      }
+      if (data.version === 3) {
+        if (data.customFiches && typeof data.customFiches === "object") saveCustomFiches(data.customFiches);
+        if (data.ficheConfig && typeof data.ficheConfig === "object") localStorage.setItem(FICHE_CONFIG_KEY, JSON.stringify(data.ficheConfig));
       }
       renderMain();
       showToast(`✓ ${linkCount} liens + ${thumbCount} images importés`);
@@ -1469,21 +1701,56 @@ function extractDriveId(url) {
 function driveViewUrl(id)     { return `https://drive.google.com/file/d/${id}/view`; }
 function driveDownloadUrl(id) { return `https://drive.google.com/uc?export=download&id=${id}`; }
 
+// ── RÉCENTS
+const RECENT_KEY = "conum_recent_v1";
+function loadRecents() {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; }
+}
+function pushRecent(num) {
+  let r = loadRecents().filter(x => x !== num);
+  r.unshift(num);
+  if (r.length > 20) r = r.slice(0, 20);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(r));
+}
+
+// ── INDICATEUR SYNC
+function updateSyncDot(state) {
+  const dot = document.getElementById("sync-dot");
+  if (!dot) return;
+  dot.className = "sync-dot " + state;
+  if (state === "ok") setTimeout(() => { dot.className = "sync-dot"; }, 3000);
+}
+
 // ── STATE
 let currentChap = "all", currentSearch = "";
 let modalAtelier = null, editAtelier = null, imgAtelier = null;
 let pendingImgSrc = "";
 let compressGen = 0;
-
 let showTodoOnly = false;
+let showRecentOnly = false;
+let sortMode = "default";
+let listViewActive = (localStorage.getItem("conum_list_view") === "1");
+
 function filtered() {
-  return CATALOGUE.filter(a => {
+  let list = CATALOGUE.filter(a => {
     const matchChap = currentChap === "all" || a.chap === currentChap;
     const q = currentSearch.toLowerCase();
     const matchSearch = !q || a.titre.toLowerCase().includes(q) || a.num.toLowerCase().includes(q);
     const matchTodo = !showTodoOnly || countLinks(a.num) < FICHES.length;
-    return matchChap && matchSearch && matchTodo;
+    const matchRecent = !showRecentOnly || loadRecents().includes(a.num);
+    return matchChap && matchSearch && matchTodo && matchRecent;
   });
+  if (sortMode === "az") {
+    list = list.slice().sort((a, b) => a.titre.localeCompare(b.titre, "fr"));
+  } else if (sortMode === "progress-asc") {
+    list = list.slice().sort((a, b) => countLinks(a.num) - countLinks(b.num));
+  } else if (sortMode === "progress-desc") {
+    list = list.slice().sort((a, b) => countLinks(b.num) - countLinks(a.num));
+  } else if (showRecentOnly) {
+    const r = loadRecents();
+    list = list.slice().sort((a, b) => r.indexOf(a.num) - r.indexOf(b.num));
+  }
+  return list;
 }
 
 // ── RENDER
@@ -1513,16 +1780,48 @@ function renderOverview() {
         <div class="ov-chap-meta"><span>${ats.length} ateliers</span><span>${done}/${ats.length} prêts</span></div>
       </div>`;
   }).join("");
+  const chapColors = { A:"var(--A)",B:"var(--B)",C:"var(--C)",D:"var(--D)",E:"var(--E)",F:"var(--F)" };
+  const reportRows = order.map(ch => {
+    const ats = CATALOGUE.filter(a => a.chap === ch);
+    const chapFilled = ats.reduce((s, a) => s + countLinks(a.num), 0);
+    const maxFiches = ats.length * FICHES.length;
+    const done = ats.filter(a => countLinks(a.num) === FICHES.length).length;
+    const p = maxFiches ? Math.round((chapFilled / maxFiches) * 100) : 0;
+    return `<tr>
+      <td><span class="ch-dot" style="background:${chapColors[ch]}"></span><strong>${ch}</strong></td>
+      <td>${CHAPITRES[ch].label.replace(/^Le numérique /,"").replace(/^La /,"")}</td>
+      <td>${ats.length}</td>
+      <td>${chapFilled}/${maxFiches}</td>
+      <td>${done}/${ats.length}</td>
+      <td>${p}%</td>
+    </tr>`;
+  }).join("");
+  const reportOpen = document.getElementById("ov-report-body")?.classList.contains("open");
+  const totalFiches = total * FICHES.length;
   ov.innerHTML = `
     <div class="ov-grid">
       <div class="ov-hero">
         <div class="ov-ring" style="--p:${pct}"><div class="ov-ring-num">${pct}%<small>FICHES</small></div></div>
         <div class="ov-hero-txt">
           <div class="ov-hero-title">${ready} atelier${ready>1?'s':''} prêt${ready>1?'s':''} sur ${total}</div>
-          <div class="ov-hero-sub">${started} en cours de préparation · ${total - started} à démarrer.<br>Choisis un thème ci-dessous ou une tuile pour lancer un atelier.</div>
+          <div class="ov-hero-sub">${totalFilled}/${totalFiches} fiches configurées · ${started} en cours · ${total - started} à démarrer.<br>Clique sur un thème ou une tuile pour lancer un atelier.</div>
         </div>
       </div>
       <div class="ov-chaps">${chapsHTML}</div>
+    </div>
+    <div class="ov-report">
+      <div class="ov-report-head" id="ov-report-head">
+        <span class="ov-report-label">📊 Rapport détaillé par thème</span>
+        <span class="ov-report-chevron${reportOpen?' open':''}" id="ov-report-chevron">▼</span>
+      </div>
+      <div class="ov-report-body${reportOpen?' open':''}" id="ov-report-body">
+        <table class="ov-table">
+          <thead><tr>
+            <th>Thème</th><th>Nom</th><th>Ateliers</th><th>Fiches config.</th><th>Prêts</th><th>%</th>
+          </tr></thead>
+          <tbody>${reportRows}</tbody>
+        </table>
+      </div>
     </div>`;
   ov.querySelectorAll(".ov-chap").forEach(el => {
     el.addEventListener("click", () => {
@@ -1530,17 +1829,27 @@ function renderOverview() {
       document.querySelectorAll(".chap-btn").forEach(b => b.classList.remove("active"));
       document.querySelector('[data-chap="all"]').classList.add("active");
       showTodoOnly = false;
+      showRecentOnly = false;
       document.getElementById("btn-todo").textContent = "⚪ À compléter";
+      document.getElementById("btn-todo").classList.remove("active");
+      document.getElementById("btn-recent").classList.remove("active");
       currentChap = ch;
       renderMain();
       const main = document.getElementById("main");
       if (main) window.scrollTo({ top: main.offsetTop - 78, behavior: "smooth" });
     });
   });
+  document.getElementById("ov-report-head")?.addEventListener("click", () => {
+    const body = document.getElementById("ov-report-body");
+    const chev = document.getElementById("ov-report-chevron");
+    body?.classList.toggle("open");
+    chev?.classList.toggle("open");
+  });
 }
 
 function renderMain() {
   renderOverview();
+  document.body.classList.toggle("list-view", listViewActive);
   const main = document.getElementById("main");
   const list = filtered();
   const configured = CATALOGUE.filter(a => countLinks(a.num) > 0).length;
@@ -1632,6 +1941,7 @@ function openModal(num, e) {
   const a = CATALOGUE.find(x => x.num === num);
   if (!a) return;
   modalAtelier = a;
+  pushRecent(num);
   const links = getAtlierLinks(num);
 
   const thumb = document.getElementById("modal-thumb");
@@ -1894,15 +2204,17 @@ document.getElementById("btn-save").addEventListener("click", async () => {
   if (tok) {
     const btn = document.getElementById("btn-save");
     btn.textContent = "⏳ Sync…"; btn.disabled = true;
+    updateSyncDot("syncing");
     await pushFicheConfigToRepo(loadFicheConfig(), tok);
     const result = await pushLinksToRepo(tok);
     btn.textContent = "✓ Enregistrer"; btn.disabled = false;
     closeEditModal();
-    if (result === "auth_error") showToast("⚠ Token expiré — ouvre 🖼️ pour le renouveler");
-    else if (result) showToast(`✓ Enregistré et synchronisé`);
-    else showToast(`✓ Enregistré (sync échouée)`);
+    if (result === "auth_error") { updateSyncDot("dirty"); showToast("⚠ Token expiré — ouvre 🖼️ pour le renouveler"); }
+    else if (result) { updateSyncDot("ok"); showToast(`✓ Enregistré et synchronisé`); }
+    else { updateSyncDot("dirty"); showToast(`✓ Enregistré (sync échouée)`); }
   } else {
     closeEditModal();
+    updateSyncDot("dirty");
     showToast(`✓ Enregistré pour ${editAtelier.num}`);
   }
 });
@@ -2108,12 +2420,13 @@ document.getElementById("import-file").addEventListener("change", e => {
 });
 
 document.querySelectorAll(".chap-btn").forEach(btn => {
+  if (btn.id === "btn-todo" || btn.id === "btn-recent") return;
   btn.addEventListener("click", () => {
-    if (btn.id !== "btn-todo") {
-      showTodoOnly = false;
-      document.getElementById("btn-todo").classList.remove("active");
-      document.getElementById("btn-todo").textContent = "⚪ À compléter";
-    }
+    showTodoOnly = false;
+    showRecentOnly = false;
+    document.getElementById("btn-todo").classList.remove("active");
+    document.getElementById("btn-todo").textContent = "⚪ À compléter";
+    document.getElementById("btn-recent").classList.remove("active");
     document.querySelectorAll(".chap-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentChap = btn.dataset.chap;
@@ -2124,6 +2437,8 @@ document.querySelectorAll(".chap-btn").forEach(btn => {
 document.getElementById("search").addEventListener("input", e => {
   currentSearch = e.target.value;
   if (currentSearch) {
+    showRecentOnly = false;
+    document.getElementById("btn-recent").classList.remove("active");
     document.querySelectorAll(".chap-btn").forEach(b => b.classList.remove("active"));
     document.querySelector('[data-chap="all"]').classList.add("active");
     currentChap = "all";
@@ -2132,7 +2447,14 @@ document.getElementById("search").addEventListener("input", e => {
 });
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { closeModal(); closeEditModal(); closeImgModal(); closeTokenModal(); document.getElementById("amb-pop").classList.remove("open"); }
+  if (e.key === "Escape") {
+    closeModal(); closeEditModal(); closeImgModal(); closeTokenModal();
+    closeSlideshowOverlay(); closePickModal();
+    document.getElementById("amb-pop").classList.remove("open");
+    document.getElementById("sort-pop")?.classList.remove("open");
+  }
+  if (e.key === "ArrowRight" && document.getElementById("slideshow-overlay").classList.contains("open")) slideshowNext();
+  if (e.key === "ArrowLeft"  && document.getElementById("slideshow-overlay").classList.contains("open")) slideshowPrev();
   if (e.key === "/" && !document.getElementById("modal").classList.contains("open")
     && !document.getElementById("edit-modal").classList.contains("open")
     && !document.getElementById("img-modal").classList.contains("open")) {
@@ -2143,10 +2465,13 @@ document.addEventListener("keydown", e => {
 applyTokenClass();
 updateTokenBtn();
 rebuildCatalogue();
+if (listViewActive) {
+  document.body.classList.add("list-view");
+  document.getElementById("btn-list-view").classList.add("active");
+}
+if (localStorage.getItem(DIRTY_KEY)) updateSyncDot("dirty");
 (async () => {
   await loadManifest();
-  // Si des suppressions/modifs n'ont pas été poussées (dirty), on pousse d'abord
-  // avant de tirer depuis le repo — pour protéger l'état local
   const tok = getGhToken();
   if (tok && localStorage.getItem(DIRTY_KEY)) await pushLinksToRepo(tok);
   await loadRepoLinks();
@@ -2154,6 +2479,11 @@ rebuildCatalogue();
   await loadRepoCatalogue();
   await loadRepoFicheConfig();
   renderMain();
+  // Deep link : ouvrir le modal si un # est dans l'URL
+  if (location.hash) {
+    const num = location.hash.slice(1).toUpperCase();
+    if (CATALOGUE.find(a => a.num === num)) setTimeout(() => openModal(num), 350);
+  }
 })();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 
@@ -2190,6 +2520,7 @@ document.getElementById("btn-pres").addEventListener("click", () => {
 document.getElementById("btn-refresh").addEventListener("click", async () => {
   const btn = document.getElementById("btn-refresh");
   btn.textContent = "⏳"; btn.disabled = true;
+  updateSyncDot("syncing");
   const tok = getGhToken();
   if (tok) await pushLinksToRepo(tok);
   await loadRepoLinks();
@@ -2198,6 +2529,7 @@ document.getElementById("btn-refresh").addEventListener("click", async () => {
   await loadRepoFicheConfig();
   renderMain();
   btn.textContent = "↻"; btn.disabled = false;
+  updateSyncDot("ok");
   showToast("✓ Synchronisation complète");
 });
 
@@ -2383,11 +2715,6 @@ document.getElementById("token-clear-btn").addEventListener("click", () => {
   showToast("✕ Token supprimé");
 });
 
-// ── FILTRE À COMPLÉTER
-document.getElementById("btn-todo").addEventListener("click", () => {
-  showTodoOnly = !showTodoOnly;
-  document.getElementById("btn-todo").textContent = showTodoOnly ? "🔴 À compléter" : "⚪ À compléter";
-});
 
 // ── QR CODE
 document.getElementById("modal-qr-btn").addEventListener("click", () => {
@@ -2449,6 +2776,170 @@ document.getElementById("main").addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
   const card = e.target.closest(".card");
   if (card) openModal(card.dataset.id, e);
+});
+
+// ── PLEIN ÉCRAN ①
+document.getElementById("btn-fullscreen").addEventListener("click", () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+});
+document.addEventListener("fullscreenchange", () => {
+  const btn = document.getElementById("btn-fullscreen");
+  const full = !!document.fullscreenElement;
+  btn.classList.toggle("on", full);
+  btn.textContent = full ? "⛶ ✕" : "⛶";
+});
+
+// ── VUE LISTE COMPACTE ③
+document.getElementById("btn-list-view").addEventListener("click", () => {
+  listViewActive = !listViewActive;
+  localStorage.setItem("conum_list_view", listViewActive ? "1" : "");
+  document.getElementById("btn-list-view").classList.toggle("active", listViewActive);
+  document.body.classList.toggle("list-view", listViewActive);
+});
+
+// ── TRI ④
+document.getElementById("btn-sort").addEventListener("click", e => {
+  e.stopPropagation();
+  document.getElementById("sort-pop").classList.toggle("open");
+});
+document.querySelectorAll(".sort-opt").forEach(opt => {
+  opt.addEventListener("click", () => {
+    sortMode = opt.dataset.sort;
+    document.querySelectorAll(".sort-opt").forEach(o => o.classList.toggle("active", o.dataset.sort === sortMode));
+    document.getElementById("btn-sort").classList.toggle("active", sortMode !== "default");
+    document.getElementById("sort-pop").classList.remove("open");
+    renderMain();
+  });
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest(".sort-wrap")) document.getElementById("sort-pop")?.classList.remove("open");
+});
+
+// ── FILTRE RÉCENTS ⑤
+document.getElementById("btn-recent").addEventListener("click", () => {
+  showRecentOnly = !showRecentOnly;
+  document.getElementById("btn-recent").classList.toggle("active", showRecentOnly);
+  if (showRecentOnly) {
+    showTodoOnly = false;
+    document.getElementById("btn-todo").classList.remove("active");
+    document.getElementById("btn-todo").textContent = "⚪ À compléter";
+  }
+  renderMain();
+});
+
+// ── LIEN RAPIDE ⑧
+document.getElementById("modal-link-btn").addEventListener("click", async () => {
+  if (!modalAtelier) return;
+  const url = location.origin + location.pathname + "#" + modalAtelier.num;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast("✓ Lien copié — partage-le tel quel");
+  } catch {
+    prompt("Copie ce lien :", url);
+  }
+});
+
+// ── MODE DIAPORAMA ⑥
+let slideshowList = [];
+let slideshowIdx = 0;
+
+function renderSlideshowCard() {
+  const a = slideshowList[slideshowIdx];
+  if (!a) return;
+  const links = getAtlierLinks(a.num);
+  const thumb = document.getElementById("sli-thumb");
+  thumb.className = `sli-thumb thumb-${a.chap}`;
+  thumb.textContent = a.emoji;
+  const imgSrc = getEffectiveThumb(a.num);
+  if (imgSrc) { thumb.style.backgroundImage = `url(${JSON.stringify(imgSrc)})`; thumb.textContent = ""; }
+  else { thumb.style.backgroundImage = ""; }
+  document.getElementById("sli-eyebrow").textContent = `${a.num} · ${CHAPITRES[a.chap].label}`;
+  document.getElementById("sli-title").textContent = a.titre;
+  const fiches = getFichesForAtelier(a.num);
+  document.getElementById("sli-fiches").innerHTML = fiches.map(f => {
+    const id = links[f.key] || "";
+    return `<div class="sli-fiche${id?' has-link':''}">
+      <span class="sf-icon">${f.emoji}</span>
+      <span class="sf-lbl">${f.label}</span>
+      <button class="sf-open" ${!id?'disabled':''} data-id="${id}">▶</button>
+    </div>`;
+  }).join("");
+  document.getElementById("sli-fiches").querySelectorAll(".sf-open").forEach(btn => {
+    btn.addEventListener("click", () => { if (btn.dataset.id) window.open(driveViewUrl(btn.dataset.id), "_blank"); });
+  });
+  document.getElementById("sli-counter").textContent = `${slideshowIdx + 1} / ${slideshowList.length}`;
+  document.getElementById("sli-prev").disabled = slideshowIdx === 0;
+  document.getElementById("sli-next").disabled = slideshowIdx === slideshowList.length - 1;
+  // Replay animation
+  const card = document.getElementById("sli-card");
+  card.style.animation = "none"; card.offsetHeight;
+  card.style.animation = "";
+}
+function slideshowNext() { if (slideshowIdx < slideshowList.length - 1) { slideshowIdx++; renderSlideshowCard(); } }
+function slideshowPrev() { if (slideshowIdx > 0) { slideshowIdx--; renderSlideshowCard(); } }
+function openSlideshowOverlay() {
+  slideshowList = filtered();
+  if (!slideshowList.length) { showToast("⚠ Aucun atelier à afficher"); return; }
+  slideshowIdx = 0;
+  renderSlideshowCard();
+  document.getElementById("slideshow-overlay").classList.add("open");
+}
+function closeSlideshowOverlay() {
+  document.getElementById("slideshow-overlay").classList.remove("open");
+}
+document.getElementById("btn-slideshow").addEventListener("click", openSlideshowOverlay);
+document.getElementById("slideshow-close").addEventListener("click", closeSlideshowOverlay);
+document.getElementById("sli-prev").addEventListener("click", slideshowPrev);
+document.getElementById("sli-next").addEventListener("click", slideshowNext);
+document.getElementById("slideshow-overlay").addEventListener("click", e => {
+  if (e.target === document.getElementById("slideshow-overlay")) closeSlideshowOverlay();
+});
+
+// ── DUPLIQUER CONFIG FICHE ⑦
+function openPickModal() {
+  const list = document.getElementById("pick-list");
+  list.innerHTML = CATALOGUE
+    .filter(a => editAtelier && a.num !== editAtelier.num)
+    .map(a => `<div class="pick-item" data-num="${a.num}">
+      <span class="pick-num" style="color:var(--${a.chap})">${a.num}</span>
+      <span class="pick-title">${a.titre}</span>
+    </div>`).join("");
+  list.querySelectorAll(".pick-item").forEach(item => {
+    item.addEventListener("click", () => {
+      const srcNum = item.dataset.num;
+      const srcFiches = getFichesForAtelier(srcNum);
+      captureEditFicheLabels();
+      editFiches = srcFiches.map(f => ({ ...f }));
+      renderEditFields();
+      closePickModal();
+      showToast(`✓ Configuration copiée depuis ${srcNum}`);
+    });
+  });
+  document.getElementById("pick-modal").classList.add("open");
+}
+function closePickModal() {
+  document.getElementById("pick-modal").classList.remove("open");
+}
+document.getElementById("copy-config-btn").addEventListener("click", openPickModal);
+document.getElementById("pick-modal-close").addEventListener("click", closePickModal);
+document.getElementById("pick-modal").addEventListener("click", e => {
+  if (e.target === document.getElementById("pick-modal")) closePickModal();
+});
+
+// ── TODO filter (update to also clear recent)
+document.getElementById("btn-todo").addEventListener("click", () => {
+  showTodoOnly = !showTodoOnly;
+  document.getElementById("btn-todo").textContent = showTodoOnly ? "🔴 À compléter" : "⚪ À compléter";
+  document.getElementById("btn-todo").classList.toggle("active", showTodoOnly);
+  if (showTodoOnly) {
+    showRecentOnly = false;
+    document.getElementById("btn-recent").classList.remove("active");
+  }
+  renderMain();
 });
 </script>
 </body>
