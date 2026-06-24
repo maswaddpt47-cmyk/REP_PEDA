@@ -926,6 +926,121 @@
   .ov-table td { padding:7px 0; border-bottom:1px solid var(--border-soft); }
   .ov-table tr:last-child td { border-bottom:none; }
   .ov-table .ch-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+
+  /* ── BOUTON LIEN PARTENAIRE */
+  .partner-share-btn {
+    display:flex; align-items:center; gap:5px;
+    height:34px; padding:0 12px; border-radius:8px;
+    background:var(--bg); border:1px solid var(--border);
+    color:var(--muted); font-size:13px; font-weight:500; cursor:pointer;
+    transition:all .18s; flex-shrink:0; font-family:'Inter',sans-serif;
+  }
+  .partner-share-btn:hover { border-color:#10b981; color:#10b981; }
+  body:not(.has-token) .partner-share-btn { display:none !important; }
+
+  /* ── MODE PARTENAIRE */
+  body.partenaire-mode > header,
+  body.partenaire-mode > nav,
+  body.partenaire-mode > main,
+  body.partenaire-mode .modal-overlay,
+  body.partenaire-mode .save-toast,
+  body.partenaire-mode #slideshow-overlay { display:none !important; }
+  #partenaire-overlay {
+    display:none; position:fixed; inset:0; overflow-y:auto;
+    background:var(--bg); z-index:900;
+  }
+  body.partenaire-mode #partenaire-overlay { display:block; }
+  .partner-inner { max-width:860px; margin:0 auto; padding:32px 20px 120px; }
+  .partner-header { text-align:center; margin-bottom:36px; }
+  .partner-logo-mark {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:52px; height:52px; background:var(--A-bg); border-radius:14px;
+    font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700;
+    color:#fff; margin-bottom:14px;
+  }
+  .partner-title {
+    font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700;
+    color:var(--text); margin-bottom:8px;
+  }
+  .partner-subtitle {
+    font-size:14px; color:var(--muted); max-width:560px; margin:0 auto; line-height:1.6;
+  }
+  .partner-chapters { display:flex; flex-direction:column; gap:12px; }
+  .pchap-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden;
+  }
+  .pchap-stripe { height:4px; }
+  .pchap-head {
+    display:flex; align-items:center; gap:14px; padding:16px 18px;
+    cursor:pointer; user-select:none; transition:background .15s;
+  }
+  .pchap-head:hover { background:var(--surface-2); }
+  .pchap-emoji { font-size:24px; width:38px; text-align:center; flex-shrink:0; }
+  .pchap-info { flex:1; min-width:0; }
+  .pchap-id {
+    font-family:'Space Grotesk',sans-serif; font-size:10.5px; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; margin-bottom:2px;
+  }
+  .pchap-name {
+    font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; color:var(--text);
+  }
+  .pchap-desc { font-size:12px; color:var(--muted); margin-top:3px; line-height:1.45; }
+  .pchap-badge {
+    font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px;
+    border:1px solid; flex-shrink:0; transition:all .15s; white-space:nowrap;
+    opacity:0;
+  }
+  .pchap-badge.visible { opacity:1; }
+  .pchap-arrow { color:var(--muted); font-size:13px; transition:transform .2s; flex-shrink:0; }
+  .pchap-arrow.open { transform:rotate(180deg); }
+  .pchap-ateliers { display:none; padding:4px 16px 14px; border-top:1px solid var(--border); }
+  .pchap-ateliers.open { display:block; }
+  .pchap-select-all {
+    display:flex; align-items:center; gap:9px; padding:8px 8px 8px 10px;
+    font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase;
+    letter-spacing:.4px; cursor:pointer;
+  }
+  .pchap-select-all input { cursor:pointer; width:15px; height:15px; }
+  .patelier-item {
+    display:flex; align-items:center; gap:11px; padding:9px 10px;
+    border-radius:8px; cursor:pointer; transition:background .12s;
+  }
+  .patelier-item:hover { background:var(--surface-2); }
+  .patelier-item input[type="checkbox"] { width:16px; height:16px; cursor:pointer; flex-shrink:0; }
+  .patelier-emoji { font-size:15px; width:22px; text-align:center; flex-shrink:0; }
+  .patelier-num {
+    font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:700; min-width:26px; flex-shrink:0;
+  }
+  .patelier-title { font-size:13px; font-weight:600; color:var(--text); flex:1; }
+  .partner-sticky {
+    position:fixed; bottom:0; left:0; right:0; background:var(--surface);
+    border-top:1px solid var(--border); padding:13px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    z-index:950; box-shadow:0 -8px 30px rgba(0,0,0,.4);
+  }
+  .partner-count {
+    font-size:14px; font-weight:700; color:var(--text);
+    font-family:'Space Grotesk',sans-serif; flex-shrink:0;
+  }
+  .partner-count em { font-style:normal; color:#4f8ef7; }
+  .partner-btns { display:flex; gap:10px; }
+  .partner-btn {
+    padding:9px 16px; border-radius:10px; font-size:13px; font-weight:700;
+    cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; white-space:nowrap;
+  }
+  .partner-btn.p-copy {
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+  }
+  .partner-btn.p-copy:hover { border-color:#4f8ef7; color:#4f8ef7; }
+  .partner-btn.p-email { background:#4f8ef7; color:#fff; border:1px solid #3b7ae8; }
+  .partner-btn.p-email:hover { background:#3b7ae8; }
+  .partner-btn:disabled { opacity:.35; cursor:not-allowed; }
+  @media(max-width:520px) {
+    .partner-sticky { flex-direction:column; gap:10px; padding:12px 14px; }
+    .partner-btns { width:100%; }
+    .partner-btn { flex:1; text-align:center; }
+    .pchap-desc { display:none; }
+  }
 </style>
 </head>
 <body>
@@ -952,6 +1067,7 @@
     <button class="pres-btn" id="btn-pres" title="Mode présentation">👁 Présentation</button>
     <button class="pres-btn" id="btn-fullscreen" title="Plein écran">⛶</button>
     <button class="slideshow-btn" id="btn-slideshow" title="Mode diaporama">▶ Diaporama</button>
+    <button class="partner-share-btn" id="btn-partner-share" title="Copier le lien catalogue partenaire">🔗 Lien partenaire</button>
     <button class="token-btn" id="btn-token" title="Accès administration">🔑</button>
     <div class="amb-wrap">
       <button class="theme-btn" id="btn-theme" title="Choisir l'ambiance">🎨</button>
@@ -1179,6 +1295,28 @@
 </div>
 
 <div class="save-toast" id="toast"></div>
+
+<!-- MODE PARTENAIRE -->
+<div id="partenaire-overlay">
+  <div class="partner-inner">
+    <div class="partner-header">
+      <div class="partner-logo-mark">CN</div>
+      <div class="partner-title">Catalogue des Ateliers Numériques</div>
+      <div class="partner-subtitle">
+        Conseillers Numériques · Lot-et-Garonne 2025–2026<br>
+        Sélectionnez les thèmes et ateliers qui vous intéressent, puis envoyez votre sélection.
+      </div>
+    </div>
+    <div class="partner-chapters" id="partner-chapters"></div>
+  </div>
+  <div class="partner-sticky">
+    <div class="partner-count" id="partner-count"><em>0</em> atelier sélectionné</div>
+    <div class="partner-btns">
+      <button class="partner-btn p-copy" id="partner-copy" disabled>📋 Copier ma sélection</button>
+      <button class="partner-btn p-email" id="partner-email" disabled>✉ Envoyer par email</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const FICHES = [
@@ -2941,6 +3079,138 @@ document.getElementById("btn-todo").addEventListener("click", () => {
   }
   renderMain();
 });
+
+// ── MODE PARTENAIRE ⑧
+const CHAP_DESC = {
+  A: "Maîtrisez les outils numériques fondamentaux : ordinateur, tablette, smartphone, applications, navigation internet et sécurité de base.",
+  B: "Simplifiez votre quotidien grâce au numérique : messagerie, démarches administratives, espace santé, scolarité, budget et achats sécurisés.",
+  C: "Gagnez en efficacité avec les outils bureautiques : traitement de texte, tableur, gestion des PDF et stockage dans le cloud.",
+  D: "Boostez votre vie professionnelle et vos déplacements : recherche d'emploi, formation CPF, sites emploi et solutions de mobilité.",
+  E: "Naviguez sereinement : cybersécurité, réseaux sociaux, e-réputation, bien-être face aux écrans et intelligence artificielle.",
+  F: "Ouvrez-vous à la culture en ligne : médiathèque numérique, streaming, livres numériques, autoformation et visites virtuelles.",
+};
+const CHAP_EMOJI_P = { A:"🖥️", B:"🌐", C:"📂", D:"💼", E:"🛡️", F:"📚" };
+const CHAP_COLOR  = { A:"#3b82f6", B:"#10b981", C:"#f59e0b", D:"#8b5cf6", E:"#ef4444", F:"#06b6d4" };
+
+function initPartnerMode() {
+  const container = document.getElementById("partner-chapters");
+  if (!container) return;
+  Object.keys(CHAPITRES).forEach(key => {
+    const color = CHAP_COLOR[key];
+    const ateliers = CATALOGUE.filter(a => a.chap === key);
+    const card = document.createElement("div");
+    card.className = "pchap-card";
+    card.innerHTML = `
+      <div class="pchap-stripe" style="background:linear-gradient(to right,${color} 0%,transparent 100%)"></div>
+      <div class="pchap-head">
+        <div class="pchap-emoji">${CHAP_EMOJI_P[key]}</div>
+        <div class="pchap-info">
+          <div class="pchap-id" style="color:${color}">Thème ${key}</div>
+          <div class="pchap-name">${CHAPITRES[key].label}</div>
+          <div class="pchap-desc">${CHAP_DESC[key]}</div>
+        </div>
+        <div class="pchap-badge" id="pbadge-${key}" style="color:${color};border-color:${color};background:${color}18"></div>
+        <div class="pchap-arrow" id="parr-${key}">▾</div>
+      </div>
+      <div class="pchap-ateliers" id="patel-${key}">
+        <label class="pchap-select-all">
+          <input type="checkbox" id="pall-${key}" style="accent-color:${color}">
+          Tout sélectionner
+        </label>
+        ${ateliers.map(a => `
+          <label class="patelier-item">
+            <input type="checkbox" class="patelier-cb" data-num="${a.num}" data-chap="${key}" style="accent-color:${color}">
+            <span class="patelier-emoji">${a.emoji}</span>
+            <span class="patelier-num" style="color:${color}">${a.num}</span>
+            <span class="patelier-title">${a.titre}</span>
+          </label>`).join("")}
+      </div>`;
+    container.appendChild(card);
+
+    const head = card.querySelector(".pchap-head");
+    const body = card.querySelector(`#patel-${key}`);
+    const arrow = card.querySelector(`#parr-${key}`);
+    head.addEventListener("click", e => {
+      if (e.target.type === "checkbox") return;
+      const open = body.classList.toggle("open");
+      arrow.classList.toggle("open", open);
+    });
+
+    const allCb = card.querySelector(`#pall-${key}`);
+    allCb.addEventListener("change", () => {
+      card.querySelectorAll(".patelier-cb").forEach(cb => { cb.checked = allCb.checked; });
+      updatePartnerCount();
+    });
+    card.querySelectorAll(".patelier-cb").forEach(cb => {
+      cb.addEventListener("change", () => {
+        allCb.checked = [...card.querySelectorAll(".patelier-cb")].every(c => c.checked);
+        updatePartnerCount();
+      });
+    });
+  });
+
+  document.getElementById("partner-copy").addEventListener("click", partnerCopy);
+  document.getElementById("partner-email").addEventListener("click", partnerEmail);
+  updatePartnerCount();
+}
+
+function getPartnerSel() {
+  return [...document.querySelectorAll(".patelier-cb:checked")].map(cb => cb.dataset.num);
+}
+
+function updatePartnerCount() {
+  const sel = getPartnerSel();
+  const n = sel.length;
+  document.getElementById("partner-count").innerHTML = `<em>${n}</em> atelier${n !== 1 ? "s" : ""} sélectionné${n !== 1 ? "s" : ""}`;
+  const chapN = {};
+  sel.forEach(num => { const a = CATALOGUE.find(x => x.num === num); if (a) chapN[a.chap] = (chapN[a.chap] || 0) + 1; });
+  Object.keys(CHAPITRES).forEach(key => {
+    const badge = document.getElementById(`pbadge-${key}`);
+    if (!badge) return;
+    const cnt = chapN[key] || 0;
+    if (cnt > 0) { badge.textContent = cnt + " sélectionné" + (cnt > 1 ? "s" : ""); badge.classList.add("visible"); }
+    else { badge.textContent = ""; badge.classList.remove("visible"); }
+  });
+  document.getElementById("partner-copy").disabled = n === 0;
+  document.getElementById("partner-email").disabled = n === 0;
+}
+
+function buildSelText(sel) {
+  const byChap = {};
+  sel.forEach(num => { const a = CATALOGUE.find(x => x.num === num); if (a) (byChap[a.chap] = byChap[a.chap] || []).push(a); });
+  const lines = ["Ateliers Numériques — Sélection CONUM 47", ""];
+  Object.keys(byChap).sort().forEach(key => {
+    lines.push(`Thème ${key} — ${CHAPITRES[key].label}`);
+    byChap[key].forEach(a => lines.push(`  • ${a.num} — ${a.titre}`));
+    lines.push("");
+  });
+  return lines.join("\n").trim();
+}
+
+function partnerCopy() {
+  const text = buildSelText(getPartnerSel());
+  navigator.clipboard.writeText(text)
+    .then(() => showToast("✓ Sélection copiée dans le presse-papier"))
+    .catch(() => showToast("⚠ Impossible de copier automatiquement"));
+}
+function partnerEmail() {
+  const text = buildSelText(getPartnerSel());
+  const sub = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
+  const body = encodeURIComponent(text);
+  window.location.href = `mailto:aldayaa47@gmail.com?subject=${sub}&body=${body}`;
+}
+
+document.getElementById("btn-partner-share").addEventListener("click", () => {
+  const url = location.origin + location.pathname + "?partenaire";
+  navigator.clipboard.writeText(url)
+    .then(() => showToast("✓ Lien partenaire copié : " + url))
+    .catch(() => showToast("Lien : " + url));
+});
+
+if (new URLSearchParams(location.search).has("partenaire")) {
+  document.body.classList.add("partenaire-mode");
+  initPartnerMode();
+}
 </script>
 </body>
 </html>
