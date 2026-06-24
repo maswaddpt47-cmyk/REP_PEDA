@@ -1038,11 +1038,7 @@
     padding:9px 16px; border-radius:10px; font-size:13px; font-weight:700;
     cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; white-space:nowrap;
   }
-  .partner-btn.p-copy {
-    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
-  }
-  .partner-btn.p-copy:hover { border-color:#4f8ef7; color:#4f8ef7; }
-  .partner-btn.p-submit { background:#4f8ef7; color:#fff; border:1px solid #3b7ae8; }
+.partner-btn.p-submit { background:#4f8ef7; color:#fff; border:1px solid #3b7ae8; }
   .partner-btn.p-submit:hover:not(:disabled) { background:#3b7ae8; }
   .partner-btn.p-submit.sent { background:#10b981; border-color:#0d9e6e; cursor:default; }
   .partner-btn:disabled { opacity:.4; cursor:not-allowed; }
@@ -1333,7 +1329,6 @@
     <div class="partner-sticky-bottom">
       <div class="partner-count" id="partner-count"><em>0</em> atelier sélectionné</div>
       <div class="partner-btns">
-        <button class="partner-btn p-copy"   id="partner-copy"   disabled>📋 Copier</button>
         <button class="partner-btn p-submit" id="partner-submit" disabled>✉ Envoyer ma sélection</button>
       </div>
     </div>
@@ -3174,7 +3169,6 @@ function initPartnerMode() {
     });
   });
 
-  document.getElementById("partner-copy").addEventListener("click", partnerCopy);
   document.getElementById("partner-submit").addEventListener("click", partnerSubmit);
   updatePartnerCount();
 
@@ -3202,7 +3196,6 @@ function updatePartnerCount() {
     if (cnt > 0) { badge.textContent = cnt + " sélectionné" + (cnt > 1 ? "s" : ""); badge.classList.add("visible"); }
     else { badge.textContent = ""; badge.classList.remove("visible"); }
   });
-  document.getElementById("partner-copy").disabled = n === 0;
   const submitBtn = document.getElementById("partner-submit");
   if (submitBtn && !submitBtn.classList.contains("sent")) submitBtn.disabled = n === 0;
 }
@@ -3221,12 +3214,6 @@ function buildSelText(sel) {
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mjgqgyba";
 
-function partnerCopy() {
-  const text = buildSelText(getPartnerSel());
-  navigator.clipboard.writeText(text)
-    .then(() => showToast("✓ Sélection copiée dans le presse-papier"))
-    .catch(() => showToast("⚠ Impossible de copier automatiquement"));
-}
 
 async function partnerSubmit() {
   const sel = getPartnerSel();
@@ -3275,7 +3262,7 @@ async function partnerSubmit() {
   } catch {
     btn.disabled = false;
     btn.textContent = "✉ Envoyer ma sélection";
-    showToast("⚠ Erreur d'envoi — utilisez 📋 Copier");
+    showToast("⚠ Erreur d'envoi — veuillez réessayer");
   }
 }
 
