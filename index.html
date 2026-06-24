@@ -3206,8 +3206,7 @@ function buildSelText(sel) {
   return lines.join("\n").trim();
 }
 
-// Remplacer par l'URL Formspree après création du compte : https://formspree.io/f/XXXXXXXX
-const FORMSPREE_ENDPOINT = "";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mjgqgyba";
 
 function partnerCopy() {
   const text = buildSelText(getPartnerSel());
@@ -3226,7 +3225,7 @@ async function partnerSubmit() {
     const text = buildSelText(sel);
     const sub = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
     const body = encodeURIComponent(`De : ${name}\n\n${text}`);
-    window.location.href = `mailto:aldayaa47@gmail.com?subject=${sub}&body=${body}`;
+    window.location.href = `mailto:m.aswad.dpt47@gmail.com?subject=${sub}&body=${body}`;
     return;
   }
 
