@@ -950,7 +950,7 @@
     background:var(--bg); z-index:900;
   }
   body.partenaire-mode #partenaire-overlay { display:block; }
-  .partner-inner { max-width:860px; margin:0 auto; padding:32px 20px 120px; }
+  .partner-inner { max-width:860px; margin:0 auto; padding:32px 20px 260px; }
   .partner-header { text-align:center; margin-bottom:36px; }
   .partner-logo-mark {
     display:inline-flex; align-items:center; justify-content:center;
@@ -1018,7 +1018,7 @@
     display:flex; flex-direction:column; gap:10px;
     z-index:950; box-shadow:0 -8px 30px rgba(0,0,0,.4);
   }
-  .partner-fields { display:flex; gap:10px; }
+  .partner-fields { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .partner-field {
     flex:1; height:38px; padding:0 13px; border-radius:9px;
     border:1px solid var(--border); background:var(--bg); color:var(--text);
@@ -1047,10 +1047,12 @@
   .partner-btn.p-submit.sent { background:#10b981; border-color:#0d9e6e; cursor:default; }
   .partner-btn:disabled { opacity:.4; cursor:not-allowed; }
   @media(max-width:560px) {
-    .partner-fields { flex-direction:column; gap:6px; }
+    .partner-sticky { padding:10px 14px; gap:8px; }
+    .partner-fields { grid-template-columns:1fr 1fr; gap:6px; }
+    .partner-field { height:34px; font-size:12px; padding:0 10px; }
     .partner-sticky-bottom { flex-direction:column; align-items:stretch; gap:8px; }
     .partner-btns { width:100%; }
-    .partner-btn { flex:1; text-align:center; }
+    .partner-btn { flex:1; text-align:center; padding:8px 10px; }
     .pchap-desc { display:none; }
   }
 </style>
@@ -1321,7 +1323,7 @@
     </div>
     <div class="partner-chapters" id="partner-chapters"></div>
   </div>
-  <div class="partner-sticky">
+  <div class="partner-sticky" id="partner-sticky">
     <div class="partner-fields">
       <input type="text"  id="partner-name"    class="partner-field" placeholder="Votre nom ou organisation *" autocomplete="organization">
       <input type="email" id="partner-contact" class="partner-field" placeholder="Votre email *"               autocomplete="email">
@@ -3172,6 +3174,12 @@ function initPartnerMode() {
   document.getElementById("partner-copy").addEventListener("click", partnerCopy);
   document.getElementById("partner-submit").addEventListener("click", partnerSubmit);
   updatePartnerCount();
+
+  const inner  = document.querySelector(".partner-inner");
+  const sticky = document.getElementById("partner-sticky");
+  const adjustPadding = () => { inner.style.paddingBottom = (sticky.offsetHeight + 24) + "px"; };
+  adjustPadding();
+  new ResizeObserver(adjustPadding).observe(sticky);
 }
 
 function getPartnerSel() {
