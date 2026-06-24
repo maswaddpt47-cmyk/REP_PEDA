@@ -2625,6 +2625,8 @@ document.addEventListener("keydown", e => {
 applyTokenClass();
 updateTokenBtn();
 rebuildCatalogue();
+const IS_PARTNER_MODE = new URLSearchParams(location.search).has("partenaire");
+if (IS_PARTNER_MODE) document.body.classList.add("partenaire-mode");
 if (listViewActive) {
   document.body.classList.add("list-view");
   document.getElementById("btn-list-view").classList.add("active");
@@ -2638,6 +2640,7 @@ if (localStorage.getItem(DIRTY_KEY)) updateSyncDot("dirty");
   await loadRepoFiches();
   await loadRepoCatalogue();
   await loadRepoFicheConfig();
+  if (IS_PARTNER_MODE) { initPartnerMode(); return; }
   renderMain();
   // Deep link : ouvrir le modal si un # est dans l'URL
   if (location.hash) {
@@ -3283,10 +3286,6 @@ document.getElementById("btn-partner-share").addEventListener("click", () => {
     .catch(() => showToast("Lien : " + url));
 });
 
-if (new URLSearchParams(location.search).has("partenaire")) {
-  document.body.classList.add("partenaire-mode");
-  initPartnerMode();
-}
 </script>
 </body>
 </html>
