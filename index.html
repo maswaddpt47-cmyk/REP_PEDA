@@ -609,15 +609,17 @@
   .fiche-up-btn:not(:disabled):hover, .fiche-dn-btn:not(:disabled):hover { border-color: #4f8ef7; color: #4f8ef7; }
   .fiche-up-btn:disabled, .fiche-dn-btn:disabled { opacity: .25; cursor: not-allowed; }
   .ef-emoji {
-    cursor: text; min-width: 22px; font-size: 16px; border-radius: 4px;
-    padding: 1px 3px; user-select: text; flex-shrink: 0;
+    cursor: pointer; min-width: 22px; font-size: 16px; border-radius: 6px;
+    padding: 2px 4px; flex-shrink: 0; border: 1px solid transparent;
+    transition: border-color .15s; line-height: 1.4;
   }
+  .ef-emoji:hover { border-color: #4f8ef7; }
   .ef-label {
     flex: 1; cursor: text; font-size: 12px; font-weight: 600; color: var(--muted);
     padding: 2px 5px; border-radius: 5px; border: 1px solid transparent;
     user-select: text; word-break: break-word; min-width: 0;
   }
-  .ef-emoji[contenteditable]:focus, .ef-label[contenteditable]:focus {
+  .ef-label[contenteditable]:focus {
     outline: none; border-color: #4f8ef7; background: var(--bg); color: var(--text);
   }
   .ef-del-btn {
@@ -626,6 +628,30 @@
     cursor: pointer; transition: all .15s;
   }
   .ef-del-btn:hover { border-color: #ef4444; color: #ef4444; }
+  /* ── EMOJI PICKER */
+  .emoji-picker {
+    position: fixed; z-index: 9999;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.45);
+    display: grid; grid-template-columns: repeat(7, 36px);
+    gap: 3px; max-height: 256px; overflow-y: auto; width: 282px;
+  }
+  .ep-btn {
+    border: none; background: transparent; font-size: 21px;
+    width: 36px; height: 36px; padding: 0; line-height: 1;
+    cursor: pointer; border-radius: 7px; transition: background .1s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ep-btn:hover, .ep-btn:active { background: var(--bg); }
+  .ep-trigger-btn {
+    border: 1px solid var(--border); background: var(--bg);
+    border-radius: 8px; font-size: 20px; cursor: pointer;
+    transition: border-color .15s; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 44px; height: 38px; padding: 0 6px;
+  }
+  .ep-trigger-btn:hover { border-color: #4f8ef7; }
   /* Fiche custom — légère distinction */
   .fiche-row.custom { border-style: dashed; }
   /* Bouton + ajouter fiche */
@@ -790,7 +816,7 @@
     <button class="modal-add-fiche-btn" id="modal-add-fiche-btn">＋ Ajouter une fiche</button>
     <div id="modal-add-fiche-form" style="display:none">
       <div class="add-fiche-row">
-        <input class="field-input add-fiche-emoji-input" id="add-fiche-emoji" type="text" placeholder="📄" maxlength="8">
+        <button type="button" class="ep-trigger-btn" id="add-fiche-emoji-btn" data-emoji="📄">📄</button>
         <input class="field-input" id="add-fiche-label" type="text" placeholder="Nom de la fiche…" maxlength="60">
         <button class="add-fiche-confirm" id="add-fiche-confirm">＋ Ajouter</button>
       </div>
@@ -813,7 +839,7 @@
     <button class="modal-add-fiche-btn" id="edit-add-fiche-btn">＋ Ajouter une fiche</button>
     <div id="edit-add-fiche-form" style="display:none">
       <div class="add-fiche-row">
-        <input class="field-input add-fiche-emoji-input" id="edit-add-fiche-emoji" type="text" placeholder="📄" maxlength="8">
+        <button type="button" class="ep-trigger-btn" id="edit-add-fiche-emoji-btn" data-emoji="📄">📄</button>
         <input class="field-input" id="edit-add-fiche-label" type="text" placeholder="Nom de la fiche…" maxlength="60">
         <button class="add-fiche-confirm" id="edit-add-fiche-confirm">＋</button>
       </div>
@@ -897,9 +923,12 @@
         <div class="field-label">Numéro</div>
         <input class="field-input" id="cat-num" type="text" placeholder="A7" maxlength="6" autocomplete="off">
       </div>
-      <div class="field-group" style="flex:0 0 90px">
+      <div class="field-group" style="flex:0 0 110px">
         <div class="field-label">Emoji</div>
-        <input class="field-input" id="cat-emoji" type="text" placeholder="🔧" maxlength="8">
+        <div style="display:flex;gap:5px;align-items:center">
+          <input class="field-input" id="cat-emoji" type="text" placeholder="🔧" maxlength="8" style="flex:1;min-width:0">
+          <button type="button" class="ep-trigger-btn" id="cat-emoji-pick" title="Choisir un emoji">🎨</button>
+        </div>
       </div>
     </div>
     <div class="field-group">
@@ -1037,6 +1066,35 @@ function loadCustomFiches() {
 function saveCustomFiches(obj) {
   localStorage.setItem(CUSTOM_FICHES_KEY, JSON.stringify(obj));
 }
+// ── EMOJI PICKER
+const EMOJI_LIST = [
+  "📄","📃","📑","📋","📊","📈","📉","📌","📍","🗂","📁","📂","🗄","📦",
+  "📚","📖","📝","✏","🖊","🖋","📏","📐","🎓","🏫","💡","🔬","🔭",
+  "💻","🖥","📱","⌨","🖱","🖨","💾","💿","📡","🔌","🔋","📶","🌐","🔐","🔑",
+  "📧","📨","📩","📬","📮","📞","☎","📷","📸","🎥","🎙","📻","📺",
+  "✅","❌","⚠","❓","❗","🔴","🟡","🟢","⭐","🔥","🎯","🏆","👍","👁","🤝",
+  "🔧","🔨","⚙","🛠","🗑","🔍","🔗","📎","✂","🖇","🛡",
+  "👤","👥","🏠","🏢","🗓","📆","⏰","⏱","🎨","🎭","🎬","🎤","🎵","🌟","💬"
+];
+function openEmojiPicker(anchorEl, onSelect) {
+  closeEmojiPicker();
+  const picker = document.createElement("div");
+  picker.id = "emoji-picker";
+  picker.className = "emoji-picker";
+  EMOJI_LIST.forEach(emoji => {
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "ep-btn"; btn.textContent = emoji;
+    btn.addEventListener("click", e => { e.stopPropagation(); onSelect(emoji); closeEmojiPicker(); });
+    picker.appendChild(btn);
+  });
+  document.body.appendChild(picker);
+  const rect = anchorEl.getBoundingClientRect();
+  picker.style.left = Math.max(4, Math.min(rect.left, window.innerWidth - 290)) + "px";
+  picker.style.top = Math.min(rect.bottom + 4, window.innerHeight - 266) + "px";
+  setTimeout(() => document.addEventListener("click", closeEmojiPicker, { once: true }), 0);
+}
+function closeEmojiPicker() { const p = document.getElementById("emoji-picker"); if (p) p.remove(); }
+
 const GH_FICHE_CONFIG = "assets/fiche-config.json";
 const FICHE_CONFIG_KEY = "conum_fiche_config_v1";
 function loadFicheConfig() {
@@ -1659,10 +1717,6 @@ function closeModal() { document.getElementById("modal").classList.remove("open"
 let editFiches = [];
 
 function captureEditFicheLabels() {
-  document.querySelectorAll("#edit-fields-container .ef-emoji").forEach(el => {
-    const idx = +el.dataset.idx;
-    if (editFiches[idx]) editFiches[idx].emoji = el.textContent.trim() || editFiches[idx].emoji;
-  });
   document.querySelectorAll("#edit-fields-container .ef-label").forEach(el => {
     const idx = +el.dataset.idx;
     if (editFiches[idx]) editFiches[idx].label = el.textContent.trim() || editFiches[idx].label;
@@ -1686,7 +1740,7 @@ function renderEditFields() {
           <button class="fiche-up-btn" data-idx="${idx}" ${idx === 0 ? "disabled" : ""}>▲</button>
           <button class="fiche-dn-btn" data-idx="${idx}" ${idx === total - 1 ? "disabled" : ""}>▼</button>
         </div>
-        <span class="ef-emoji" contenteditable="true" spellcheck="false" data-idx="${idx}">${safeEmoji}</span>
+        <span class="ef-emoji" data-idx="${idx}" title="Choisir un emoji">${safeEmoji}</span>
         <span class="ef-label" contenteditable="true" spellcheck="false" data-idx="${idx}">${safeLabel}</span>
         <button class="ef-del-btn" data-idx="${idx}" title="Supprimer cette fiche">✕</button>
       </div>
@@ -1720,6 +1774,16 @@ function renderEditFields() {
       captureEditFicheLabels();
       editFiches.splice(idx, 1);
       renderEditFields();
+    });
+  });
+  container.querySelectorAll(".ef-emoji").forEach(span => {
+    span.addEventListener("click", e => {
+      e.stopPropagation();
+      const idx = +span.dataset.idx;
+      openEmojiPicker(span, emoji => {
+        editFiches[idx].emoji = emoji;
+        span.textContent = emoji;
+      });
     });
   });
   container.querySelectorAll(".field-input").forEach(input => {
@@ -1870,14 +1934,15 @@ document.getElementById("edit-add-fiche-btn").addEventListener("click", () => {
 
 document.getElementById("edit-add-fiche-confirm").addEventListener("click", () => {
   if (!editAtelier) return;
-  const emoji = document.getElementById("edit-add-fiche-emoji").value.trim() || "📄";
+  const emojiBtn = document.getElementById("edit-add-fiche-emoji-btn");
+  const emoji = emojiBtn.dataset.emoji || "📄";
   const label = document.getElementById("edit-add-fiche-label").value.trim();
   if (!label) { document.getElementById("edit-add-fiche-label").focus(); return; }
   captureEditFicheLabels();
   editFiches.push({ key: `cf_${Date.now().toString(36)}`, label, emoji });
   document.getElementById("edit-add-fiche-form").style.display = "none";
   document.getElementById("edit-add-fiche-btn").style.display = "";
-  document.getElementById("edit-add-fiche-emoji").value = "";
+  emojiBtn.dataset.emoji = "📄"; emojiBtn.textContent = "📄";
   document.getElementById("edit-add-fiche-label").value = "";
   renderEditFields();
   showToast(`✓ Fiche "${label}" ajoutée — clique Enregistrer pour sauvegarder`);
@@ -2147,7 +2212,8 @@ document.getElementById("modal-add-fiche-btn").addEventListener("click", () => {
 
 document.getElementById("add-fiche-confirm").addEventListener("click", async () => {
   if (!modalAtelier) return;
-  const emoji = document.getElementById("add-fiche-emoji").value.trim() || "📄";
+  const emojiBtn = document.getElementById("add-fiche-emoji-btn");
+  const emoji = emojiBtn.dataset.emoji || "📄";
   const label = document.getElementById("add-fiche-label").value.trim();
   if (!label) { document.getElementById("add-fiche-label").focus(); return; }
   const key = `cf_${Date.now().toString(36)}`;
@@ -2155,11 +2221,33 @@ document.getElementById("add-fiche-confirm").addEventListener("click", async () 
   if (!cf[modalAtelier.num]) cf[modalAtelier.num] = [];
   cf[modalAtelier.num].push({ key, label, emoji });
   saveCustomFiches(cf);
+  emojiBtn.dataset.emoji = "📄"; emojiBtn.textContent = "📄";
+  document.getElementById("add-fiche-label").value = "";
   const tok = getGhToken();
   if (tok) await pushFichesToRepo(cf, tok);
   const num = modalAtelier.num;
   openModal(num);
   showToast(`✓ Fiche "${label}" ajoutée`);
+});
+
+// ── TRIGGERS EMOJI PICKER
+document.getElementById("cat-emoji-pick").addEventListener("click", e => {
+  e.stopPropagation();
+  const input = document.getElementById("cat-emoji");
+  openEmojiPicker(e.currentTarget, emoji => {
+    input.value = emoji;
+    e.currentTarget.textContent = emoji;
+  });
+});
+document.getElementById("add-fiche-emoji-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  openEmojiPicker(btn, emoji => { btn.dataset.emoji = emoji; btn.textContent = emoji; });
+});
+document.getElementById("edit-add-fiche-emoji-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  openEmojiPicker(btn, emoji => { btn.dataset.emoji = emoji; btn.textContent = emoji; });
 });
 
 // ── MODAL CATALOGUE PERSONNALISÉ
