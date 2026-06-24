@@ -2940,17 +2940,24 @@ document.getElementById("main").addEventListener("keydown", e => {
 
 // ── PLEIN ÉCRAN ①
 document.getElementById("btn-fullscreen").addEventListener("click", () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
+  const el  = document.documentElement;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+  if (!isFs) {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (req) req.call(el).catch(() => showToast("⚠ Plein écran non autorisé par ce navigateur"));
+    else showToast("⚠ Plein écran non supporté");
   } else {
-    document.exitFullscreen();
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if (exit) exit.call(document);
   }
 });
-document.addEventListener("fullscreenchange", () => {
-  const btn = document.getElementById("btn-fullscreen");
-  const full = !!document.fullscreenElement;
-  btn.classList.toggle("on", full);
-  btn.textContent = full ? "⛶ ✕" : "⛶";
+["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange"].forEach(evt => {
+  document.addEventListener(evt, () => {
+    const btn  = document.getElementById("btn-fullscreen");
+    const full = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    btn.classList.toggle("on", full);
+    btn.textContent = full ? "⛶ ✕" : "⛶";
+  });
 });
 
 // ── VUE LISTE COMPACTE ③
