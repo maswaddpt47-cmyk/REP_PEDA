@@ -2165,7 +2165,8 @@ function openModal(num, e) {
   // Réinitialiser le formulaire ajout fiche
   document.getElementById("modal-add-fiche-form").style.display = "none";
   document.getElementById("modal-add-fiche-btn").style.display = "";
-  document.getElementById("add-fiche-emoji").value = "";
+  const _afeBtn = document.getElementById("add-fiche-emoji-btn");
+  _afeBtn.dataset.emoji = "📄"; _afeBtn.textContent = "📄";
   document.getElementById("add-fiche-label").value = "";
 
   const qrBtn = document.getElementById("modal-qr-btn");
@@ -2269,7 +2270,8 @@ function openEditModal(num, e) {
   renderEditFields();
   document.getElementById("edit-add-fiche-form").style.display = "none";
   document.getElementById("edit-add-fiche-btn").style.display = "";
-  document.getElementById("edit-add-fiche-emoji").value = "";
+  const _eafeBtn = document.getElementById("edit-add-fiche-emoji-btn");
+  _eafeBtn.dataset.emoji = "📄"; _eafeBtn.textContent = "📄";
   document.getElementById("edit-add-fiche-label").value = "";
   document.getElementById("edit-modal").classList.add("open");
   setTimeout(() => document.getElementById("edit-fields-container").querySelector("input")?.focus(), 200);
