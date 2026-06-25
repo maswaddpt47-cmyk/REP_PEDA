@@ -1051,6 +1051,109 @@
     .partner-btn { flex:1; text-align:center; padding:8px 10px; }
     .pchap-desc { display:none; }
   }
+
+  /* ── FAVORIS */
+  .fav-btn {
+    background:none; border:none; cursor:pointer; font-size:15px;
+    padding:0 3px; opacity:.35; transition:opacity .15s, transform .15s;
+    line-height:1; flex-shrink:0;
+  }
+  .fav-btn:hover { opacity:.8; transform:scale(1.2); }
+  .fav-btn.active { opacity:1; }
+  .favs-filter {
+    display:flex; align-items:center; gap:6px; height:34px; padding:0 12px;
+    border-radius:8px; background:var(--surface); border:1px solid var(--border);
+    color:var(--muted); font-size:13px; font-weight:600; cursor:pointer;
+    transition:all .18s; white-space:nowrap; font-family:'Inter',sans-serif;
+  }
+  .favs-filter.active { color:#f59e0b; border-color:#f59e0b; background:rgba(245,158,11,.08); }
+  .favs-filter:hover { border-color:#f59e0b; color:#f59e0b; }
+
+  /* ── NOTES ATELIER */
+  .modal-note-wrap { margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
+  body:not(.has-token) .modal-note-wrap { display:none !important; }
+  .modal-note-label {
+    font-size:10.5px; font-weight:700; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.7px; margin-bottom:6px;
+  }
+  .modal-note {
+    width:100%; min-height:70px; resize:vertical;
+    background:var(--bg); border:1px solid var(--border); border-radius:9px;
+    color:var(--text); font-size:13px; font-family:'Inter',sans-serif;
+    padding:9px 12px; outline:none; transition:border-color .15s; line-height:1.5;
+  }
+  .modal-note:focus { border-color:#4f8ef7; }
+
+  /* ── SHARE & PRINT */
+  .modal-action-row { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .modal-share-btn, .modal-print-btn {
+    flex:1; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:600;
+    border:1px solid var(--border); cursor:pointer; background:var(--surface);
+    color:var(--muted); font-family:'Inter',sans-serif; transition:all .15s;
+    text-align:center; min-width:0;
+  }
+  .modal-share-btn:hover { border-color:#10b981; color:#10b981; }
+  .modal-print-btn:hover { border-color:#f59e0b; color:#f59e0b; }
+
+  /* ── DRAG & DROP ateliers perso */
+  .card[draggable="true"] { cursor:default; }
+  .card.drag-over { border-color:#4f8ef7 !important; box-shadow:0 0 0 2px rgba(79,142,247,.3) !important; }
+  .card.drag-src { opacity:.45; }
+  .drag-handle {
+    font-size:12px; color:var(--muted); cursor:grab; padding:0 3px;
+    opacity:.45; transition:opacity .12s; flex-shrink:0;
+  }
+  .drag-handle:hover { opacity:1; }
+  .drag-handle:active { cursor:grabbing; }
+
+  /* ── RÉCAP PARTENAIRE */
+  .partner-recap-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    opacity:0; pointer-events:none; transition:opacity .2s;
+  }
+  .partner-recap-overlay.open { opacity:1; pointer-events:all; }
+  .partner-recap-box {
+    background:var(--surface); border:1px solid var(--border); border-radius:18px;
+    width:500px; max-width:95vw; max-height:82vh; overflow-y:auto; padding:24px;
+    transform:scale(.94); transition:transform .2s;
+  }
+  .partner-recap-overlay.open .partner-recap-box { transform:scale(1); }
+  .partner-recap-title { font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:700; margin-bottom:4px; }
+  .partner-recap-sub { font-size:12.5px; color:var(--muted); margin-bottom:16px; line-height:1.5; }
+  .partner-recap-list { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+  .recap-chap-group { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; }
+  .recap-chap-name { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; }
+  .recap-atelier { font-size:12.5px; color:var(--text); padding:1px 0; }
+  .recap-atelier::before { content:"· "; color:var(--muted); }
+  .partner-recap-actions { display:flex; gap:10px; }
+  .recap-btn {
+    flex:1; padding:10px; border-radius:10px; font-size:13px; font-weight:700;
+    cursor:pointer; font-family:'Inter',sans-serif; border:1px solid var(--border);
+    transition:all .15s; text-align:center;
+  }
+  .recap-btn.r-cancel { background:var(--surface-2); color:var(--muted); }
+  .recap-btn.r-cancel:hover { border-color:var(--text); color:var(--text); }
+  .recap-btn.r-confirm { background:#4f8ef7; color:#fff; border-color:#3b7ae8; }
+  .recap-btn.r-confirm:hover { background:#3b7ae8; }
+
+  /* ── IMPRESSION @media print */
+  @media print {
+    body > *:not(#modal) { display:none !important; }
+    #modal {
+      position:static !important; background:none !important;
+      display:block !important; padding:0 !important;
+    }
+    #modal .modal {
+      box-shadow:none !important; border:1px solid #ccc !important;
+      max-height:none !important; overflow:visible !important;
+      transform:none !important; max-width:100% !important; margin:0 !important;
+    }
+    #modal .modal-close, #modal .modal-qr-btn, #modal .modal-qr-box,
+    #modal .modal-link-btn, #modal .modal-action-row, #modal .modal-add-fiche-btn,
+    #modal #modal-add-fiche-form, #modal .modal-note-wrap { display:none !important; }
+    .fiche-row { break-inside:avoid; }
+  }
 </style>
 </head>
 <body>
@@ -1096,6 +1199,7 @@
   <button class="chap-btn active" data-chap="all"><span class="chap-pill" style="background:#4f8ef7">Tout</span>Catalogue complet</button>
   <button class="chap-btn todo-filter" id="btn-todo" data-chap="all">⚪ À compléter</button>
   <button class="chap-btn recent-filter" id="btn-recent" data-chap="all">⏱ Récents</button>
+  <button class="favs-filter" id="btn-favs" data-chap="all">☆ Favoris</button>
   <div class="sort-wrap" style="margin-left:auto">
     <button class="sort-btn" id="btn-sort">⇅ Trier</button>
     <div class="sort-pop" id="sort-pop">
@@ -1134,6 +1238,14 @@
       <span class="modal-qr-close" id="modal-qr-close">Fermer</span>
     </div>
     <button class="modal-link-btn" id="modal-link-btn">🔗 Lien rapide</button>
+    <div class="modal-action-row">
+      <button class="modal-share-btn" id="modal-share-btn">↗ Partager</button>
+      <button class="modal-print-btn" id="modal-print-btn">🖨 Imprimer</button>
+    </div>
+    <div class="modal-note-wrap">
+      <div class="modal-note-label">📝 Notes</div>
+      <textarea class="modal-note" id="modal-note" placeholder="Observations, niveau du public, remarques terrain…"></textarea>
+    </div>
   </div>
 </div>
 
@@ -1301,6 +1413,19 @@
     <div class="edit-modal-title">Copier la configuration depuis…</div>
     <div class="edit-modal-sub">Choisir l'atelier dont tu veux reprendre les fiches</div>
     <div class="pick-list" id="pick-list"></div>
+  </div>
+</div>
+
+<!-- RÉCAP PARTENAIRE -->
+<div class="partner-recap-overlay" id="partner-recap">
+  <div class="partner-recap-box">
+    <div class="partner-recap-title">Confirmer l'envoi</div>
+    <div class="partner-recap-sub" id="recap-sub"></div>
+    <div class="partner-recap-list" id="recap-list"></div>
+    <div class="partner-recap-actions">
+      <button class="recap-btn r-cancel" id="recap-cancel">← Modifier</button>
+      <button class="recap-btn r-confirm" id="recap-confirm">✉ Confirmer l'envoi</button>
+    </div>
   </div>
 </div>
 
@@ -1868,6 +1993,25 @@ function pushRecent(num) {
   localStorage.setItem(RECENT_KEY, JSON.stringify(r));
 }
 
+// ── FAVORIS
+const FAVS_KEY = "conum_favs_v1";
+function loadFavs() { try { return JSON.parse(localStorage.getItem(FAVS_KEY) || "[]"); } catch { return []; } }
+function saveFavs(arr) { localStorage.setItem(FAVS_KEY, JSON.stringify(arr)); }
+function isFav(num) { return loadFavs().includes(num); }
+function toggleFav(num) {
+  const favs = loadFavs();
+  const idx = favs.indexOf(num);
+  if (idx >= 0) favs.splice(idx, 1); else favs.unshift(num);
+  saveFavs(favs);
+  return idx < 0;
+}
+
+// ── NOTES PAR ATELIER
+const NOTES_KEY = "conum_notes_v1";
+function loadNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY) || "{}"); } catch { return {}; } }
+function saveNote(num, text) { const n = loadNotes(); if (text.trim()) n[num] = text; else delete n[num]; localStorage.setItem(NOTES_KEY, JSON.stringify(n)); }
+function getNote(num) { return loadNotes()[num] || ""; }
+
 // ── INDICATEUR SYNC
 function updateSyncDot(state) {
   const dot = document.getElementById("sync-dot");
@@ -1883,6 +2027,7 @@ let pendingImgSrc = "";
 let compressGen = 0;
 let showTodoOnly = false;
 let showRecentOnly = false;
+let showFavsOnly = false;
 let sortMode = "default";
 let listViewActive = (localStorage.getItem("conum_list_view") === "1");
 
@@ -1890,10 +2035,12 @@ function filtered() {
   let list = CATALOGUE.filter(a => {
     const matchChap = currentChap === "all" || a.chap === currentChap;
     const q = currentSearch.toLowerCase();
-    const matchSearch = !q || a.titre.toLowerCase().includes(q) || a.num.toLowerCase().includes(q);
-    const matchTodo = !showTodoOnly || countLinks(a.num) < FICHES.length;
+    const matchSearch = !q || a.titre.toLowerCase().includes(q) || a.num.toLowerCase().includes(q)
+      || getFichesForAtelier(a.num).some(f => f.label.toLowerCase().includes(q));
+    const matchTodo   = !showTodoOnly   || countLinks(a.num) < FICHES.length;
     const matchRecent = !showRecentOnly || loadRecents().includes(a.num);
-    return matchChap && matchSearch && matchTodo && matchRecent;
+    const matchFavs   = !showFavsOnly   || isFav(a.num);
+    return matchChap && matchSearch && matchTodo && matchRecent && matchFavs;
   });
   if (sortMode === "az") {
     list = list.slice().sort((a, b) => a.titre.localeCompare(b.titre, "fr"));
@@ -2035,7 +2182,7 @@ function renderMain() {
           const hasImg = !!getEffectiveThumb(a.num);
           const isCustom = !BASE_CATALOGUE.some(b => b.num === a.num);
           return `
-          <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}" style="animation-delay:${Math.min(cardI++, 24) * 192}ms">
+          <div class="card ${n > 0 ? 'has-link' : ''}" tabindex="0" data-id="${a.num}" data-chap="${a.chap}" style="animation-delay:${Math.min(cardI++, 24) * 192}ms" ${isCustom ? 'draggable="true"' : ''}>
             <div class="card-thumb thumb-${a.chap}${hasImg ? ' has-img' : ''}" data-num="${a.num}">
               <span class="card-num">${a.num}</span>
               <span class="card-link-badge ${n===0?'badge-empty':n===FICHES.length?'badge-full':''}">${n}/${FICHES.length}</span>
@@ -2051,6 +2198,8 @@ function renderMain() {
                 <button class="card-img-btn" title="Personnaliser l'image" onclick="openImgModal('${a.num}',event)">🖼️</button>
                 <button class="card-edit-btn" title="Modifier les liens Drive" onclick="openEditModal('${a.num}',event)">✏️</button>
                 ${isCustom ? `<button class="card-cat-btn" title="Modifier cette tuile" onclick="openCatModal('${a.num}',event)">⚙</button>` : ''}
+                ${isCustom ? `<span class="drag-handle" title="Glisser pour réorganiser">⠿</span>` : ''}
+                <button class="fav-btn ${isFav(a.num) ? 'active' : ''}" data-num="${a.num}" title="Favori" onclick="event.stopPropagation();const on=toggleFav('${a.num}');this.classList.toggle('active',on);this.textContent=on?'⭐':'☆';">${isFav(a.num) ? '⭐' : '☆'}</button>
               </div>
             </div>
           </div>`;
@@ -2061,6 +2210,7 @@ function renderMain() {
   `).join("");
 
   applyThumbs();
+  setupDragDrop();
 }
 
 function setThumbEl(el, src) {
@@ -2172,6 +2322,9 @@ function openModal(num, e) {
   const qrBtn = document.getElementById("modal-qr-btn");
   document.getElementById("modal-qr-box").style.display = "none";
   qrBtn.disabled = !links.presentation;
+
+  // Notes
+  document.getElementById("modal-note").value = getNote(num);
 
   document.getElementById("modal").classList.add("open");
 }
@@ -3178,7 +3331,6 @@ function initPartnerMode() {
     });
   });
 
-  document.getElementById("partner-submit").addEventListener("click", partnerSubmit);
   updatePartnerCount();
 
   const inner  = document.querySelector(".partner-inner");
@@ -3223,64 +3375,160 @@ function buildSelText(sel) {
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/mjgqgyba";
 
-
-async function partnerSubmit() {
-  const sel = getPartnerSel();
-  if (!sel.length) return;
-  const name    = document.getElementById("partner-name").value.trim();
-  const email   = document.getElementById("partner-contact").value.trim();
-  const phone   = document.getElementById("partner-phone").value.trim();
-  const address = document.getElementById("partner-address").value.trim();
-  if (!name)    { showToast("⚠ Nom ou organisation obligatoire");  document.getElementById("partner-name").focus();    return; }
-  if (!email)   { showToast("⚠ Email obligatoire");                document.getElementById("partner-contact").focus(); return; }
-  if (!phone)   { showToast("⚠ Téléphone obligatoire");            document.getElementById("partner-phone").focus();   return; }
-  if (!address) { showToast("⚠ Adresse obligatoire");              document.getElementById("partner-address").focus(); return; }
-
-  if (!FORMSPREE_ENDPOINT) {
-    const text = buildSelText(sel);
-    const sub = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
-    const body = encodeURIComponent(`De : ${name}\nEmail : ${email}\nTél : ${phone}\nAdresse : ${address}\n\n${text}`);
-    window.location.href = `mailto:m.aswad.dpt47@gmail.com?subject=${sub}&body=${body}`;
-    return;
-  }
-
-  const btn = document.getElementById("partner-submit");
-  btn.disabled = true;
-  btn.textContent = "Envoi en cours…";
-
-  try {
-    const res = await fetch(FORMSPREE_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({
-        nom: name,
-        email_contact: email,
-        telephone: phone,
-        adresse: address,
-        selection: buildSelText(sel),
-        nb_ateliers: sel.length,
-      })
-    });
-    if (res.ok) {
-      btn.textContent = "✓ Envoyé !";
-      btn.classList.add("sent");
-      showToast("✓ Sélection envoyée — merci !");
-    } else {
-      throw new Error();
-    }
-  } catch {
-    btn.disabled = false;
-    btn.textContent = "✉ Envoyer ma sélection";
-    showToast("⚠ Erreur d'envoi — veuillez réessayer");
-  }
-}
-
 document.getElementById("btn-partner-share").addEventListener("click", () => {
   const url = location.origin + location.pathname + "?partenaire";
   navigator.clipboard.writeText(url)
     .then(() => showToast("✓ Lien partenaire copié : " + url))
     .catch(() => showToast("Lien : " + url));
 });
+
+// ── FAVORIS — filtre nav
+document.getElementById("btn-favs").addEventListener("click", () => {
+  showFavsOnly = !showFavsOnly;
+  document.getElementById("btn-favs").classList.toggle("active", showFavsOnly);
+  document.getElementById("btn-favs").textContent = showFavsOnly ? "⭐ Favoris" : "☆ Favoris";
+  if (showFavsOnly) {
+    showTodoOnly = false; showRecentOnly = false;
+    document.getElementById("btn-todo").classList.remove("active");
+    document.getElementById("btn-todo").textContent = "⚪ À compléter";
+    document.getElementById("btn-recent").classList.remove("active");
+  }
+  renderMain();
+});
+
+// ── NOTES — auto-save
+document.getElementById("modal-note").addEventListener("input", function () {
+  if (modalAtelier) saveNote(modalAtelier.num, this.value);
+});
+
+// ── SHARE (Web Share API avec fallback clipboard)
+document.getElementById("modal-share-btn").addEventListener("click", () => {
+  if (!modalAtelier) return;
+  const url   = location.origin + location.pathname + "#" + modalAtelier.num;
+  const title = modalAtelier.titre;
+  if (navigator.share) {
+    navigator.share({ title, url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url)
+      .then(() => showToast("✓ Lien copié : " + url))
+      .catch(() => showToast("Lien : " + url));
+  }
+});
+
+// ── PRINT
+document.getElementById("modal-print-btn").addEventListener("click", () => {
+  window.print();
+});
+
+// ── DRAG & DROP ateliers personnalisés
+let _dragSrcNum = null;
+function setupDragDrop() {
+  document.querySelectorAll(".card[draggable='true']").forEach(card => {
+    card.addEventListener("dragstart", e => {
+      _dragSrcNum = card.dataset.id;
+      card.classList.add("drag-src");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    card.addEventListener("dragend", () => {
+      _dragSrcNum = null;
+      card.classList.remove("drag-src");
+      document.querySelectorAll(".card.drag-over").forEach(c => c.classList.remove("drag-over"));
+    });
+    card.addEventListener("dragover", e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (card.dataset.id !== _dragSrcNum) card.classList.add("drag-over");
+    });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", e => {
+      e.preventDefault();
+      const tgt = card.dataset.id;
+      if (!_dragSrcNum || _dragSrcNum === tgt) return;
+      let custom = loadCustomAteliers();
+      const si = custom.findIndex(a => a.num === _dragSrcNum);
+      const ti = custom.findIndex(a => a.num === tgt);
+      if (si < 0 || ti < 0) return;
+      const [moved] = custom.splice(si, 1);
+      custom.splice(ti, 0, moved);
+      saveCustomAteliers(custom);
+      rebuildCatalogue();
+      renderMain();
+    });
+  });
+}
+
+// ── RÉCAP PARTENAIRE — affichage avant envoi
+function openPartnerRecap() {
+  const sel = getPartnerSel();
+  if (!sel.length) { showToast("⚠ Aucun atelier sélectionné"); return; }
+  const name = document.getElementById("partner-name").value.trim();
+  const email = document.getElementById("partner-contact").value.trim();
+  const phone = document.getElementById("partner-phone").value.trim();
+  const address = document.getElementById("partner-address").value.trim();
+  if (!name)    { showToast("⚠ Nom obligatoire");     document.getElementById("partner-name").focus();    return; }
+  if (!email)   { showToast("⚠ Email obligatoire");   document.getElementById("partner-contact").focus(); return; }
+  if (!phone)   { showToast("⚠ Téléphone obligatoire"); document.getElementById("partner-phone").focus(); return; }
+  if (!address) { showToast("⚠ Adresse obligatoire"); document.getElementById("partner-address").focus(); return; }
+
+  const byChap = {};
+  sel.forEach(num => { const a = CATALOGUE.find(x => x.num === num); if (a) (byChap[a.chap] = byChap[a.chap] || []).push(a); });
+  document.getElementById("recap-sub").textContent =
+    `${name} · ${sel.length} atelier${sel.length > 1 ? "s" : ""} sélectionné${sel.length > 1 ? "s" : ""}`;
+  document.getElementById("recap-list").innerHTML = Object.keys(byChap).sort().map(key =>
+    `<div class="recap-chap-group">
+      <div class="recap-chap-name" style="color:${CHAP_COLOR[key]}">Thème ${key} — ${CHAPITRES[key].label}</div>
+      ${byChap[key].map(a => `<div class="recap-atelier">${a.num} — ${a.titre}</div>`).join("")}
+    </div>`
+  ).join("");
+  document.getElementById("partner-recap").classList.add("open");
+}
+document.getElementById("partner-submit").addEventListener("click", openPartnerRecap);
+document.getElementById("recap-cancel").addEventListener("click", () => {
+  document.getElementById("partner-recap").classList.remove("open");
+});
+document.getElementById("recap-confirm").addEventListener("click", async () => {
+  document.getElementById("partner-recap").classList.remove("open");
+  await doPartnerSubmit();
+});
+
+// ── ENVOI FORMSPREE (appelé depuis recap-confirm)
+async function doPartnerSubmit() {
+  const sel     = getPartnerSel();
+  const name    = document.getElementById("partner-name").value.trim();
+  const email   = document.getElementById("partner-contact").value.trim();
+  const phone   = document.getElementById("partner-phone").value.trim();
+  const address = document.getElementById("partner-address").value.trim();
+
+  if (!FORMSPREE_ENDPOINT) {
+    const sub  = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
+    const body = encodeURIComponent(`De : ${name}\nEmail : ${email}\nTél : ${phone}\nAdresse : ${address}\n\n${buildSelText(sel)}`);
+    window.location.href = `mailto:m.aswad.dpt47@gmail.com?subject=${sub}&body=${body}`;
+    return;
+  }
+  const btn = document.getElementById("partner-submit");
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+  try {
+    const res = await fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        nom: name, email_contact: email, _replyto: email,
+        telephone: phone, adresse: address,
+        selection: buildSelText(sel), nb_ateliers: sel.length,
+      })
+    });
+    if (res.ok) {
+      btn.textContent = "✓ Envoyé !";
+      btn.classList.add("sent");
+      showToast("✓ Sélection envoyée — merci !");
+    } else { throw new Error(); }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = "✉ Envoyer ma sélection";
+    showToast("⚠ Erreur d'envoi — veuillez réessayer");
+  }
+}
 
 </script>
 </body>
