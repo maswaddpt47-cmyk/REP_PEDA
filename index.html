@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ateliers Numériques — Supports CONUM 47</title>
+<title>ARIANE — Supports CONUM 47</title>
 <link rel="manifest" href="app.webmanifest">
 <meta name="theme-color" content="#0c0e14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CONUM 47">
+<meta name="apple-mobile-web-app-title" content="ARIANE">
 <link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -102,6 +102,8 @@
   }
   .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -.2px; }
   .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: .2px; }
+  .logo-tagline { font-size: 10px; color: var(--muted); margin-top: 3px; letter-spacing: .05px; line-height: 1.4; opacity: .85; }
+  .acro-l { color: var(--A); font-weight: 700; }
   .header-center { flex: 1; max-width: 560px; }
   #search {
     width: 100%; background: var(--bg); border: 1px solid var(--border);
@@ -696,6 +698,7 @@
     header { padding: 12px 14px; gap: 8px; }
     .logo-text { font-size: 13px; }
     .logo-sub  { display: none; }
+    .logo-tagline { display: none; }
     .count-badge { display: none; }
     #btn-export, #btn-import { display: none; }
     .pres-btn { padding: 0 8px; font-size: 12px; }
@@ -1160,10 +1163,11 @@
 
 <header>
   <div class="logo">
-    <div class="logo-mark">CN</div>
+    <div class="logo-mark">AR</div>
     <div>
-      <div class="logo-text">Supports Ateliers 2025–2026</div>
+      <div class="logo-text">ARIANE 2025–2026</div>
       <div class="logo-sub">Conseillers Numériques · Lot-et-Garonne · <span style="color:#4f8ef7">v2.0</span></div>
+      <div class="logo-tagline"><span class="acro-l">A</span>ccompagnement et <span class="acro-l">R</span>essources pour <span class="acro-l">I</span>nterventions en <span class="acro-l">A</span>telier <span class="acro-l">N</span>umérique et <span class="acro-l">É</span>ducatif</div>
     </div>
   </div>
   <div class="header-center">
@@ -1435,8 +1439,8 @@
 <div id="partenaire-overlay">
   <div class="partner-inner">
     <div class="partner-header">
-      <div class="partner-logo-mark">CN</div>
-      <div class="partner-title">Catalogue des Ateliers Numériques</div>
+      <div class="partner-logo-mark">AR</div>
+      <div class="partner-title">Catalogue ARIANE</div>
       <div class="partner-subtitle">
         Conseillers Numériques · Lot-et-Garonne 2025–2026<br>
         Sélectionnez les thèmes et ateliers qui vous intéressent, puis envoyez votre sélection.
@@ -3364,7 +3368,7 @@ function updatePartnerCount() {
 function buildSelText(sel) {
   const byChap = {};
   sel.forEach(num => { const a = CATALOGUE.find(x => x.num === num); if (a) (byChap[a.chap] = byChap[a.chap] || []).push(a); });
-  const lines = ["Ateliers Numériques — Sélection CONUM 47", ""];
+  const lines = ["ARIANE — Sélection CONUM 47", ""];
   Object.keys(byChap).sort().forEach(key => {
     lines.push(`Thème ${key} — ${CHAPITRES[key].label}`);
     byChap[key].forEach(a => lines.push(`  • ${a.num} — ${a.titre}`));
@@ -3500,7 +3504,7 @@ async function doPartnerSubmit() {
   const address = document.getElementById("partner-address").value.trim();
 
   if (!FORMSPREE_ENDPOINT) {
-    const sub  = encodeURIComponent("Sélection d'ateliers numériques CONUM 47");
+    const sub  = encodeURIComponent("Sélection d'ateliers ARIANE — CONUM 47");
     const body = encodeURIComponent(`De : ${name}\nEmail : ${email}\nTél : ${phone}\nAdresse : ${address}\n\n${buildSelText(sel)}`);
     window.location.href = `mailto:m.aswad.dpt47@gmail.com?subject=${sub}&body=${body}`;
     return;
