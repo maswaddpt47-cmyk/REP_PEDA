@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARIANE — Supports CONUM 47</title>
+<title>ARIANE 47 — Supports CONUM 47</title>
 <link rel="manifest" href="app.webmanifest">
 <meta name="theme-color" content="#0c0e14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ARIANE">
+<meta name="apple-mobile-web-app-title" content="ARIANE 47">
 <link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -97,8 +97,7 @@
     width: 42px; height: 42px;
     background: linear-gradient(135deg, var(--A), var(--D));
     border-radius: 13px; display: grid; place-items: center;
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: #fff;
-    box-shadow: 0 8px 20px rgba(59,130,246,.34); letter-spacing: .5px;
+    box-shadow: 0 8px 20px rgba(59,130,246,.34); flex-shrink: 0;
   }
   .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: -.2px; }
   .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: .2px; }
@@ -956,10 +955,11 @@
   .partner-inner { max-width:860px; margin:0 auto; padding:32px 20px 260px; }
   .partner-header { text-align:center; margin-bottom:36px; }
   .partner-logo-mark {
-    display:inline-flex; align-items:center; justify-content:center;
-    width:52px; height:52px; background:var(--A-bg); border-radius:14px;
-    font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700;
-    color:#fff; margin-bottom:14px;
+    display:inline-grid; place-items:center;
+    width:52px; height:52px;
+    background:linear-gradient(135deg, var(--A), var(--D));
+    border-radius:14px; margin-bottom:14px;
+    box-shadow:0 8px 20px rgba(59,130,246,.34);
   }
   .partner-title {
     font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700;
@@ -1163,9 +1163,9 @@
 
 <header>
   <div class="logo">
-    <div class="logo-mark">AR</div>
+    <div class="logo-mark"><svg viewBox="0 0 44 44" style="width:38px;height:38px;display:block" xmlns="http://www.w3.org/2000/svg"><polyline points="23.5,22 23.5,23.7 21.6,25 18.9,24.2 17.5,21.1 19.4,17.4 23.8,16.2 28.2,19.2 28.8,25.4 24.7,30 17.5,30 12.2,23.8 13.1,16.1 21.4,10.5 31,13.7 35,22" stroke="rgba(255,255,255,0.92)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23.5" cy="22" r="1.8" fill="white"/></svg></div>
     <div>
-      <div class="logo-text">ARIANE 2025–2026</div>
+      <div class="logo-text">ARIANE 47</div>
       <div class="logo-sub">Conseillers Numériques · Lot-et-Garonne · <span style="color:#4f8ef7">v2.0</span></div>
       <div class="logo-tagline"><span class="acro-l">A</span>ctivités et <span class="acro-l">R</span>essources pour <span class="acro-l">I</span>nterventions en <span class="acro-l">A</span>telier <span class="acro-l">N</span>umérique et <span class="acro-l">E</span>ducatif</div>
     </div>
@@ -1439,8 +1439,8 @@
 <div id="partenaire-overlay">
   <div class="partner-inner">
     <div class="partner-header">
-      <div class="partner-logo-mark">AR</div>
-      <div class="partner-title">Catalogue ARIANE</div>
+      <div class="partner-logo-mark"><svg viewBox="0 0 44 44" style="width:44px;height:44px;display:block" xmlns="http://www.w3.org/2000/svg"><polyline points="23.5,22 23.5,23.7 21.6,25 18.9,24.2 17.5,21.1 19.4,17.4 23.8,16.2 28.2,19.2 28.8,25.4 24.7,30 17.5,30 12.2,23.8 13.1,16.1 21.4,10.5 31,13.7 35,22" stroke="rgba(255,255,255,0.92)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23.5" cy="22" r="1.8" fill="white"/></svg></div>
+      <div class="partner-title">Catalogue ARIANE 47</div>
       <div class="partner-subtitle">
         Conseillers Numériques · Lot-et-Garonne 2025–2026<br>
         Sélectionnez les thèmes et ateliers qui vous intéressent, puis envoyez votre sélection.
@@ -3368,7 +3368,7 @@ function updatePartnerCount() {
 function buildSelText(sel) {
   const byChap = {};
   sel.forEach(num => { const a = CATALOGUE.find(x => x.num === num); if (a) (byChap[a.chap] = byChap[a.chap] || []).push(a); });
-  const lines = ["ARIANE — Sélection CONUM 47", ""];
+  const lines = ["ARIANE 47 — Sélection CONUM 47", ""];
   Object.keys(byChap).sort().forEach(key => {
     lines.push(`Thème ${key} — ${CHAPITRES[key].label}`);
     byChap[key].forEach(a => lines.push(`  • ${a.num} — ${a.titre}`));
@@ -3504,7 +3504,7 @@ async function doPartnerSubmit() {
   const address = document.getElementById("partner-address").value.trim();
 
   if (!FORMSPREE_ENDPOINT) {
-    const sub  = encodeURIComponent("Sélection d'ateliers ARIANE — CONUM 47");
+    const sub  = encodeURIComponent("Sélection d'ateliers ARIANE 47 — CONUM 47");
     const body = encodeURIComponent(`De : ${name}\nEmail : ${email}\nTél : ${phone}\nAdresse : ${address}\n\n${buildSelText(sel)}`);
     window.location.href = `mailto:m.aswad.dpt47@gmail.com?subject=${sub}&body=${body}`;
     return;
