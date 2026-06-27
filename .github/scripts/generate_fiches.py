@@ -30,7 +30,11 @@ CONSEILS_DEFAULT = [
 
 def clean(text):
     """Supprime emojis et caractères parasites."""
-    return re.sub(r'[^\x00-\x7FÀ-ɏ’–—«»]', '', text).strip()
+    return re.sub(r'[^\x00-\x7FÀ-ɏ‘’–—«»]', '', text).strip()
+
+
+def trunc(t, n):
+    return t[:n] + "…" if len(t) > n else t
 
 
 def get_slide_title(slide):
@@ -54,9 +58,23 @@ def get_first_bullet(slide, title):
             t = para.text.strip()
             if t and t != title and len(t) > 10:
                 t = clean(t)
-                # Tronquer à 90 caractères
                 return t[:90] + ("…" if len(t) > 90 else "")
     return ""
+
+
+def get_bullets(slide, title, max_bullets=3):
+    """Retourne jusqu'à max_bullets phrases de contenu d'une slide (hors titre)."""
+    bullets = []
+    for shape in slide.shapes:
+        if not shape.has_text_frame:
+            continue
+        for para in shape.text_frame.paragraphs:
+            t = para.text.strip()
+            if t and t != title and len(t) > 10:
+                bullets.append(trunc(clean(t), 75))
+                if len(bullets) >= max_bullets:
+                    return bullets
+    return bullets
 
 
 def extract_fiche(pptx_path, slides_meta):
@@ -77,16 +95,18 @@ def extract_fiche(pptx_path, slides_meta):
     ]
 
     # Objectifs : titres des 4 premières slides de contenu (max 55 car.)
-    def trunc(t, n): return t[:n] + "…" if len(t) > n else t
     objectifs = [trunc(clean(m["titre"]), 55) for _, m in content_slides[:4]]
     while len(objectifs) < 4:
         objectifs.append("")
 
-    # Déroulé : toutes les slides non-titre (max 6)
+    # Déroulé : slides non-titre non-optionnelles (max 6)
     deroulé = []
     cumtime = 0
     for slide, meta in zip(prs.slides, slides_meta):
         if meta["role"] == "titre":
+            cumtime += meta["min"]
+            continue
+        if meta.get("optionnel"):
             cumtime += meta["min"]
             continue
         h2, m2 = divmod(cumtime, 60)
@@ -102,12 +122,28 @@ def extract_fiche(pptx_path, slides_meta):
         if len(deroulé) == 6:
             break
 
+    # Blocs optionnels (max 2, pour la table en bas de fiche)
+    optional_slides = [
+        (slide, meta) for slide, meta in zip(prs.slides, slides_meta)
+        if meta.get("optionnel") and meta["role"] not in ("titre", "conclusion")
+    ]
+    optionnels = []
+    for slide, meta in optional_slides[:2]:
+        titre_opt = trunc(clean(meta["titre"]), 38)
+        bullets = get_bullets(slide, meta["titre"], max_bullets=3)
+        optionnels.append({
+            "min": meta["min"],
+            "titre": titre_opt,
+            "bullets": bullets,
+        })
+
     return {
         "titre": titre,
         "duree": duree_str,
         "objectifs": objectifs,
         "materiel": MATERIEL_DEFAULT,
         "deroulé": deroulé,
+        "optionnels": optionnels,
         "conseils": CONSEILS_DEFAULT,
     }
 
@@ -118,14 +154,41 @@ def set_para_text(para, text):
     runs = p_xml.findall(qn("a:r"))
     if not runs:
         return
-    # Conserver le premier run, supprimer les autres
     first_run_xml = runs[0]
     for r in runs[1:]:
         p_xml.remove(r)
-    # Mettre à jour le texte dans le premier run
     t_el = first_run_xml.find(qn("a:t"))
     if t_el is not None:
         t_el.text = text
+
+
+def fill_optional_table(shape, optionnels):
+    """Remplit (ou vide) les lignes 1 et 2 de la table Blocs optionnels."""
+    tbl = shape.table
+    for row_idx in [1, 2]:
+        row = tbl.rows[row_idx]
+        cell = row.cells[0]
+        paras = cell.text_frame.paragraphs
+        data_idx = row_idx - 1
+
+        if data_idx >= len(optionnels):
+            # Vider toutes les lignes de ce bloc
+            for p in paras:
+                set_para_text(p, "")
+            continue
+
+        opt = optionnels[data_idx]
+        bullets = opt.get("bullets", [])
+        if len(paras) > 0:
+            set_para_text(paras[0], f"{opt['min']} min")
+        if len(paras) > 1:
+            set_para_text(paras[1], opt["titre"])
+        if len(paras) > 2:
+            set_para_text(paras[2], f". {bullets[0]}" if len(bullets) > 0 else "")
+        if len(paras) > 3:
+            set_para_text(paras[3], f". {bullets[1]}" if len(bullets) > 1 else "")
+        if len(paras) > 4:
+            set_para_text(paras[4], f". {bullets[2]}" if len(bullets) > 2 else "")
 
 
 def fill_template(fiche_data, output_path):
@@ -170,7 +233,6 @@ def fill_template(fiche_data, output_path):
     ]
     for idx, (time_name, content_name) in enumerate(step_pairs):
         if idx >= len(fiche_data["deroulé"]):
-            # Vider l'étape si pas de données
             s_time = shapes.get(time_name)
             s_cont = shapes.get(content_name)
             if s_time:
@@ -198,6 +260,12 @@ def fill_template(fiche_data, output_path):
                 set_para_text(paras[2], f". {step['bullet']}" if step["bullet"] else "")
             for i in range(3, len(paras)):
                 set_para_text(paras[i], "")
+
+    # ── Blocs optionnels (table object 53)
+    for shape in slide.shapes:
+        if shape.name == "object 53" and shape.shape_type == 19:  # TABLE
+            fill_optional_table(shape, fiche_data["optionnels"])
+            break
 
     # ── Conseils
     s = shapes.get("object 57")
@@ -228,7 +296,8 @@ def main():
             fiche_data = extract_fiche(pptx_path, plan["slides"])
             out = FICHES_DIR / f"{key}-fiche.pptx"
             fill_template(fiche_data, out)
-            print(f"OK {key}: {fiche_data['titre']} ({fiche_data['duree']})")
+            n_opt = len(fiche_data["optionnels"])
+            print(f"OK {key}: {fiche_data['titre']} ({fiche_data['duree']}) — {n_opt} bloc(s) opt.")
             generated.append(key)
         except Exception as e:
             print(f"ERREUR {key}: {e}")
