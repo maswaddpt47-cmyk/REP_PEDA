@@ -1291,8 +1291,16 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
         <button class="version-dl-btn" id="version-dl-btn" disabled>⬇ Générer la version</button>
       </div>
       <div class="version-drop-zone" id="version-drop-zone" style="display:none">
-        <div style="margin-bottom:10px">① Ouvre et télécharge l'original → <a id="version-drive-link" href="#" target="_blank" style="color:var(--A);font-weight:600">Drive ↗</a></div>
-        <label class="version-pick-btn" for="version-file-input">② Sélectionner le fichier .pptx</label>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+          Télécharge d'abord le PPTX original depuis Drive,<br>puis sélectionne-le ici.
+        </div>
+        <a id="version-drive-link" href="#" target="_blank" class="version-pick-btn" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;text-decoration:none">
+          ① Ouvrir dans Drive ↗
+        </a>
+        <br>
+        <label class="version-pick-btn" for="version-file-input" style="display:inline-flex;align-items:center;gap:6px">
+          ② Sélectionner le .pptx téléchargé
+        </label>
       </div>
       <input type="file" id="version-file-input" accept=".pptx" style="display:none">
       <div id="version-result" style="display:none;margin-top:10px;padding:14px;border:2px solid var(--A);border-radius:10px;text-align:center"></div>
@@ -3689,16 +3697,26 @@ function renderSlideList(plan) {
 }
 
 // ── DOWNLOAD FLOW ─────────────────────────────────────────────────────────
-document.getElementById("version-dl-btn").addEventListener("click", () => {
+document.getElementById("version-dl-btn").addEventListener("click", async () => {
   const drop = document.getElementById("version-drop-zone");
   const opening = drop.style.display === "none";
   drop.style.display = opening ? "block" : "none";
   if (opening) {
-    const id = (loadLinks()[_currentVersionNum] || {}).presentation;
+    // Try localStorage first, then assets/links.json directly
+    let id = (loadLinks()[_currentVersionNum] || {}).presentation;
+    if (!id) {
+      try {
+        const r = await fetch("assets/links.json?_=" + Date.now(), { cache: "no-store" });
+        if (r.ok) { const d = await r.json(); id = (d[_currentVersionNum] || {}).presentation; }
+      } catch {}
+    }
     const a = document.getElementById("version-drive-link");
-    if (id) { a.href = `https://drive.google.com/file/d/${id}/view`; }
-    else { a.href = "#"; a.textContent = "(lien non configuré)"; }
-    // Scroll drop zone into view
+    if (id) {
+      a.href = `https://drive.google.com/file/d/${id}/view`;
+      a.textContent = "① Ouvrir dans Drive ↗";
+    } else {
+      a.href = "#"; a.textContent = "① Drive (lien non configuré)";
+    }
     setTimeout(() => drop.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
   }
 });
