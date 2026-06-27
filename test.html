@@ -1104,6 +1104,15 @@
   }
   .modal-share-btn:hover { border-color:#10b981; color:#10b981; }
   .modal-print-btn:hover { border-color:#f59e0b; color:#f59e0b; }
+  .modal-fiche-dl-btn {
+    display:block; width:100%; margin-top:8px; padding:8px 12px;
+    border-radius:8px; font-size:13px; font-weight:600;
+    border:1.5px solid var(--border); cursor:pointer; background:var(--surface);
+    color:var(--muted); font-family:'Inter',sans-serif; transition:all .15s;
+    text-align:center; text-decoration:none;
+  }
+  .modal-fiche-dl-btn:not([hidden]):hover { border-color:#6366f1; color:#6366f1; }
+  .modal-fiche-dl-btn[hidden] { display:none !important; }
 
   /* ── DRAG & DROP ateliers perso */
   .card[draggable="true"] { cursor:default; }
@@ -1291,6 +1300,7 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
       <button class="modal-share-btn" id="modal-share-btn">↗ Partager</button>
       <button class="modal-print-btn" id="modal-print-btn">🖨 Imprimer</button>
     </div>
+    <a class="modal-fiche-dl-btn" id="modal-fiche-dl-btn" hidden>📄 Fiche animateur</a>
     <div class="modal-usage-wrap">
       <div class="modal-usage-row">
         <span class="modal-usage-info" id="modal-usage-info">Jamais utilisé en atelier</span>
@@ -2429,6 +2439,17 @@ function openModal(num, e) {
 
   // Suivi d'utilisation
   renderUsagePanel(num);
+
+  // Fiche animateur (si PPTX analysé)
+  const ficheDlBtn = document.getElementById("modal-fiche-dl-btn");
+  ficheDlBtn.hidden = true;
+  loadSlidePlans().then(plans => {
+    if (modalAtelier && modalAtelier.num === num && plans[num] && plans[num].analyse) {
+      ficheDlBtn.href = `./assets/fiches/${num}-fiche.pptx`;
+      ficheDlBtn.download = `${num}-fiche-animateur.pptx`;
+      ficheDlBtn.hidden = false;
+    }
+  });
 
   document.getElementById("modal").classList.add("open");
 }
