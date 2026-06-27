@@ -76,8 +76,9 @@ def extract_fiche(pptx_path, slides_meta):
         if meta["role"] in ("contenu", "demo", "chapitre") and meta["n"] > 1
     ]
 
-    # Objectifs : titres des 4 premières slides de contenu
-    objectifs = [clean(m["titre"]) for _, m in content_slides[:4]]
+    # Objectifs : titres des 4 premières slides de contenu (max 55 car.)
+    def trunc(t, n): return t[:n] + "…" if len(t) > n else t
+    objectifs = [trunc(clean(m["titre"]), 55) for _, m in content_slides[:4]]
     while len(objectifs) < 4:
         objectifs.append("")
 
@@ -94,7 +95,7 @@ def extract_fiche(pptx_path, slides_meta):
         deroulé.append({
             "heure": heure_str,
             "min": meta["min"],
-            "titre": clean(meta["titre"]),
+            "titre": trunc(clean(meta["titre"]), 48),
             "bullet": bullet,
         })
         cumtime += meta["min"]
