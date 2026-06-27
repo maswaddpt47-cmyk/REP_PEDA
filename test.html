@@ -1313,7 +1313,6 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
         <span class="version-total" id="version-total">—</span>
         <button class="version-dl-btn" id="version-dl-btn" disabled>⬇ Générer la version</button>
         <div id="version-progress" style="display:none;font-size:12px;color:var(--muted);margin-top:6px;text-align:center"></div>
-        <div id="pptx-cache-status" style="display:none;font-size:11px;margin-top:4px;width:100%;text-align:right"></div>
       </div>
       <div id="version-result" style="display:none;margin-top:10px;padding:14px;border:2px solid var(--A);border-radius:10px;text-align:center"></div>
     </div>
@@ -3642,17 +3641,6 @@ let _slidePlan = null;
 let _versionChecked = new Set();
 let _currentVersionNum = null;
 
-async function updatePptxCacheStatus(num) {
-  const el = document.getElementById("pptx-cache-status");
-  if (!el || !("caches" in window)) return;
-  try {
-    const match = await caches.match(`assets/pptx/${num}.pptx`);
-    el.style.display = "block";
-    el.innerHTML = match
-      ? `<span style="color:#22c55e">✓ Disponible hors-ligne</span>`
-      : `<span style="color:var(--muted)">○ Générer une fois pour l'utiliser hors-ligne</span>`;
-  } catch { el.style.display = "none"; }
-}
 
 async function loadSlidePlans() {
   if (_slidePlan) return _slidePlan;
@@ -3690,7 +3678,6 @@ async function renderVersionsPanel(num) {
     return;
   }
   if (legend) legend.style.display = "flex";
-  updatePptxCacheStatus(num);
 
   // Tabs
   const vers = plan.versions;
@@ -3791,7 +3778,6 @@ document.getElementById("version-dl-btn").addEventListener("click", async () => 
     const url = `assets/pptx/${_currentVersionNum}.pptx`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`PPTX introuvable (${res.status})`);
-    updatePptxCacheStatus(_currentVersionNum); // PPTX mis en cache par le SW
     progress.textContent = "⚙️ Génération de la version…";
     const ab = await res.arrayBuffer();
     await processVersionPPTX(ab, _currentVersionNum);
