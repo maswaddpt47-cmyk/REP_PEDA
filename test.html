@@ -1074,6 +1074,12 @@
   .favs-filter:hover { border-color:#f59e0b; color:#f59e0b; }
 
   /* ── NOTES ATELIER */
+  .modal-usage-wrap { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .modal-usage-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .modal-usage-info { font-size: 12px; color: var(--muted); }
+  .modal-usage-btn { font-size: 12px; padding: 5px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: none; color: var(--text); cursor: pointer; white-space: nowrap; transition: all .15s; }
+  .modal-usage-btn:hover:not(:disabled) { border-color: #22c55e; color: #22c55e; }
+  .modal-usage-btn:disabled { opacity: .5; cursor: default; }
   .modal-note-wrap { margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
   body:not(.has-token) .modal-note-wrap { display:none !important; }
   .modal-note-label {
@@ -1284,6 +1290,12 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
     <div class="modal-action-row">
       <button class="modal-share-btn" id="modal-share-btn">↗ Partager</button>
       <button class="modal-print-btn" id="modal-print-btn">🖨 Imprimer</button>
+    </div>
+    <div class="modal-usage-wrap">
+      <div class="modal-usage-row">
+        <span class="modal-usage-info" id="modal-usage-info">Jamais utilisé en atelier</span>
+        <button class="modal-usage-btn" id="modal-usage-btn">✓ Utilisé aujourd'hui</button>
+      </div>
     </div>
     <div class="modal-note-wrap">
       <div class="modal-note-label">📝 Notes</div>
@@ -2068,6 +2080,35 @@ function toggleFav(num) {
 const NOTES_KEY = "conum_notes_v1";
 function loadNotes() { try { return JSON.parse(localStorage.getItem(NOTES_KEY) || "{}"); } catch { return {}; } }
 function saveNote(num, text) { const n = loadNotes(); if (text.trim()) n[num] = text; else delete n[num]; localStorage.setItem(NOTES_KEY, JSON.stringify(n)); }
+
+const USAGE_KEY = "conum_usage_v1";
+function loadUsage() { try { return JSON.parse(localStorage.getItem(USAGE_KEY) || "{}"); } catch { return {}; } }
+function logUsage(num) {
+  const u = loadUsage();
+  if (!u[num]) u[num] = [];
+  u[num].unshift(new Date().toISOString().slice(0, 10));
+  localStorage.setItem(USAGE_KEY, JSON.stringify(u));
+}
+function getUsageStats(num) {
+  const dates = loadUsage()[num] || [];
+  return { count: dates.length, last: dates[0] || null };
+}
+function renderUsagePanel(num) {
+  const { count, last } = getUsageStats(num);
+  const info = document.getElementById("modal-usage-info");
+  const btn  = document.getElementById("modal-usage-btn");
+  if (count === 0) {
+    info.textContent = "Jamais utilisé en atelier";
+  } else {
+    const fmt = new Date(last + "T00:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+    info.textContent = `Utilisé ${count} fois · dernière le ${fmt}`;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const alreadyToday = last === today;
+  btn.disabled = alreadyToday;
+  btn.textContent = alreadyToday ? "✓ Déjà enregistré aujourd'hui" : "✓ Utilisé aujourd'hui";
+  btn.onclick = () => { logUsage(num); renderUsagePanel(num); showToast("Atelier enregistré !"); };
+}
 function getNote(num) { return loadNotes()[num] || ""; }
 
 // ── INDICATEUR SYNC
@@ -2385,6 +2426,9 @@ function openModal(num, e) {
 
   // Notes
   document.getElementById("modal-note").value = getNote(num);
+
+  // Suivi d'utilisation
+  renderUsagePanel(num);
 
   document.getElementById("modal").classList.add("open");
 }
@@ -2858,7 +2902,9 @@ if (localStorage.getItem(DIRTY_KEY)) updateSyncDot("dirty");
     if (CATALOGUE.find(a => a.num === num)) setTimeout(() => openModal(num), 350);
   }
 })();
-/* SW désactivé dans test.html — évite les conflits de cache avec index.html */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
 
 // ── AUTO-REFRESH toutes les 3 min sur les appareils sans token
 setInterval(async () => {

@@ -1,5 +1,10 @@
-const CACHE = "conum47-v5";
-const STATIC = ["./assets/icon.svg"];
+const CACHE = "conum47-v6";
+const STATIC = [
+  "./index.html",
+  "./test.html",
+  "./assets/icon.svg",
+  "./assets/slide-plans.json",
+];
 
 self.addEventListener("install", e => {
   e.waitUntil(
@@ -20,15 +25,27 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.url.includes("api.github.com")) return;
 
-  // HTML, links.json et manifest.json : toujours réseau (données dynamiques)
-  if (e.request.mode === "navigate" || e.request.url.includes("links.json") || e.request.url.includes("manifest.json")) {
+  // HTML et données dynamiques : réseau d'abord, cache en fallback offline
+  if (e.request.mode === "navigate"
+      || e.request.url.includes("links.json")
+      || e.request.url.includes("manifest.json")) {
     e.respondWith(
-      fetch(e.request).catch(() => caches.match("./index.html"))
+      caches.open(CACHE).then(async cache => {
+        try {
+          const res = await fetch(e.request);
+          if (res.ok) cache.put(e.request, res.clone());
+          return res;
+        } catch {
+          return cache.match(e.request);
+        }
+      })
     );
     return;
   }
 
-  // Assets statiques : cache-first
+  // Assets statiques (PPTXs exclus — trop lourds) : cache-first
+  if (e.request.url.includes("/assets/pptx/")) return;
+
   e.respondWith(
     caches.open(CACHE).then(async cache => {
       const cached = await cache.match(e.request);
