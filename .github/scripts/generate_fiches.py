@@ -227,6 +227,23 @@ def fill_optional_table(shape, optionnels):
             set_para_text(paras[4], f". {bullets[2]}" if len(bullets) > 2 else "")
 
 
+def set_norm_autofit(text_frame):
+    """Remplace spAutoFit par normAutofit pour que le texte rétrécisse au lieu de déborder."""
+    from lxml import etree
+    bodyPr = text_frame._txBody.find(qn("a:bodyPr"))
+    if bodyPr is None:
+        return
+    for tag in (qn("a:spAutoFit"), qn("a:noAutofit"), qn("a:normAutofit")):
+        for el in bodyPr.findall(tag):
+            bodyPr.remove(el)
+    bodyPr.append(etree.SubElement(bodyPr, qn("a:normAutofit")))
+
+
+def hide_shape(shape):
+    """Déplace la forme hors de la slide (left très négatif) pour la masquer."""
+    shape.left = -10000000  # ~-11 cm hors diapo
+
+
 def fill_template(fiche_data, output_path):
     prs = Presentation(TEMPLATE)
     slide = prs.slides[0]
@@ -236,11 +253,12 @@ def fill_template(fiche_data, output_path):
     s = shapes.get("object 2")
     if s:
         tf = s.text_frame
+        set_norm_autofit(tf)  # empêche le débordement vers le bas
         if len(tf.paragraphs) > 0:
             set_para_text(tf.paragraphs[0], f"Fiche Action - Atelier {fiche_data['titre']}")
         if len(tf.paragraphs) > 1:
             set_para_text(tf.paragraphs[1],
-                f"{fiche_data['duree']} | Guide d'animation pour les Conseillers Numériques CD47")
+                f"{fiche_data['duree']} | Guide d'animation — Conseillers Numériques CD47")
 
     # ── Objectifs
     s = shapes.get("object 7")
@@ -297,11 +315,17 @@ def fill_template(fiche_data, output_path):
             for i in range(3, len(paras)):
                 set_para_text(paras[i], "")
 
-    # ── Blocs optionnels (table object 53)
+    # ── Blocs optionnels (table object 53 + décoration object 48)
+    has_opt = bool(fiche_data["optionnels"])
     for shape in slide.shapes:
         if shape.name == "object 53" and shape.shape_type == 19:  # TABLE
-            fill_optional_table(shape, fiche_data["optionnels"])
-            break
+            if has_opt:
+                fill_optional_table(shape, fiche_data["optionnels"])
+            else:
+                hide_shape(shape)
+        elif shape.name == "object 48":  # GROUP décoratif du bloc OPT
+            if not has_opt:
+                hide_shape(shape)
 
     # ── Conseils
     s = shapes.get("object 57")
