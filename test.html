@@ -3737,20 +3737,25 @@ async function processVersionPPTX(file) {
       let xml = await f.async("string");
       const shouldHide = !_versionChecked.has(n);
 
-      // Remove existing show attribute then add if needed
-      xml = xml.replace(/<p:sld\b([^>]*?)(\s+show="[^"]*")?([^>]*?)>/,
-        (m, before, _show, after) => {
-          const attrs = (before + after).trim();
-          return shouldHide
-            ? `<p:sld ${attrs} show="0">`
-            : `<p:sld ${attrs}>`;
-        });
+      // Set or clear show="0" on the <p:sld> opening tag
+      if (shouldHide) {
+        if (!xml.includes('show="0"')) {
+          if (xml.includes('show="1"')) {
+            xml = xml.replace('show="1"', 'show="0"');
+          } else {
+            xml = xml.replace(/(<p:sld\b)/, '$1 show="0"');
+          }
+        }
+      } else {
+        xml = xml.replace(/\s*show="0"/, '');
+      }
       zip.file(path, xml);
     }
 
     const blob = await zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation", compression: "DEFLATE" });
     const hidden = totalSlides - _versionChecked.size;
-    const fname = file.name.replace(/\.pptx$/i, `_${_versionChecked.size}slides.pptx`);
+    const base = file.name.replace(/\.pptx$/i, '').replace(/_\d+slides$/i, '');
+    const fname = `${base}_${_versionChecked.size}slides.pptx`;
     const url = URL.createObjectURL(blob);
 
     // Afficher un bouton de téléchargement explicite (fiable sur mobile)
