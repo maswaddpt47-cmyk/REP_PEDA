@@ -162,6 +162,41 @@ def set_para_text(para, text):
         t_el.text = text
 
 
+def clear_para_runs(para):
+    """Supprime tous les runs d'un paragraphe (évite les artefacts de style)."""
+    p_xml = para._p
+    for r in p_xml.findall(qn("a:r")):
+        p_xml.remove(r)
+
+
+def set_badge_para(para, badge_text, bullet_text):
+    """Para avec badge stylé (run[0] conservé) + bullet en run plain séparé."""
+    import copy
+    p_xml = para._p
+    runs = p_xml.findall(qn("a:r"))
+    if not runs:
+        return
+    # Remettre le texte du badge dans run[0] (garde son style orange)
+    t_el = runs[0].find(qn("a:t"))
+    if t_el is not None:
+        t_el.text = badge_text
+    # Supprimer tous les runs suivants
+    for r in runs[1:]:
+        p_xml.remove(r)
+    # Ajouter un run plain pour le bullet (copie sans couleur ni gras)
+    new_run = copy.deepcopy(runs[0])
+    rPr = new_run.find(qn("a:rPr"))
+    if rPr is not None:
+        for fill in rPr.findall(qn("a:solidFill")):
+            rPr.remove(fill)
+        rPr.attrib.pop("b", None)
+        rPr.set("sz", "900")
+    new_t = new_run.find(qn("a:t"))
+    if new_t is not None:
+        new_t.text = f"\t{bullet_text}"
+    p_xml.append(new_run)
+
+
 def fill_optional_table(shape, optionnels):
     """Remplit (ou vide) les lignes 1 et 2 de la table Blocs optionnels."""
     tbl = shape.table
@@ -172,9 +207,9 @@ def fill_optional_table(shape, optionnels):
         data_idx = row_idx - 1
 
         if data_idx >= len(optionnels):
-            # Vider toutes les lignes de ce bloc
+            # Vider : supprimer tous les runs (évite le rectangle orange résiduel)
             for p in paras:
-                set_para_text(p, "")
+                clear_para_runs(p)
             continue
 
         opt = optionnels[data_idx]
@@ -183,8 +218,9 @@ def fill_optional_table(shape, optionnels):
             set_para_text(paras[0], f"{opt['min']} min")
         if len(paras) > 1:
             set_para_text(paras[1], opt["titre"])
+        # para[2] : badge "OPT." (run[0] stylé) + premier bullet en run plain
         if len(paras) > 2:
-            set_para_text(paras[2], f". {bullets[0]}" if len(bullets) > 0 else "")
+            set_badge_para(paras[2], "OPT.", f". {bullets[0]}" if bullets else "")
         if len(paras) > 3:
             set_para_text(paras[3], f". {bullets[1]}" if len(bullets) > 1 else "")
         if len(paras) > 4:
