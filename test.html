@@ -1179,6 +1179,10 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
 .vslide-badge.demo { background: color-mix(in srgb, var(--A) 12%, transparent); color: var(--A); }
 .vslide.unchecked .vslide-titre { opacity: .4; text-decoration: line-through; }
 .vslide.unchecked .vslide-min  { opacity: .4; }
+.vslide-prio { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-right: 2px; }
+.vslide-prio.prio-essential { background: #22c55e; }
+.vslide-prio.prio-medium    { background: #f59e0b; }
+.vslide-prio.prio-low       { background: #ef4444; }
 .version-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .version-total { font-size: 13px; color: var(--muted); }
 .version-total strong { color: var(--text); }
@@ -3650,6 +3654,8 @@ function renderSlideList(plan) {
   list.innerHTML = "";
 
   let mins = 0;
+  const v1h   = new Set((plan.versions["1h"]?.indices)   || []);
+  const v1h30 = new Set((plan.versions["1h30"]?.indices) || []);
   plan.slides.forEach(s => {
     const checked = _versionChecked.has(s.n);
     if (checked) mins += s.min;
@@ -3660,8 +3666,18 @@ function renderSlideList(plan) {
     const badgeLabel = s.role === "demo" ? "démo" : s.optionnel ? "optionnel" : "";
     const badgeClass = s.role === "demo" ? "demo" : s.optionnel ? "opt" : "";
 
+    let prioClass, prioTitle;
+    if (v1h.has(s.n)) {
+      prioClass = "prio-essential"; prioTitle = "Essentiel — conservé dans toutes les versions";
+    } else if (v1h30.has(s.n)) {
+      prioClass = "prio-medium";    prioTitle = "Retiré en version 1h";
+    } else {
+      prioClass = "prio-low";       prioTitle = "Retiré dès la version 1h30";
+    }
+
     row.innerHTML = `
       <input type="checkbox" ${checked ? "checked" : ""} data-n="${s.n}">
+      <span class="vslide-prio ${prioClass}" title="${prioTitle}"></span>
       <span class="vslide-num">${s.n}</span>
       <span class="vslide-titre">${s.titre}</span>
       ${badgeLabel ? `<span class="vslide-badge ${badgeClass}">${badgeLabel}</span>` : ""}
@@ -3670,7 +3686,6 @@ function renderSlideList(plan) {
     row.querySelector("input").addEventListener("change", e => {
       if (e.target.checked) _versionChecked.add(s.n);
       else _versionChecked.delete(s.n);
-      // Clear active tab (custom selection)
       document.querySelectorAll(".vtab").forEach(b => b.classList.remove("active"));
       renderSlideList(plan);
     });
