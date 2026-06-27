@@ -1,2 +1,6 @@
 # Backups automatiques (règle CLAUDE.md #2)
 *.backup_*
+
+# Python
+__pycache__/
+*.pyc
