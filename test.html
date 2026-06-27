@@ -1188,6 +1188,7 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
 .version-drop-zone.drag-over { border-color: var(--A); background: color-mix(in srgb, var(--A) 6%, transparent); }
 .version-drop-zone input { display: none; }
 .version-not-analysed { font-size: 13px; color: var(--muted); padding: 12px; background: var(--surface-2); border-radius: 8px; text-align: center; line-height: 1.6; }
+.version-pick-btn { display: inline-block; padding: 10px 20px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -1290,9 +1291,9 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
         <button class="version-dl-btn" id="version-dl-btn" disabled>⬇ Générer la version</button>
       </div>
       <div class="version-drop-zone" id="version-drop-zone" style="display:none">
-        <div>① Télécharge d'abord l'original → <a id="version-drive-link" href="#" target="_blank">Ouvrir dans Drive ↗</a></div>
-        <div style="margin-top:8px">② Dépose le fichier .pptx ici</div>
-        <input type="file" id="version-file-input" accept=".pptx">
+        <div style="margin-bottom:10px">① Ouvre et télécharge l'original → <a id="version-drive-link" href="#" target="_blank" style="color:var(--A);font-weight:600">Drive ↗</a></div>
+        <label class="version-pick-btn" for="version-file-input">② Sélectionner le fichier .pptx</label>
+        <input type="file" id="version-file-input" accept=".pptx" style="display:none">
       </div>
     </div>
   </div>
@@ -3687,17 +3688,16 @@ function renderSlideList(plan) {
 // ── DOWNLOAD FLOW ─────────────────────────────────────────────────────────
 document.getElementById("version-dl-btn").addEventListener("click", () => {
   const drop = document.getElementById("version-drop-zone");
-  drop.style.display = drop.style.display === "none" ? "block" : "none";
-  // Set Drive link
-  const links = window._linksCache || {};
-  const id = links[_currentVersionNum]?.presentation;
-  const a = document.getElementById("version-drive-link");
-  if (id) a.href = `https://drive.google.com/file/d/${id}/view`;
-  else a.textContent = "(lien non configuré)";
-  // Click on drop zone opens file picker
-  document.getElementById("version-drop-zone").addEventListener("click", e => {
-    if (e.target.tagName !== "A") document.getElementById("version-file-input").click();
-  }, { once: false });
+  const opening = drop.style.display === "none";
+  drop.style.display = opening ? "block" : "none";
+  if (opening) {
+    const id = (loadLinks()[_currentVersionNum] || {}).presentation;
+    const a = document.getElementById("version-drive-link");
+    if (id) { a.href = `https://drive.google.com/file/d/${id}/view`; }
+    else { a.href = "#"; a.textContent = "(lien non configuré)"; }
+    // Scroll drop zone into view
+    setTimeout(() => drop.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
+  }
 });
 
 document.getElementById("version-file-input").addEventListener("change", async e => {
