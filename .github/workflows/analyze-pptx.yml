@@ -25,10 +25,13 @@ jobs:
       - name: Analyser les nouveaux PPTXs
         run: python .github/scripts/analyze_pptx.py
 
-      - name: Commit slide-plans.json si modifié
+      - name: Générer les fiches animateur
+        run: python .github/scripts/generate_fiches.py
+
+      - name: Commit artefacts générés si modifiés
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/slide-plans.json
-          git diff --cached --quiet || git commit -m "feat: slide-plans.json mis à jour automatiquement"
+          git add assets/slide-plans.json assets/fiches/
+          git diff --cached --quiet || git commit -m "feat: slide-plans.json + fiches animateur mis à jour automatiquement"
           git push
