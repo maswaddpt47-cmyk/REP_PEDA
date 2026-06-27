@@ -3602,9 +3602,8 @@ async function renderVersionsPanel(num) {
   const list  = document.getElementById("vslides-list");
   const total = document.getElementById("version-total");
   const dlBtn = document.getElementById("version-dl-btn");
-  const drop  = document.getElementById("version-drop-zone");
 
-  tabs.innerHTML = ""; list.innerHTML = ""; drop.style.display = "none";
+  tabs.innerHTML = ""; list.innerHTML = "";
   dlBtn.disabled = true; total.innerHTML = "—";
   const res = document.getElementById("version-result");
   if (res) { res.style.display = "none"; res.innerHTML = ""; }
