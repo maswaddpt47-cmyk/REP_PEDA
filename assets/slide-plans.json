@@ -7,14 +7,14 @@
         "n": 1,
         "titre": "Doctolib & Téléconsultation",
         "role": "titre",
-        "min": 5,
+        "min": 2,
         "optionnel": false
       },
       {
         "n": 2,
         "titre": "🗺️ Au programme aujourd'hui",
         "role": "intro",
-        "min": 5,
+        "min": 4,
         "optionnel": false
       },
       {
@@ -28,7 +28,7 @@
         "n": 4,
         "titre": "✅ Pourquoi l'utiliser ?",
         "role": "contenu",
-        "min": 10,
+        "min": 8,
         "optionnel": false
       },
       {
@@ -48,15 +48,15 @@
       {
         "n": 7,
         "titre": "🔍 Trouver un professionnel de santé",
-        "role": "demo",
-        "min": 12,
+        "role": "contenu",
+        "min": 8,
         "optionnel": false
       },
       {
         "n": 8,
         "titre": "📋 Prendre rendez-vous",
-        "role": "demo",
-        "min": 12,
+        "role": "contenu",
+        "min": 8,
         "optionnel": false
       },
       {
@@ -69,8 +69,8 @@
       {
         "n": 10,
         "titre": "⚙️ Comment ça se passe concrètement ?",
-        "role": "demo",
-        "min": 15,
+        "role": "contenu",
+        "min": 8,
         "optionnel": false
       },
       {
@@ -90,16 +90,16 @@
       {
         "n": 13,
         "titre": "♻️ Bonnes pratiques numériques",
-        "role": "contenu",
-        "min": 10,
-        "optionnel": true
+        "role": "demo",
+        "min": 12,
+        "optionnel": false
       },
       {
         "n": 14,
         "titre": "❓ Questions fréquentes",
-        "role": "contenu",
-        "min": 8,
-        "optionnel": true
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": false
       },
       {
         "n": 15,
@@ -119,9 +119,12 @@
           5,
           6,
           7,
-          8
+          8,
+          9,
+          10,
+          11
         ],
-        "label": "1h — Chapitres 1 & 2"
+        "label": "1h — 1h · 11 slides"
       },
       "1h30": {
         "indices": [
@@ -135,9 +138,11 @@
           8,
           9,
           10,
-          11
+          11,
+          13,
+          14
         ],
-        "label": "1h30 — Sans numérique responsable"
+        "label": "1h30 — 1h17 · 13 slides"
       },
       "complet": {
         "indices": [
@@ -157,17 +162,344 @@
           14,
           15
         ],
-        "label": "Complet"
+        "label": "Complet — 1h24 · 15 slides"
       }
     }
   },
   "E7": {
-    "analyse": false,
-    "titre": "Intelligence artificielle (IA)"
+    "analyse": true,
+    "titre": "Intelligence artificielle (IA)",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "L'Intelligence Artificielle pour tous",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Au programme aujourd'hui",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "DÉFINITION",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "UN PEU D'HISTOIRE",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "Comment ça marche ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "L'IA que vous utilisez déjà… sans le savoir !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "ASSISTANTS VOCAUX",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "IA CONVERSATIONNELLE",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "L'IA dans la santé, les transports et les services publics",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "LES BÉNÉFICES",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "⚠️ RISQUES & LIMITES",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "Comment reconnaître une information générée par l'IA ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "BONS RÉFLEXES",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "Ce qu'il faut retenir",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "PAROLES DE FRANÇAIS",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "label": "1h30 — 1h34 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h50 · 15 slides"
+      }
+    }
   },
   "D2": {
-    "analyse": false,
-    "titre": "Compte Personnel de Formation (CPF)"
+    "analyse": true,
+    "titre": "Compte Personnel de Formation (CPF)",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Maîtriser son CPF",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "SOMMAIRE",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "DÉFINITION",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "BÉNÉFICIAIRES",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "DROITS & SOLDE",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "CHAPITRE 2",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "PLATEFORME OFFICIELLE",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "ÉTAPE 1",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "ÉTAPE 2",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "CHAPITRE 3",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "CATALOGUE DE FORMATIONS",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "INSCRIPTION",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "SOLDE INSUFFISANT ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "ORGANISATION",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "Prêts à transformer votre avenir ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "label": "1h — 1h02 · 12 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "1h30 — 1h26 · 15 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h26 · 15 slides"
+      }
+    }
   },
   "B3": {
     "analyse": true,
@@ -500,8 +832,177 @@
     }
   },
   "A1": {
-    "analyse": false,
-    "titre": "Prendre en main l'ordinateur"
+    "analyse": true,
+    "titre": "Prendre en main l'ordinateur",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Prendre en main l'ordinateur",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Au programme aujourd'hui",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "Qu'est-ce qu'un ordinateur ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "Les éléments essentiels",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "Allumer et éteindre correctement",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "Découverte du bureau",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "La souris, votre meilleur outil",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "Le clavier pas à pas",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "Gérer les fenêtres",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "Les raccourcis clavier essentiels",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "Créer et organiser ses fichiers",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "Les erreurs fréquentes des débutants",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "Se protéger avec un antivirus",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "Personnaliser son bureau Windows 11",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "Continuer à apprendre",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 16,
+        "titre": "Atelier terminé 🎉",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "label": "1h30 — 1h34 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "label": "Complet — 1h58 · 16 slides"
+      }
+    }
   },
   "A2": {
     "analyse": true,
@@ -647,7 +1148,7 @@
         "titre": "🔍 Découvrir votre smartphone",
         "role": "contenu",
         "min": 8,
-        "optionnel": true
+        "optionnel": false
       },
       {
         "n": 4,
@@ -739,13 +1240,13 @@
         "indices": [
           1,
           2,
+          3,
           4,
           5,
           6,
           7,
           8,
-          9,
-          10
+          9
         ],
         "label": "1h — 1h02 · 9 slides"
       },
@@ -753,6 +1254,7 @@
         "indices": [
           1,
           2,
+          3,
           4,
           5,
           6,
@@ -762,8 +1264,7 @@
           10,
           11,
           12,
-          13,
-          14
+          13
         ],
         "label": "1h30 — 1h34 · 13 slides"
       },
@@ -880,8 +1381,8 @@
       {
         "n": 13,
         "titre": "🔋 Applications en arrière-plan : gérer la batterie et les données",
-        "role": "intro",
-        "min": 4,
+        "role": "contenu",
+        "min": 8,
         "optionnel": false
       },
       {
@@ -889,7 +1390,7 @@
         "titre": "🌱 Applications et impact environnemental",
         "role": "contenu",
         "min": 8,
-        "optionnel": true
+        "optionnel": false
       },
       {
         "n": 15,
@@ -911,9 +1412,9 @@
           7,
           8,
           9,
-          13
+          10
         ],
-        "label": "1h — 1h · 10 slides"
+        "label": "1h — 1h04 · 10 slides"
       },
       "1h30": {
         "indices": [
@@ -929,10 +1430,9 @@
           10,
           11,
           12,
-          13,
-          15
+          13
         ],
-        "label": "1h30 — 1h32 · 14 slides"
+        "label": "1h30 — 1h28 · 13 slides"
       },
       "complet": {
         "indices": [
@@ -952,7 +1452,7 @@
           14,
           15
         ],
-        "label": "Complet — 1h40 · 15 slides"
+        "label": "Complet — 1h44 · 15 slides"
       }
     }
   },
@@ -1303,8 +1803,8 @@
       {
         "n": 8,
         "titre": "🏷️ Bons plans & outils pour dépenser moins",
-        "role": "intro",
-        "min": 4,
+        "role": "contenu",
+        "min": 8,
         "optionnel": false
       },
       {
@@ -1336,7 +1836,7 @@
           9,
           10
         ],
-        "label": "1h — 1h · 10 slides"
+        "label": "1h — 1h04 · 10 slides"
       },
       "1h30": {
         "indices": [
@@ -1351,7 +1851,7 @@
           9,
           10
         ],
-        "label": "1h30 — 1h · 10 slides"
+        "label": "1h30 — 1h04 · 10 slides"
       },
       "complet": {
         "indices": [
@@ -1366,7 +1866,7 @@
           9,
           10
         ],
-        "label": "Complet — 1h · 10 slides"
+        "label": "Complet — 1h04 · 10 slides"
       }
     }
   },
