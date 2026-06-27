@@ -1289,20 +1289,8 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
       <div class="version-footer">
         <span class="version-total" id="version-total">—</span>
         <button class="version-dl-btn" id="version-dl-btn" disabled>⬇ Générer la version</button>
+        <div id="version-progress" style="display:none;font-size:12px;color:var(--muted);margin-top:6px;text-align:center"></div>
       </div>
-      <div class="version-drop-zone" id="version-drop-zone" style="display:none">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
-          Télécharge d'abord le PPTX original depuis Drive,<br>puis sélectionne-le ici.
-        </div>
-        <a id="version-drive-link" href="#" target="_blank" class="version-pick-btn" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;text-decoration:none">
-          ① Ouvrir dans Drive ↗
-        </a>
-        <br>
-        <label class="version-pick-btn" for="version-file-input" style="display:inline-flex;align-items:center;gap:6px">
-          ② Sélectionner le .pptx téléchargé
-        </label>
-      </div>
-      <input type="file" id="version-file-input" accept=".pptx" style="display:none">
       <div id="version-result" style="display:none;margin-top:10px;padding:14px;border:2px solid var(--A);border-radius:10px;text-align:center"></div>
     </div>
   </div>
@@ -3620,6 +3608,8 @@ async function renderVersionsPanel(num) {
   dlBtn.disabled = true; total.innerHTML = "—";
   const res = document.getElementById("version-result");
   if (res) { res.style.display = "none"; res.innerHTML = ""; }
+  const prog = document.getElementById("version-progress");
+  if (prog) { prog.style.display = "none"; prog.textContent = ""; }
 
   if (!plan || !plan.analyse) {
     list.innerHTML = `<div class="version-not-analysed">
@@ -3698,51 +3688,33 @@ function renderSlideList(plan) {
 
 // ── DOWNLOAD FLOW ─────────────────────────────────────────────────────────
 document.getElementById("version-dl-btn").addEventListener("click", async () => {
-  const drop = document.getElementById("version-drop-zone");
-  const opening = drop.style.display === "none";
-  drop.style.display = opening ? "block" : "none";
-  if (opening) {
-    // Try localStorage first, then assets/links.json directly
-    let id = (loadLinks()[_currentVersionNum] || {}).presentation;
-    if (!id) {
-      try {
-        const r = await fetch("assets/links.json?_=" + Date.now(), { cache: "no-store" });
-        if (r.ok) { const d = await r.json(); id = (d[_currentVersionNum] || {}).presentation; }
-      } catch {}
-    }
-    const a = document.getElementById("version-drive-link");
-    if (id) {
-      a.href = `https://drive.google.com/file/d/${id}/view`;
-      a.textContent = "① Ouvrir dans Drive ↗";
-    } else {
-      a.href = "#"; a.textContent = "① Drive (lien non configuré)";
-    }
-    setTimeout(() => drop.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
+  const btn = document.getElementById("version-dl-btn");
+  const progress = document.getElementById("version-progress");
+  const result = document.getElementById("version-result");
+
+  btn.disabled = true;
+  result.style.display = "none"; result.innerHTML = "";
+  progress.style.display = "block";
+  progress.textContent = "⏳ Téléchargement en cours…";
+
+  try {
+    const url = `assets/pptx/${_currentVersionNum}.pptx`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`PPTX introuvable (${res.status})`);
+    progress.textContent = "⚙️ Génération de la version…";
+    const ab = await res.arrayBuffer();
+    await processVersionPPTX(ab, _currentVersionNum);
+  } catch (err) {
+    progress.style.display = "none";
+    showToast("⚠ " + err.message);
+  } finally {
+    btn.disabled = false;
   }
 });
 
-document.getElementById("version-file-input").addEventListener("change", async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  await processVersionPPTX(file);
-  e.target.value = "";
-});
-
-// Drag & drop on drop zone
-const vDrop = document.getElementById("version-drop-zone");
-vDrop.addEventListener("dragover", e => { e.preventDefault(); vDrop.classList.add("drag-over"); });
-vDrop.addEventListener("dragleave", () => vDrop.classList.remove("drag-over"));
-vDrop.addEventListener("drop", async e => {
-  e.preventDefault(); vDrop.classList.remove("drag-over");
-  const file = e.dataTransfer.files[0];
-  if (file && file.name.endsWith(".pptx")) await processVersionPPTX(file);
-});
-
-async function processVersionPPTX(file) {
+async function processVersionPPTX(ab, atelierNum) {
   if (typeof JSZip === "undefined") { showToast("⚠ JSZip non chargé"); return; }
-  showToast("⏳ Traitement en cours…");
   try {
-    const ab = await file.arrayBuffer();
     const zip = await JSZip.loadAsync(ab);
 
     // Determine total slide count from [Content_Types].xml
@@ -3775,16 +3747,19 @@ async function processVersionPPTX(file) {
 
     const blob = await zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation", compression: "DEFLATE" });
     const hidden = totalSlides - _versionChecked.size;
-    const base = file.name.replace(/\.pptx$/i, '').replace(/_\d+slides$/i, '');
-    const fname = `${base}_${_versionChecked.size}slides.pptx`;
+    // Determine active version key for filename
+    const activeTab = document.querySelector(".vtab.active");
+    const versionKey = activeTab ? activeTab.dataset.key : "custom";
+    const fname = `${atelierNum}_${versionKey}_${_versionChecked.size}slides.pptx`;
     const url = URL.createObjectURL(blob);
 
-    // Afficher le résultat dans un div séparé (préserve le file input)
+    const progress = document.getElementById("version-progress");
+    if (progress) progress.style.display = "none";
     const result = document.getElementById("version-result");
     result.innerHTML = `
-      <div style="margin-bottom:10px;color:var(--text);font-weight:600">✓ Fichier prêt — ${_versionChecked.size} slides actives, ${hidden} masquées</div>
+      <div style="margin-bottom:10px;color:var(--text);font-weight:600">✓ ${_versionChecked.size} slides · ${hidden} masquées</div>
       <a href="${url}" download="${fname}" class="version-pick-btn" style="background:var(--A);color:#fff;border-color:var(--A);text-decoration:none">
-        ⬇ Télécharger ${fname}
+        ⬇ Télécharger
       </a>`;
     result.style.display = "block";
     result.scrollIntoView({ behavior: "smooth", block: "nearest" });
