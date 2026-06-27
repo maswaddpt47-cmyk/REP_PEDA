@@ -1293,8 +1293,9 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
       <div class="version-drop-zone" id="version-drop-zone" style="display:none">
         <div style="margin-bottom:10px">① Ouvre et télécharge l'original → <a id="version-drive-link" href="#" target="_blank" style="color:var(--A);font-weight:600">Drive ↗</a></div>
         <label class="version-pick-btn" for="version-file-input">② Sélectionner le fichier .pptx</label>
-        <input type="file" id="version-file-input" accept=".pptx" style="display:none">
       </div>
+      <input type="file" id="version-file-input" accept=".pptx" style="display:none">
+      <div id="version-result" style="display:none;margin-top:10px;padding:14px;border:2px solid var(--A);border-radius:10px;text-align:center"></div>
     </div>
   </div>
 </div>
@@ -3609,6 +3610,8 @@ async function renderVersionsPanel(num) {
 
   tabs.innerHTML = ""; list.innerHTML = ""; drop.style.display = "none";
   dlBtn.disabled = true; total.innerHTML = "—";
+  const res = document.getElementById("version-result");
+  if (res) { res.style.display = "none"; res.innerHTML = ""; }
 
   if (!plan || !plan.analyse) {
     list.innerHTML = `<div class="version-not-analysed">
@@ -3758,15 +3761,15 @@ async function processVersionPPTX(file) {
     const fname = `${base}_${_versionChecked.size}slides.pptx`;
     const url = URL.createObjectURL(blob);
 
-    // Afficher un bouton de téléchargement explicite (fiable sur mobile)
-    const drop = document.getElementById("version-drop-zone");
-    drop.innerHTML = `
+    // Afficher le résultat dans un div séparé (préserve le file input)
+    const result = document.getElementById("version-result");
+    result.innerHTML = `
       <div style="margin-bottom:10px;color:var(--text);font-weight:600">✓ Fichier prêt — ${_versionChecked.size} slides actives, ${hidden} masquées</div>
       <a href="${url}" download="${fname}" class="version-pick-btn" style="background:var(--A);color:#fff;border-color:var(--A);text-decoration:none">
         ⬇ Télécharger ${fname}
       </a>`;
-    drop.style.display = "block";
-    drop.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    result.style.display = "block";
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
   } catch(err) {
     showToast("⚠ Erreur : " + err.message);
     console.error(err);
