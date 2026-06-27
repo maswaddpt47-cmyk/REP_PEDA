@@ -1,0 +1,47 @@
+{
+  "B10": {
+    "titre": "Doctolib & Téléconsultation",
+    "analyse": true,
+    "slides": [
+      {"n":1,  "titre":"Doctolib & Téléconsultation",          "role":"titre",    "min":5,  "optionnel":false},
+      {"n":2,  "titre":"🗺️ Au programme aujourd'hui",           "role":"intro",    "min":5,  "optionnel":false},
+      {"n":3,  "titre":"🏥 Chapitre 1 — La plateforme",         "role":"chapitre", "min":2,  "optionnel":false},
+      {"n":4,  "titre":"✅ Pourquoi l'utiliser ?",               "role":"contenu",  "min":10, "optionnel":false},
+      {"n":5,  "titre":"🔐 Sécurité & confiance",               "role":"contenu",  "min":8,  "optionnel":false},
+      {"n":6,  "titre":"💻 Chapitre 2 — Naviguer sur le site",  "role":"chapitre", "min":2,  "optionnel":false},
+      {"n":7,  "titre":"🔍 Trouver un professionnel de santé",  "role":"demo",     "min":12, "optionnel":false},
+      {"n":8,  "titre":"📋 Prendre rendez-vous",                "role":"demo",     "min":12, "optionnel":false},
+      {"n":9,  "titre":"📹 Chapitre 3 — La téléconsultation",   "role":"chapitre", "min":2,  "optionnel":false},
+      {"n":10, "titre":"⚙️ Comment ça se passe concrètement ?", "role":"demo",     "min":15, "optionnel":false},
+      {"n":11, "titre":"💰 Remboursement",                      "role":"contenu",  "min":8,  "optionnel":false},
+      {"n":12, "titre":"🌱 Chapitre 4 — Numérique responsable", "role":"chapitre", "min":2,  "optionnel":true},
+      {"n":13, "titre":"♻️ Bonnes pratiques numériques",        "role":"contenu",  "min":10, "optionnel":true},
+      {"n":14, "titre":"❓ Questions fréquentes",               "role":"contenu",  "min":8,  "optionnel":true},
+      {"n":15, "titre":"🎯 Pour aller plus loin",               "role":"conclusion","min":5, "optionnel":true}
+    ],
+    "versions": {
+      "1h":      {"indices":[1,2,3,4,5,6,7,8],             "label":"1h — Chapitres 1 & 2"},
+      "1h30":    {"indices":[1,2,3,4,5,6,7,8,9,10,11],    "label":"1h30 — Sans numérique responsable"},
+      "complet": {"indices":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"label":"Complet"}
+    }
+  },
+  "E7": { "analyse": false, "titre": "Intelligence artificielle (IA)" },
+  "D2": { "analyse": false, "titre": "Compte Personnel de Formation (CPF)" },
+  "B3": { "analyse": false, "titre": "Créer son identité numérique (FranceConnect)" },
+  "B9": { "analyse": false, "titre": "Sécuriser ses achats en ligne et éviter les arnaques" },
+  "A1": { "analyse": false, "titre": "Prendre en main l'ordinateur" },
+  "A2": { "analyse": false, "titre": "Prendre en main la tablette" },
+  "A3": { "analyse": false, "titre": "Prendre en main le smartphone" },
+  "A4": { "analyse": false, "titre": "Télécharger et gérer ses applis (iOS/Android)" },
+  "B4": { "analyse": false, "titre": "Démarches administratives en ligne" },
+  "B7": { "analyse": false, "titre": "Outils numériques de scolarité (Pronote, Educonnect, Parcoursup…)" },
+  "B8": { "analyse": false, "titre": "Solutions numériques pour la gestion de budget" },
+  "B6": { "analyse": false, "titre": "Espace personnel site médical (Mon espace santé, Doctolib…)" },
+  "B5": { "analyse": false, "titre": "Espace personnel site administratif (Ameli, CAF, MSA, Impôts…)" },
+  "B1": { "analyse": false, "titre": "Prendre en main sa boite mail" },
+  "B2": { "analyse": false, "titre": "Recevoir et envoyer un mail avec pièce jointe" },
+  "E5": { "analyse": false, "titre": "Écrans et jeunesse" },
+  "E6": { "analyse": false, "titre": "Numérique et environnement" },
+  "A5": { "analyse": false, "titre": "Naviguer sur internet" },
+  "A6": { "analyse": false, "titre": "Sécuriser son environnement numérique" }
+}

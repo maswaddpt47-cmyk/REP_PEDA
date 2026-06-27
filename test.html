@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root {
     --bg:         #0a0b11;
@@ -1157,6 +1158,36 @@
     #modal #modal-add-fiche-form, #modal .modal-note-wrap { display:none !important; }
     .fiche-row { break-inside:avoid; }
   }
+
+/* ── VERSIONS PANEL ── */
+.modal-versions-wrap { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+body:not(.has-token) .modal-versions-wrap { display: none !important; }
+.modal-versions-title { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 12px; }
+.vtabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.vtab { padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: none; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .15s; }
+.vtab.active { background: var(--A); border-color: var(--A); color: #fff; }
+.vslides-list { display: flex; flex-direction: column; gap: 4px; max-height: 280px; overflow-y: auto; margin-bottom: 12px; }
+.vslide { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: background .1s; }
+.vslide:hover { background: var(--surface-2); }
+.vslide.checked { background: color-mix(in srgb, var(--A) 8%, transparent); border-color: color-mix(in srgb, var(--A) 30%, transparent); }
+.vslide input[type=checkbox] { accent-color: var(--A); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+.vslide-num { font-size: 11px; color: var(--muted); min-width: 22px; text-align: right; }
+.vslide-titre { flex: 1; font-size: 13px; color: var(--text); line-height: 1.3; }
+.vslide-min { font-size: 11px; color: var(--muted); min-width: 36px; text-align: right; }
+.vslide-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--surface-2); color: var(--muted); }
+.vslide-badge.opt { background: color-mix(in srgb, #f59e0b 15%, transparent); color: #b45309; }
+.vslide-badge.demo { background: color-mix(in srgb, var(--A) 12%, transparent); color: var(--A); }
+.vslide.unchecked .vslide-titre { opacity: .4; text-decoration: line-through; }
+.vslide.unchecked .vslide-min  { opacity: .4; }
+.version-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.version-total { font-size: 13px; color: var(--muted); }
+.version-total strong { color: var(--text); }
+.version-dl-btn { padding: 9px 18px; background: var(--A); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.version-dl-btn:disabled { opacity: .4; cursor: default; }
+.version-drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 18px; text-align: center; font-size: 13px; color: var(--muted); margin-top: 12px; cursor: pointer; transition: border-color .2s; }
+.version-drop-zone.drag-over { border-color: var(--A); background: color-mix(in srgb, var(--A) 6%, transparent); }
+.version-drop-zone input { display: none; }
+.version-not-analysed { font-size: 13px; color: var(--muted); padding: 12px; background: var(--surface-2); border-radius: 8px; text-align: center; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -1249,6 +1280,20 @@
     <div class="modal-note-wrap">
       <div class="modal-note-label">📝 Notes</div>
       <textarea class="modal-note" id="modal-note" placeholder="Observations, niveau du public, remarques terrain…"></textarea>
+    </div>
+    <div class="modal-versions-wrap" id="modal-versions-wrap">
+      <div class="modal-versions-title">🎬 Versions</div>
+      <div class="vtabs" id="vtabs"></div>
+      <div class="vslides-list" id="vslides-list"></div>
+      <div class="version-footer">
+        <span class="version-total" id="version-total">—</span>
+        <button class="version-dl-btn" id="version-dl-btn" disabled>⬇ Générer la version</button>
+      </div>
+      <div class="version-drop-zone" id="version-drop-zone" style="display:none">
+        <div>① Télécharge d'abord l'original → <a id="version-drive-link" href="#" target="_blank">Ouvrir dans Drive ↗</a></div>
+        <div style="margin-top:8px">② Dépose le fichier .pptx ici</div>
+        <input type="file" id="version-file-input" accept=".pptx">
+      </div>
     </div>
   </div>
 </div>
@@ -2266,6 +2311,8 @@ function openModal(num, e) {
 
   document.getElementById("modal-eyebrow").textContent = `${a.num} · ${CHAPITRES[a.chap].label}`;
   document.getElementById("modal-title").textContent = a.titre;
+  window._linksCache = loadLinks();
+  renderVersionsPanel(num);
 
   const allFiches = getFichesForAtelier(num);
   const list = document.getElementById("modal-fiche-list");
@@ -3531,6 +3578,188 @@ async function doPartnerSubmit() {
     btn.disabled = false;
     btn.textContent = "✉ Envoyer ma sélection";
     showToast("⚠ Erreur d'envoi — veuillez réessayer");
+  }
+}
+
+// ── VERSIONS PANEL ──────────────────────────────────────────────────────────
+let _slidePlan = null;
+let _versionChecked = new Set();
+let _currentVersionNum = null;
+
+async function loadSlidePlans() {
+  if (_slidePlan) return _slidePlan;
+  try {
+    const r = await fetch("assets/slide-plans.json?_=" + Date.now(), { cache: "no-store" });
+    _slidePlan = await r.json();
+  } catch { _slidePlan = {}; }
+  return _slidePlan;
+}
+
+async function renderVersionsPanel(num) {
+  _currentVersionNum = num;
+  const plans = await loadSlidePlans();
+  const plan = plans[num];
+  const wrap  = document.getElementById("modal-versions-wrap");
+  const tabs  = document.getElementById("vtabs");
+  const list  = document.getElementById("vslides-list");
+  const total = document.getElementById("version-total");
+  const dlBtn = document.getElementById("version-dl-btn");
+  const drop  = document.getElementById("version-drop-zone");
+
+  tabs.innerHTML = ""; list.innerHTML = ""; drop.style.display = "none";
+  dlBtn.disabled = true; total.innerHTML = "—";
+
+  if (!plan || !plan.analyse) {
+    list.innerHTML = `<div class="version-not-analysed">
+      Présentation pas encore analysée.<br>
+      Envoie le fichier PPTX pour que je puisse configurer les versions.
+    </div>`;
+    return;
+  }
+
+  // Tabs
+  const vers = plan.versions;
+  Object.entries(vers).forEach(([key, v], i) => {
+    const btn = document.createElement("button");
+    btn.className = "vtab" + (i === 0 ? " active" : "");
+    btn.dataset.key = key;
+    btn.textContent = key === "complet" ? "Complet" : key;
+    btn.addEventListener("click", () => applyVersionPreset(num, key, plan));
+    tabs.appendChild(btn);
+  });
+
+  // Apply first preset by default
+  const firstKey = Object.keys(vers)[0];
+  applyVersionPreset(num, firstKey, plan);
+}
+
+function applyVersionPreset(num, key, plan) {
+  // Update tab active state
+  document.querySelectorAll(".vtab").forEach(b => b.classList.toggle("active", b.dataset.key === key));
+
+  const preset = plan.versions[key];
+  _versionChecked = new Set(preset.indices);
+  renderSlideList(plan);
+}
+
+function renderSlideList(plan) {
+  const list  = document.getElementById("vslides-list");
+  const total = document.getElementById("version-total");
+  const dlBtn = document.getElementById("version-dl-btn");
+  list.innerHTML = "";
+
+  let mins = 0;
+  plan.slides.forEach(s => {
+    const checked = _versionChecked.has(s.n);
+    if (checked) mins += s.min;
+
+    const row = document.createElement("label");
+    row.className = "vslide " + (checked ? "checked" : "unchecked");
+
+    const badgeLabel = s.role === "demo" ? "démo" : s.optionnel ? "optionnel" : "";
+    const badgeClass = s.role === "demo" ? "demo" : s.optionnel ? "opt" : "";
+
+    row.innerHTML = `
+      <input type="checkbox" ${checked ? "checked" : ""} data-n="${s.n}">
+      <span class="vslide-num">${s.n}</span>
+      <span class="vslide-titre">${s.titre}</span>
+      ${badgeLabel ? `<span class="vslide-badge ${badgeClass}">${badgeLabel}</span>` : ""}
+      <span class="vslide-min">${s.min} min</span>`;
+
+    row.querySelector("input").addEventListener("change", e => {
+      if (e.target.checked) _versionChecked.add(s.n);
+      else _versionChecked.delete(s.n);
+      // Clear active tab (custom selection)
+      document.querySelectorAll(".vtab").forEach(b => b.classList.remove("active"));
+      renderSlideList(plan);
+    });
+
+    list.appendChild(row);
+  });
+
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const label = h > 0 ? `${h}h${m > 0 ? m.toString().padStart(2,"0") : ""}` : `${m} min`;
+  total.innerHTML = `Durée estimée : <strong>${label}</strong> · ${_versionChecked.size} slides / ${plan.slides.length}`;
+  dlBtn.disabled = false;
+}
+
+// ── DOWNLOAD FLOW ─────────────────────────────────────────────────────────
+document.getElementById("version-dl-btn").addEventListener("click", () => {
+  const drop = document.getElementById("version-drop-zone");
+  drop.style.display = drop.style.display === "none" ? "block" : "none";
+  // Set Drive link
+  const links = window._linksCache || {};
+  const id = links[_currentVersionNum]?.presentation;
+  const a = document.getElementById("version-drive-link");
+  if (id) a.href = `https://drive.google.com/file/d/${id}/view`;
+  else a.textContent = "(lien non configuré)";
+  // Click on drop zone opens file picker
+  document.getElementById("version-drop-zone").addEventListener("click", e => {
+    if (e.target.tagName !== "A") document.getElementById("version-file-input").click();
+  }, { once: false });
+});
+
+document.getElementById("version-file-input").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await processVersionPPTX(file);
+  e.target.value = "";
+});
+
+// Drag & drop on drop zone
+const vDrop = document.getElementById("version-drop-zone");
+vDrop.addEventListener("dragover", e => { e.preventDefault(); vDrop.classList.add("drag-over"); });
+vDrop.addEventListener("dragleave", () => vDrop.classList.remove("drag-over"));
+vDrop.addEventListener("drop", async e => {
+  e.preventDefault(); vDrop.classList.remove("drag-over");
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith(".pptx")) await processVersionPPTX(file);
+});
+
+async function processVersionPPTX(file) {
+  if (typeof JSZip === "undefined") { showToast("⚠ JSZip non chargé"); return; }
+  showToast("⏳ Traitement en cours…");
+  try {
+    const ab = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(ab);
+
+    // Determine total slide count from [Content_Types].xml
+    const ct = await zip.file("[Content_Types].xml").async("string");
+    const slideMatches = [...ct.matchAll(/PartName="\/ppt\/slides\/slide(\d+)\.xml"/g)];
+    const totalSlides = slideMatches.length;
+
+    // For each slide: set show="0" if not in _versionChecked, else ensure show="1" or absent
+    for (let n = 1; n <= totalSlides; n++) {
+      const path = `ppt/slides/slide${n}.xml`;
+      const f = zip.file(path);
+      if (!f) continue;
+      let xml = await f.async("string");
+      const shouldHide = !_versionChecked.has(n);
+
+      // Remove existing show attribute then add if needed
+      xml = xml.replace(/<p:sld\b([^>]*?)(\s+show="[^"]*")?([^>]*?)>/,
+        (m, before, _show, after) => {
+          const attrs = (before + after).trim();
+          return shouldHide
+            ? `<p:sld ${attrs} show="0">`
+            : `<p:sld ${attrs}>`;
+        });
+      zip.file(path, xml);
+    }
+
+    const blob = await zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation", compression: "DEFLATE" });
+    const hidden = totalSlides - _versionChecked.size;
+    const fname = file.name.replace(/\.pptx$/i, `_${[..._versionChecked.size]}slides.pptx`);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = fname; a.click();
+    URL.revokeObjectURL(url);
+    showToast(`✓ Version générée — ${_versionChecked.size} slides actives, ${hidden} masquées`);
+    document.getElementById("version-drop-zone").style.display = "none";
+  } catch(err) {
+    showToast("⚠ Erreur : " + err.message);
+    console.error(err);
   }
 }
 
