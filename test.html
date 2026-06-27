@@ -1104,15 +1104,6 @@
   }
   .modal-share-btn:hover { border-color:#10b981; color:#10b981; }
   .modal-print-btn:hover { border-color:#f59e0b; color:#f59e0b; }
-  .modal-fiche-dl-btn {
-    display:block; width:100%; margin-top:8px; padding:8px 12px;
-    border-radius:8px; font-size:13px; font-weight:600;
-    border:1.5px solid var(--border); cursor:pointer; background:var(--surface);
-    color:var(--muted); font-family:'Inter',sans-serif; transition:all .15s;
-    text-align:center; text-decoration:none;
-  }
-  .modal-fiche-dl-btn:not([hidden]):hover { border-color:#6366f1; color:#6366f1; }
-  .modal-fiche-dl-btn[hidden] { display:none !important; }
 
   /* ── DRAG & DROP ateliers perso */
   .card[draggable="true"] { cursor:default; }
@@ -1300,7 +1291,6 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
       <button class="modal-share-btn" id="modal-share-btn">↗ Partager</button>
       <button class="modal-print-btn" id="modal-print-btn">🖨 Imprimer</button>
     </div>
-    <a class="modal-fiche-dl-btn" id="modal-fiche-dl-btn" hidden>📄 Fiche animateur</a>
     <div class="modal-usage-wrap">
       <div class="modal-usage-row">
         <span class="modal-usage-info" id="modal-usage-info">Jamais utilisé en atelier</span>
@@ -2380,7 +2370,7 @@ function openModal(num, e) {
     const id = links[f.key] || "";
     const isCustom = f.key.startsWith("cf_");
     return `
-    <div class="fiche-row ${id ? 'has-link' : ''}${isCustom ? ' custom' : ''}">
+    <div class="fiche-row ${id ? 'has-link' : ''}${isCustom ? ' custom' : ''}" data-key="${f.key}">
       <span class="fiche-icon">${f.emoji}</span>
       <span class="fiche-label">${f.label}</span>
       <div class="fiche-actions">
@@ -2393,10 +2383,16 @@ function openModal(num, e) {
   }).join("");
 
   list.querySelectorAll(".fiche-open-btn").forEach(btn => {
-    btn.addEventListener("click", () => { if (btn.dataset.id) window.open(driveViewUrl(btn.dataset.id), "_blank"); });
+    btn.addEventListener("click", () => {
+      if (btn.dataset.id) window.open(driveViewUrl(btn.dataset.id), "_blank");
+      else if (btn.dataset.local) { const a = document.createElement("a"); a.href = btn.dataset.local; a.download = btn.dataset.local.split("/").pop(); document.body.appendChild(a); a.click(); a.remove(); }
+    });
   });
   list.querySelectorAll(".fiche-dl-btn").forEach(btn => {
-    btn.addEventListener("click", () => { if (btn.dataset.id) window.open(driveDownloadUrl(btn.dataset.id), "_blank"); });
+    btn.addEventListener("click", () => {
+      if (btn.dataset.id) window.open(driveDownloadUrl(btn.dataset.id), "_blank");
+      else if (btn.dataset.local) { const a = document.createElement("a"); a.href = btn.dataset.local; a.download = btn.dataset.local.split("/").pop(); document.body.appendChild(a); a.click(); a.remove(); }
+    });
   });
   list.querySelectorAll(".fiche-copy-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -2440,14 +2436,19 @@ function openModal(num, e) {
   // Suivi d'utilisation
   renderUsagePanel(num);
 
-  // Fiche animateur (si PPTX analysé)
-  const ficheDlBtn = document.getElementById("modal-fiche-dl-btn");
-  ficheDlBtn.hidden = true;
+  // Brancher la fiche animateur générée sur la ligne "Action" si pas de lien Drive
   loadSlidePlans().then(plans => {
-    if (modalAtelier && modalAtelier.num === num && plans[num] && plans[num].analyse) {
-      ficheDlBtn.href = `./assets/fiches/${num}-fiche.pptx`;
-      ficheDlBtn.download = `${num}-fiche-animateur.pptx`;
-      ficheDlBtn.hidden = false;
+    if (!modalAtelier || modalAtelier.num !== num) return;
+    if (!plans[num] || !plans[num].analyse) return;
+    const localUrl = `./assets/fiches/${num}-fiche.pptx`;
+    const actionRow = list.querySelector('[data-key="action"]');
+    if (!actionRow) return;
+    const openBtn = actionRow.querySelector(".fiche-open-btn");
+    const dlBtn   = actionRow.querySelector(".fiche-dl-btn");
+    if (openBtn && !openBtn.dataset.id) {
+      actionRow.classList.add("has-link");
+      openBtn.disabled = false; openBtn.dataset.local = localUrl;
+      dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
     }
   });
 
