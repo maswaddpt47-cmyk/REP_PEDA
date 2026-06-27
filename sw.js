@@ -1,4 +1,4 @@
-const CACHE = "conum47-v6";
+const CACHE = "conum47-v7";
 const STATIC = [
   "./index.html",
   "./test.html",
