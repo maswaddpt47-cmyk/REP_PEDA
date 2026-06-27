@@ -3651,8 +3651,8 @@ function renderSlideList(plan) {
   const v1h30 = new Set((plan.versions["1h30"]?.indices) || []);
   // Removal order: complet-only first (lowest priority), then 1h30-only
   const removalQueue = [
-    ...plan.slides.filter(s => !v1h30.has(s.n)),
-    ...plan.slides.filter(s => v1h30.has(s.n) && !v1h.has(s.n)),
+    ...plan.slides.filter(s => !v1h30.has(s.n)).sort((a,b) => b.n - a.n),
+    ...plan.slides.filter(s => v1h30.has(s.n) && !v1h.has(s.n)).sort((a,b) => b.n - a.n),
   ];
   const totalRemovable = removalQueue.length;
   const removalOrder = new Map(removalQueue.map((s, i) => [s.n, i + 1]));
