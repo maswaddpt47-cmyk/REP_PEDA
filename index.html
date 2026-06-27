@@ -1180,6 +1180,10 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
 .vslide-prio.prio-essential { background: #22c55e; }
 .vslide-prio.prio-medium    { background: #f59e0b; }
 .vslide-prio.prio-low       { background: #ef4444; }
+.vprio-legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; flex-wrap: wrap; }
+.vprio-legend span { display: flex; align-items: center; gap: 5px; }
+.vprio-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.card-actions .fav-btn { margin-left: auto; }
 .version-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .version-total { font-size: 13px; color: var(--muted); }
 .version-total strong { color: var(--text); }
@@ -1284,6 +1288,11 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
     <div class="modal-versions-wrap" id="modal-versions-wrap">
       <div class="modal-versions-title">🎬 Versions</div>
       <div class="vtabs" id="vtabs"></div>
+      <div class="vprio-legend" id="vprio-legend" style="display:none">
+        <span><i class="vprio-dot" style="background:#22c55e"></i>Essentiel</span>
+        <span><i class="vprio-dot" style="background:#f59e0b"></i>Retiré en 1h</span>
+        <span><i class="vprio-dot" style="background:#ef4444"></i>Retiré en 1h30</span>
+      </div>
       <div class="vslides-list" id="vslides-list"></div>
       <div class="version-footer">
         <span class="version-total" id="version-total">—</span>
@@ -3607,11 +3616,14 @@ async function renderVersionsPanel(num) {
   if (res) { res.style.display = "none"; res.innerHTML = ""; }
   const prog = document.getElementById("version-progress");
   if (prog) { prog.style.display = "none"; prog.textContent = ""; }
+  const legend = document.getElementById("vprio-legend");
 
   if (!plan || !plan.analyse) {
+    if (legend) legend.style.display = "none";
     list.innerHTML = `<div class="version-not-analysed">Présentation pas encore analysée.</div>`;
     return;
   }
+  if (legend) legend.style.display = "flex";
 
   const vers = plan.versions;
   Object.entries(vers).forEach(([key, v], i) => {
