@@ -3,45 +3,2652 @@
     "titre": "Doctolib & Téléconsultation",
     "analyse": true,
     "slides": [
-      {"n":1,  "titre":"Doctolib & Téléconsultation",          "role":"titre",    "min":5,  "optionnel":false},
-      {"n":2,  "titre":"🗺️ Au programme aujourd'hui",           "role":"intro",    "min":5,  "optionnel":false},
-      {"n":3,  "titre":"🏥 Chapitre 1 — La plateforme",         "role":"chapitre", "min":2,  "optionnel":false},
-      {"n":4,  "titre":"✅ Pourquoi l'utiliser ?",               "role":"contenu",  "min":10, "optionnel":false},
-      {"n":5,  "titre":"🔐 Sécurité & confiance",               "role":"contenu",  "min":8,  "optionnel":false},
-      {"n":6,  "titre":"💻 Chapitre 2 — Naviguer sur le site",  "role":"chapitre", "min":2,  "optionnel":false},
-      {"n":7,  "titre":"🔍 Trouver un professionnel de santé",  "role":"demo",     "min":12, "optionnel":false},
-      {"n":8,  "titre":"📋 Prendre rendez-vous",                "role":"demo",     "min":12, "optionnel":false},
-      {"n":9,  "titre":"📹 Chapitre 3 — La téléconsultation",   "role":"chapitre", "min":2,  "optionnel":false},
-      {"n":10, "titre":"⚙️ Comment ça se passe concrètement ?", "role":"demo",     "min":15, "optionnel":false},
-      {"n":11, "titre":"💰 Remboursement",                      "role":"contenu",  "min":8,  "optionnel":false},
-      {"n":12, "titre":"🌱 Chapitre 4 — Numérique responsable", "role":"chapitre", "min":2,  "optionnel":true},
-      {"n":13, "titre":"♻️ Bonnes pratiques numériques",        "role":"contenu",  "min":10, "optionnel":true},
-      {"n":14, "titre":"❓ Questions fréquentes",               "role":"contenu",  "min":8,  "optionnel":true},
-      {"n":15, "titre":"🎯 Pour aller plus loin",               "role":"conclusion","min":5, "optionnel":true}
+      {
+        "n": 1,
+        "titre": "Doctolib & Téléconsultation",
+        "role": "titre",
+        "min": 5,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "🗺️ Au programme aujourd'hui",
+        "role": "intro",
+        "min": 5,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🏥 Chapitre 1 — La plateforme",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "✅ Pourquoi l'utiliser ?",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🔐 Sécurité & confiance",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "💻 Chapitre 2 — Naviguer sur le site",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🔍 Trouver un professionnel de santé",
+        "role": "demo",
+        "min": 12,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "📋 Prendre rendez-vous",
+        "role": "demo",
+        "min": 12,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "📹 Chapitre 3 — La téléconsultation",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "⚙️ Comment ça se passe concrètement ?",
+        "role": "demo",
+        "min": 15,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "💰 Remboursement",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "🌱 Chapitre 4 — Numérique responsable",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": true
+      },
+      {
+        "n": 13,
+        "titre": "♻️ Bonnes pratiques numériques",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": true
+      },
+      {
+        "n": 14,
+        "titre": "❓ Questions fréquentes",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": true
+      },
+      {
+        "n": 15,
+        "titre": "🎯 Pour aller plus loin",
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": true
+      }
     ],
     "versions": {
-      "1h":      {"indices":[1,2,3,4,5,6,7,8],             "label":"1h — Chapitres 1 & 2"},
-      "1h30":    {"indices":[1,2,3,4,5,6,7,8,9,10,11],    "label":"1h30 — Sans numérique responsable"},
-      "complet": {"indices":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"label":"Complet"}
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "label": "1h — Chapitres 1 & 2"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "label": "1h30 — Sans numérique responsable"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet"
+      }
     }
   },
-  "E7": { "analyse": false, "titre": "Intelligence artificielle (IA)" },
-  "D2": { "analyse": false, "titre": "Compte Personnel de Formation (CPF)" },
-  "B3": { "analyse": false, "titre": "Créer son identité numérique (FranceConnect)" },
-  "B9": { "analyse": false, "titre": "Sécuriser ses achats en ligne et éviter les arnaques" },
-  "A1": { "analyse": false, "titre": "Prendre en main l'ordinateur" },
-  "A2": { "analyse": false, "titre": "Prendre en main la tablette" },
-  "A3": { "analyse": false, "titre": "Prendre en main le smartphone" },
-  "A4": { "analyse": false, "titre": "Télécharger et gérer ses applis (iOS/Android)" },
-  "B4": { "analyse": false, "titre": "Démarches administratives en ligne" },
-  "B7": { "analyse": false, "titre": "Outils numériques de scolarité (Pronote, Educonnect, Parcoursup…)" },
-  "B8": { "analyse": false, "titre": "Solutions numériques pour la gestion de budget" },
-  "B6": { "analyse": false, "titre": "Espace personnel site médical (Mon espace santé, Doctolib…)" },
-  "B5": { "analyse": false, "titre": "Espace personnel site administratif (Ameli, CAF, MSA, Impôts…)" },
-  "B1": { "analyse": false, "titre": "Prendre en main sa boite mail" },
-  "B2": { "analyse": false, "titre": "Recevoir et envoyer un mail avec pièce jointe" },
-  "E5": { "analyse": false, "titre": "Écrans et jeunesse" },
-  "E6": { "analyse": false, "titre": "Numérique et environnement" },
-  "A5": { "analyse": false, "titre": "Naviguer sur internet" },
-  "A6": { "analyse": false, "titre": "Sécuriser son environnement numérique" }
+  "E7": {
+    "analyse": false,
+    "titre": "Intelligence artificielle (IA)"
+  },
+  "D2": {
+    "analyse": false,
+    "titre": "Compte Personnel de Formation (CPF)"
+  },
+  "B3": {
+    "analyse": true,
+    "titre": "Créer son identité numérique (FranceConnect)",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Créer son identité numérique avec FranceConnect",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Avant de commencer — Vérifiez vos prérequis",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "Qu'est-ce que FranceConnect ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "ÉTAPE 1 SUR 3",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "ÉTAPE 2 SUR 3",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "ÉTAPE 3 SUR 3",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "⚠ Points de vigilance",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "DÉPANNAGE",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "En résumé — Les étapes clés",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "CHECKLIST",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "🎯 QUIZ D'ÉVALUATION — Testez vos connaissances",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "✅ FICHE ACTION — Créer votre compte FranceConnect",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "FICHE MÉMO",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "FICHES À EXPORTER — Copier-coller dans Word",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "🎨 EXEMPLES DE STYLES D'ILLUSTRATIONS",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "label": "1h — 58 min · 11 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "1h30 — 1h30 · 15 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h30 · 15 slides"
+      }
+    }
+  },
+  "B9": {
+    "analyse": true,
+    "titre": "Sécuriser ses achats en ligne et éviter les arnaques",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Sécuriser ses achats en ligne et éviter les arnaques",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Au programme de cet atelier",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "Les achats en ligne : qu'est-ce que c'est ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "Les arnaques les plus fréquentes",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "ÉTAPE 1 SUR 3",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "Comment repérer un faux site ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "ÉTAPE 2 SUR 3",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "Comment bien lire les avis clients ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "ÉTAPE 3 SUR 3",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "Quel moyen de paiement choisir ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "Mes droits après l'achat en ligne",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "Vous pensez être victime d'une arnaque ? Agissez vite !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "Points de vigilance essentiels",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "En résumé — Les étapes clés",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          14
+        ],
+        "label": "1h — 1h02 · 12 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "label": "1h30 — 1h18 · 14 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "label": "Complet — 1h18 · 14 slides"
+      }
+    }
+  },
+  "A1": {
+    "analyse": false,
+    "titre": "Prendre en main l'ordinateur"
+  },
+  "A2": {
+    "analyse": true,
+    "titre": "Prendre en main la tablette",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "📱 Prendre en main la tablette",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "🗺️ Au programme aujourd'hui",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🤔 C'est quoi, une tablette ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "✋ Comment tenir sa tablette ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "👆 Les gestes de base",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "🏠 L'écran d'accueil Android",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🔋 Allumer, éteindre, recharger",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "🌐 Se connecter à Internet (Wi-Fi)",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "✅ Bonnes pratiques & sécurité",
+        "role": "demo",
+        "min": 12,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "🎉 Vous avez toutes les clés !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "label": "1h — 54 min · 8 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "1h30 — 1h14 · 10 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "Complet — 1h14 · 10 slides"
+      }
+    }
+  },
+  "A3": {
+    "analyse": true,
+    "titre": "Prendre en main le smartphone",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Prendre en main son smartphone",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Au programme aujourd'hui 📋",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🔍 Découvrir votre smartphone",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": true
+      },
+      {
+        "n": 4,
+        "titre": "👆 Les gestes essentiels sur l'écran tactile",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🔋 Astuce quotidienne",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "📶 Se connecter à Internet",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "📞 Passer et recevoir un appel",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "💬 Envoyer un SMS",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "📱 Applications",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "⬇️ Télécharger une application",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "📸 Photos et vidéos : votre mémoire numérique",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "🛡️ Sécurité & confidentialité",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "🌐 Naviguer sur Internet",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "✅ Ce qu'il faut retenir",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "🎉 Bravo, vous avez fait le premier pas !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "label": "1h30 — 1h34 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h50 · 15 slides"
+      }
+    }
+  },
+  "A4": {
+    "analyse": true,
+    "titre": "Télécharger et gérer ses applis (iOS/Android)",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "📱 Télécharger et gérer ses applications",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "🗺️ Au programme de cet atelier",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "💡 C'est quoi une application ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "🏪 Les deux grandes boutiques d'applications",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🔍 Chercher et trouver la bonne application",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "⬇️ Télécharger une application : étape par étape",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🗂️ Organiser ses applications sur l'écran d'accueil",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "🔄 Mettre à jour ses applications : pourquoi c'est important ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "🗑️ Désinstaller une application : comment et quand ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "💾 Gérer l'espace de stockage de son téléphone",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "🔐 Les autorisations d'applications : ce qu'il faut savoir",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "🛒 Applications gratuites, payantes et achats intégrés",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "🔋 Applications en arrière-plan : gérer la batterie et les données",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "🌱 Applications et impact environnemental",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": true
+      },
+      {
+        "n": 15,
+        "titre": "✅ Les bons réflexes à retenir",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          13
+        ],
+        "label": "1h — 1h · 10 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          15
+        ],
+        "label": "1h30 — 1h32 · 14 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h40 · 15 slides"
+      }
+    }
+  },
+  "B4": {
+    "analyse": true,
+    "titre": "Démarches administratives en ligne",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "🧭 Les démarches administratives en ligne",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "😟 Pourquoi les démarches en ligne semblent compliquées",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🗺️ Au programme de cet atelier",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "🏛️ Service-public.fr : votre portail officiel",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🔍 Comment naviguer sur service-public.fr",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "🎯 La Boussole des jeunes : pour les 16–30 ans",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🔑 FranceConnect : une clé pour tous les services",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "📂 Les principaux sites par thème",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "🤝 Vous n'êtes pas seul·e : les lieux d'aide",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "✅ Ce que vous pouvez faire dès aujourd'hui",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "1h30 — 1h10 · 10 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "Complet — 1h10 · 10 slides"
+      }
+    }
+  },
+  "B7": {
+    "analyse": true,
+    "titre": "Outils numériques de scolarité (Pronote, Educonnect, Parcoursup…)",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Les Outils Numériques de Scolarité",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Qu'est-ce que les outils numériques de scolarité ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "Pourquoi utiliser ces outils numériques ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "Étape 1 — Se connecter à Educonnect",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "Mot de passe oublié sur Educonnect ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "Étape 2 — Consulter les informations sur Pronote",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "Justifier une absence sur Pronote",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "Étape 3 — S'orienter avec Parcoursup",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "Les dates clés de Parcoursup 2025",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "⚠ Points de vigilance",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "Arnaques numériques : restez vigilants !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "En résumé — Les étapes clés",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "Questions fréquentes (FAQ)",
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "Ateliers numériques du Lot-et-Garonne",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "Besoin d'aide ? Nous sommes là !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12
+        ],
+        "label": "1h — 58 min · 11 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "1h30 — 1h27 · 15 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h27 · 15 slides"
+      }
+    }
+  },
+  "B8": {
+    "analyse": true,
+    "titre": "Solutions numériques pour la gestion de budget",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "💰 Gérer son budget à l'ère numérique",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "📋 Au programme de cet atelier",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🤔 Pourquoi suivre son budget ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "📱 Tour d'horizon des applications de budget",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🆓 Applications gratuites vs. payantes",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "🛠️ Comment bien démarrer : les premières étapes",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "💡 Astuces pour optimiser son budget",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "🏷️ Bons plans & outils pour dépenser moins",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "🔒 Sécurité & confidentialité : ce qu'il faut savoir",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "🎉 Vous êtes prêt·e à vous lancer !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "1h — 1h · 10 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "1h30 — 1h · 10 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "Complet — 1h · 10 slides"
+      }
+    }
+  },
+  "B6": {
+    "analyse": true,
+    "titre": "Espace personnel site médical (Mon espace santé, Doctolib…)",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Créer et gérer votre Espace Personnel sur Mon Espace Santé",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "🗺️ Au programme aujourd'hui",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🏥 Introduction",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "✅ Pourquoi s'inscrire ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🔐 Avant de commencer",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "🖥️ Étape par étape",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🔑 Connexion sécurisée",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "👤 Personnalisation",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "📁 Vos documents",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "🤝 Partage & Confidentialité",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "Comprendre la différence",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "💰 Remboursements",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "📱 Application mobile",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "🛡️ Sécurité & Confidentialité",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "❓ Questions fréquentes",
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": false
+      },
+      {
+        "n": 16,
+        "titre": "🎯 En résumé",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "1h — 1h04 · 10 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "label": "1h30 — 1h28 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "label": "Complet — 1h49 · 16 slides"
+      }
+    }
+  },
+  "B5": {
+    "analyse": true,
+    "titre": "Espace personnel site administratif (Ameli, CAF, MSA, Impôts…)",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Créer et gérer votre espace personnel en ligne",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "🗺️ Ce que vous allez apprendre",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🏠 À quoi sert un espace personnel ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "📌 Les principaux sites administratifs",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🏥 Ouvrir votre compte Ameli (Assurance Maladie)",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "💰 Ouvrir votre compte Impôts.gouv.fr",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🔍 Où trouver vos numéros clés ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "🆕 Créer votre espace personnel : ce qu'il faut préparer",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "🪜 Les étapes de création de votre compte",
+        "role": "chapitre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "🔐 Choisir un mot de passe solide",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "📱 La double authentification : une sécurité supplémentaire",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "✏️ Mettre à jour vos informations personnelles",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "🆘 En cas de problème : que faire ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "✅ Les bons réflexes à adopter",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "🎉 Vous êtes prêt·e !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "label": "1h30 — 1h32 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h48 · 15 slides"
+      }
+    }
+  },
+  "B1": {
+    "analyse": true,
+    "titre": "Prendre en main sa boite mail",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "Prenez en main votre boîte mail 📬",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Au programme",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "Pourquoi la messagerie, c'est important ? 💡",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "Les trois grandes messageries 🏆",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "Anatomie d'une boîte mail 🔍",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "Lire et comprendre un e-mail reçu 📖",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "Rédiger et envoyer un e-mail ✍️",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "Les champs À, Cc et Cci expliqués 👥",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "Ajouter une pièce jointe 📎",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "Organiser sa boîte mail : les dossiers et libellés 🗂️",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "Gérer les spams et indésirables 🚫",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "Reconnaître un mail frauduleux (phishing) ⚠️",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "Sécuriser son compte mail 🔐",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "Comparatif des trois messageries 📊",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "Les bonnes habitudes à adopter dès aujourd'hui ✅",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 16,
+        "titre": "Récapitulatif de l'atelier",
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "label": "1h30 — 1h34 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "label": "Complet — 1h55 · 16 slides"
+      }
+    }
+  },
+  "B2": {
+    "analyse": true,
+    "titre": "Recevoir et envoyer un mail avec pièce jointe",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "📧 Pièces jointes par e-mail",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "🗺️ Au programme de cet atelier",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "📎 Qu'est-ce qu'une pièce jointe ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "🗂️ Les types de fichiers — Ce que disent les extensions",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "📤 Envoyer une pièce jointe avec Gmail",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "📤 Envoyer une pièce jointe avec Outlook",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "📤 Envoyer une pièce jointe avec Proton Mail",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "⚖️ Comparatif des trois messageries",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "📥 Recevoir et ouvrir une pièce jointe",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "🔎 Retrouver ses pièces jointes téléchargées",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "⚠️ Les pièges à éviter absolument",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "🛡️ Les signaux d'alarme — Infographie",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "✅ Bonnes pratiques recommandées",
+        "role": "demo",
+        "min": 12,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "📏 Les limites de taille — et comment les contourner",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "🎓 Ce qu'il faut retenir",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "label": "1h30 — 1h26 · 12 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h54 · 15 slides"
+      }
+    }
+  },
+  "E5": {
+    "analyse": true,
+    "titre": "Écrans et jeunesse",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "📱 Écrans et Jeunesse",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Au programme aujourd'hui",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "📊 Chapitre 1 — État des lieux",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "🧠 Chapitre 2 — Comprendre les mécanismes",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "⚠️ Chapitre 3 — Les risques réels",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "🔍 Chapitre 4 — Signaux d'alerte",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🛡️ Chapitre 5 — Prévention",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "🏠 Chapitre 6 — Outils concrets",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "✨ Chapitre 7 — Alternatives positives",
+        "role": "contenu",
+        "min": 10,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "🎯 Conclusion",
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "label": "1h — 56 min · 7 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "1h30 — 1h21 · 10 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "label": "Complet — 1h21 · 10 slides"
+      }
+    }
+  },
+  "E6": {
+    "analyse": true,
+    "titre": "Numérique et environnement",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "🌿 Numérique & Environnement",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "📊 Le numérique : un secteur qui pèse lourd",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "📱 Nos appareils : le cœur du problème",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "🔋 L'usage quotidien : des impacts souvent invisibles",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🏭 Les data centers : des usines énergivores",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "⛏️ Des ressources rares et précieuses",
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": true
+      },
+      {
+        "n": 7,
+        "titre": "🗑️ La montagne de déchets électroniques",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "🔄 L'obsolescence : le piège du renouvellement",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "🛠️ Allonger la vie de ses appareils",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "💡 La sobriété numérique au quotidien",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "🤖 L'IA : un appétit énergétique démesuré",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "🏢 Le numérique responsable en entreprise",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": true
+      },
+      {
+        "n": 13,
+        "titre": "⚖️ Des solutions collectives et réglementaires",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "🎯 À vous de jouer !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "📚 Pour aller plus loin — Sources",
+        "role": "conclusion",
+        "min": 5,
+        "optionnel": true
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 58 min · 8 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          8,
+          9,
+          10,
+          11,
+          13,
+          14
+        ],
+        "label": "1h30 — 1h30 · 12 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h48 · 15 slides"
+      }
+    }
+  },
+  "A5": {
+    "analyse": true,
+    "titre": "Naviguer sur internet",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "🌐 Naviguer sur Internet",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "📋 Au programme aujourd'hui",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "🔌 Qu'est-ce qu'Internet ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "📶 Se connecter au Wi-Fi — Mode d'emploi",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🖥️ Le navigateur web : votre porte d'entrée",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "🗺️ Anatomie d'une page web",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🔍 Les moteurs de recherche : comment ça marche ?",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "💬 Bien formuler sa recherche",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "🔗 Comprendre une adresse web (URL)",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "✅ Reconnaître un site fiable",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "🎣 Attention aux arnaques en ligne (phishing)",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "🔑 Créer un mot de passe solide",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "🍪 Les cookies et votre vie privée",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 14,
+        "titre": "🏛️ Les services publics en ligne",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "label": "1h30 — 1h34 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "label": "Complet — 1h42 · 14 slides"
+      }
+    }
+  },
+  "A6": {
+    "analyse": true,
+    "titre": "Sécuriser son environnement numérique",
+    "slides": [
+      {
+        "n": 1,
+        "titre": "🔐 Sécuriser son environnement numérique",
+        "role": "titre",
+        "min": 2,
+        "optionnel": false
+      },
+      {
+        "n": 2,
+        "titre": "Au programme aujourd'hui",
+        "role": "intro",
+        "min": 4,
+        "optionnel": false
+      },
+      {
+        "n": 3,
+        "titre": "⚠️ Le paysage des menaces numériques",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 4,
+        "titre": "🧠 Savoir reconnaître une tentative de phishing",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 5,
+        "titre": "🔑 Des mots de passe vraiment solides",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 6,
+        "titre": "🗄️ Les gestionnaires de mots de passe",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 7,
+        "titre": "🔐 L'authentification à deux facteurs (2FA)",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 8,
+        "titre": "🛡️ Protéger ses appareils",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 9,
+        "titre": "💾 Sauvegarder ses données : la règle du 3-2-1",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 10,
+        "titre": "📡 Les réseaux Wi-Fi publics : terrain miné",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "🌐 Naviguer sur le web en préservant sa vie privée",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "📱 La sécurité sur les réseaux sociaux",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 13,
+        "titre": "🌱 Numérique responsable",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": true
+      },
+      {
+        "n": 14,
+        "titre": "🛠️ Votre kit de survie numérique",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "✅ Ce que vous pouvez faire dès aujourd'hui",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      }
+    ],
+    "versions": {
+      "1h": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "label": "1h — 1h02 · 9 slides"
+      },
+      "1h30": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          14
+        ],
+        "label": "1h30 — 1h34 · 13 slides"
+      },
+      "complet": {
+        "indices": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "label": "Complet — 1h50 · 15 slides"
+      }
+    }
+  }
 }
