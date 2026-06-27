@@ -1181,8 +1181,7 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
 .vslide.unchecked .vslide-min  { opacity: .4; }
 .vslide-prio { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-right: 2px; }
 .vslide-prio.prio-essential { background: #22c55e; }
-.vslide-prio.prio-medium    { background: #f59e0b; }
-.vslide-prio.prio-low       { background: #ef4444; }
+.vslide-order { font-size: 10px; font-weight: 700; min-width: 28px; text-align: right; flex-shrink: 0; line-height: 1; }
 .vprio-legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; flex-wrap: wrap; }
 .vprio-legend span { display: flex; align-items: center; gap: 5px; }
 .vprio-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
@@ -1295,8 +1294,7 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
       <div class="vtabs" id="vtabs"></div>
       <div class="vprio-legend" id="vprio-legend" style="display:none">
         <span><i class="vprio-dot" style="background:#22c55e"></i>Essentiel</span>
-        <span><i class="vprio-dot" style="background:#f59e0b"></i>Retiré en 1h</span>
-        <span><i class="vprio-dot" style="background:#ef4444"></i>Retiré en 1h30</span>
+        <span><span style="font-weight:700;color:#ef4444">1/n</span> → ordre de suppression recommandé</span>
       </div>
       <div class="vslides-list" id="vslides-list"></div>
       <div class="version-footer">
@@ -3668,6 +3666,12 @@ function renderSlideList(plan) {
   let mins = 0;
   const v1h   = new Set((plan.versions["1h"]?.indices)   || []);
   const v1h30 = new Set((plan.versions["1h30"]?.indices) || []);
+  const removalQueue = [
+    ...plan.slides.filter(s => !v1h30.has(s.n)),
+    ...plan.slides.filter(s => v1h30.has(s.n) && !v1h.has(s.n)),
+  ];
+  const totalRemovable = removalQueue.length;
+  const removalOrder = new Map(removalQueue.map((s, i) => [s.n, i + 1]));
   plan.slides.forEach(s => {
     const checked = _versionChecked.has(s.n);
     if (checked) mins += s.min;
@@ -3678,18 +3682,18 @@ function renderSlideList(plan) {
     const badgeLabel = s.role === "demo" ? "démo" : s.optionnel ? "optionnel" : "";
     const badgeClass = s.role === "demo" ? "demo" : s.optionnel ? "opt" : "";
 
-    let prioClass, prioTitle;
+    let prioHTML;
     if (v1h.has(s.n)) {
-      prioClass = "prio-essential"; prioTitle = "Essentiel — conservé dans toutes les versions";
-    } else if (v1h30.has(s.n)) {
-      prioClass = "prio-medium";    prioTitle = "Retiré en version 1h";
+      prioHTML = `<span class="vslide-prio prio-essential"></span>`;
     } else {
-      prioClass = "prio-low";       prioTitle = "Retiré dès la version 1h30";
+      const order = removalOrder.get(s.n);
+      const color = v1h30.has(s.n) ? '#f59e0b' : '#ef4444';
+      prioHTML = `<span class="vslide-order" style="color:${color}">${order}/${totalRemovable}</span>`;
     }
 
     row.innerHTML = `
       <input type="checkbox" ${checked ? "checked" : ""} data-n="${s.n}">
-      <span class="vslide-prio ${prioClass}" title="${prioTitle}"></span>
+      ${prioHTML}
       <span class="vslide-num">${s.n}</span>
       <span class="vslide-titre">${s.titre}</span>
       ${badgeLabel ? `<span class="vslide-badge ${badgeClass}">${badgeLabel}</span>` : ""}
