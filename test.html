@@ -3750,13 +3750,18 @@ async function processVersionPPTX(file) {
 
     const blob = await zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation", compression: "DEFLATE" });
     const hidden = totalSlides - _versionChecked.size;
-    const fname = file.name.replace(/\.pptx$/i, `_${[..._versionChecked.size]}slides.pptx`);
+    const fname = file.name.replace(/\.pptx$/i, `_${_versionChecked.size}slides.pptx`);
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = fname; a.click();
-    URL.revokeObjectURL(url);
-    showToast(`✓ Version générée — ${_versionChecked.size} slides actives, ${hidden} masquées`);
-    document.getElementById("version-drop-zone").style.display = "none";
+
+    // Afficher un bouton de téléchargement explicite (fiable sur mobile)
+    const drop = document.getElementById("version-drop-zone");
+    drop.innerHTML = `
+      <div style="margin-bottom:10px;color:var(--text);font-weight:600">✓ Fichier prêt — ${_versionChecked.size} slides actives, ${hidden} masquées</div>
+      <a href="${url}" download="${fname}" class="version-pick-btn" style="background:var(--A);color:#fff;border-color:var(--A);text-decoration:none">
+        ⬇ Télécharger ${fname}
+      </a>`;
+    drop.style.display = "block";
+    drop.scrollIntoView({ behavior: "smooth", block: "nearest" });
   } catch(err) {
     showToast("⚠ Erreur : " + err.message);
     console.error(err);
