@@ -1,0 +1,34 @@
+name: Analyse PPTX → slide-plans.json
+
+on:
+  push:
+    paths:
+      - "assets/pptx/*.pptx"
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install python-pptx
+
+      - name: Analyser les nouveaux PPTXs
+        run: python .github/scripts/analyze_pptx.py
+
+      - name: Commit slide-plans.json si modifié
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/slide-plans.json
+          git diff --cached --quiet || git commit -m "feat: slide-plans.json mis à jour automatiquement"
+          git push
