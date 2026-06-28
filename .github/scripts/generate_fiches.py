@@ -77,20 +77,26 @@ def get_bullets(slide, title, max_bullets=3):
     return bullets
 
 
-def extract_fiche(pptx_path, slides_meta):
+def extract_fiche(pptx_path, slides_meta, indices=None):
+    """indices : liste 1-indexée des slides à inclure (version preset). None = toutes."""
     prs = Presentation(pptx_path)
 
-    # Titre atelier (slide 1)
+    # Titre atelier (slide 1 du PPTX original, toujours)
     titre = clean(get_slide_title(prs.slides[0]))
 
-    # Durée totale
-    duree_min = sum(s["min"] for s in slides_meta)
-    h, m = divmod(duree_min, 60)
-    duree_str = f"{h}h{m:02d}" if h and m else (f"{h}h" if h else f"{m} min")
+    # Filtrer les paires slide/meta selon la version
+    idx_set = set(indices) if indices is not None else None
+    pairs = [(s, m) for s, m in zip(prs.slides, slides_meta)
+             if idx_set is None or m["n"] in idx_set]
+
+    # Durée totale = slides sélectionnées uniquement
+    duree_min = sum(m["min"] for _, m in pairs)
+    h, mv = divmod(duree_min, 60)
+    duree_str = f"{h}h{mv:02d}" if h and mv else (f"{h}h" if h else f"{mv} min")
 
     # Slides de contenu (hors titre et conclusion)
     content_slides = [
-        (slide, meta) for slide, meta in zip(prs.slides, slides_meta)
+        (slide, meta) for slide, meta in pairs
         if meta["role"] in ("contenu", "demo", "chapitre") and meta["n"] > 1
     ]
 
@@ -102,7 +108,7 @@ def extract_fiche(pptx_path, slides_meta):
     # Déroulé : slides non-titre non-optionnelles (max 6)
     deroulé = []
     cumtime = 0
-    for slide, meta in zip(prs.slides, slides_meta):
+    for slide, meta in pairs:
         if meta["role"] == "titre":
             cumtime += meta["min"]
             continue
@@ -124,7 +130,7 @@ def extract_fiche(pptx_path, slides_meta):
 
     # Blocs optionnels (max 2, pour la table en bas de fiche)
     optional_slides = [
-        (slide, meta) for slide, meta in zip(prs.slides, slides_meta)
+        (slide, meta) for slide, meta in pairs
         if meta.get("optionnel") and meta["role"] not in ("titre", "conclusion")
     ]
     optionnels = []
@@ -366,17 +372,26 @@ def main():
             print(f"SKIP {key} — non analysé")
             continue
 
-        try:
-            fiche_data = extract_fiche(pptx_path, plan["slides"])
-            out = FICHES_DIR / f"{key}-fiche.pptx"
-            fill_template(fiche_data, out)
-            n_opt = len(fiche_data["optionnels"])
-            print(f"OK {key}: {fiche_data['titre']} ({fiche_data['duree']}) — {n_opt} bloc(s) opt.")
-            generated.append(key)
-        except Exception as e:
-            print(f"ERREUR {key}: {e}")
+        versions = plan.get("versions") or {}
+        if not versions:
+            # Fallback : version unique complète
+            versions = {"complet": {"indices": [s["n"] for s in plan["slides"]], "label": "Complet"}}
 
-    print(f"\n{len(generated)} fiche(s) générée(s) : {', '.join(generated)}")
+        ok = []
+        for vk, vdata in versions.items():
+            try:
+                fiche_data = extract_fiche(pptx_path, plan["slides"], indices=vdata["indices"])
+                out = FICHES_DIR / f"{key}-fiche-{vk}.pptx"
+                fill_template(fiche_data, out)
+                ok.append(f"{vk}({fiche_data['duree']})")
+            except Exception as e:
+                print(f"ERREUR {key}/{vk}: {e}")
+
+        if ok:
+            print(f"OK {key}: {', '.join(ok)}")
+            generated.append(key)
+
+    print(f"\n{len(generated)} atelier(s) traité(s) : {', '.join(generated)}")
 
 
 if __name__ == "__main__":

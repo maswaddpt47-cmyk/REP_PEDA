@@ -2389,7 +2389,8 @@ function openModal(num, e) {
   loadSlidePlans().then(plans => {
     if (!modalAtelier || modalAtelier.num !== num) return;
     if (!plans[num] || !plans[num].analyse) return;
-    const localUrl = `./assets/fiches/${num}-fiche.pptx`;
+    const _vk = Object.keys(plans[num].versions || {})[0] || "complet";
+    const localUrl = `./assets/fiches/${num}-fiche-${_vk}.pptx`;
     const actionRow = list.querySelector('[data-key="action"]');
     if (!actionRow) return;
     const openBtn = actionRow.querySelector(".fiche-open-btn");
@@ -3661,6 +3662,23 @@ function applyVersionPreset(num, key, plan) {
   document.querySelectorAll(".vtab").forEach(b => b.classList.toggle("active", b.dataset.key === key));
   _versionChecked = new Set(plan.versions[key].indices);
   renderSlideList(plan);
+  // Mettre à jour le lien de la fiche animateur selon la version active
+  if (plan.analyse) {
+    const fiches = document.getElementById("modal-fiche-list");
+    if (fiches) {
+      const actionRow = fiches.querySelector('[data-key="action"]');
+      if (actionRow) {
+        const openBtn = actionRow.querySelector(".fiche-open-btn");
+        const dlBtn   = actionRow.querySelector(".fiche-dl-btn");
+        if (openBtn && !openBtn.dataset.id) {
+          const localUrl = `./assets/fiches/${num}-fiche-${key}.pptx`;
+          actionRow.classList.add("has-link");
+          openBtn.disabled = false; openBtn.dataset.local = localUrl;
+          dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
+        }
+      }
+    }
+  }
 }
 
 function renderSlideList(plan) {
