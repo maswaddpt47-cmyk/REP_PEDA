@@ -99,9 +99,9 @@ def p(tf, text, sz, bold=False, clr=DRK, align=PP_ALIGN.LEFT, first=False, itali
 
 def draw_memo_header(slide, titre, subtitle):
     """En-tête : titre + liste des thèmes."""
-    tf = tbox(slide, 1.80, HEADER_TOP, 14.05, HEADER_H)
+    tf = tbox(slide, ML, HEADER_TOP, CW, HEADER_H)
     titre_display = re.sub(r'^(Mon mémo[\s—\-]+)', '', titre)
-    p(tf, f"Mon mémo — {titre_display}", 20, bold=True, clr=BLU, first=True)
+    p(tf, f"Mon mémo — {titre_display}", 18, bold=True, clr=BLU, first=True)
     if subtitle:
         p(tf, subtitle, 10, clr=GRY)
 
