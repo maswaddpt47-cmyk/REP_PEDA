@@ -197,6 +197,21 @@ def set_badge_para(para, badge_text, bullet_text):
     p_xml.append(new_run)
 
 
+def clear_table_row(row):
+    """Vide une ligne de tableau : texte + fond de cellule (évite les rectangles oranges résiduels)."""
+    from lxml import etree
+    cell = row.cells[0]
+    for p in cell.text_frame.paragraphs:
+        clear_para_runs(p)
+    # Effacer aussi le fond de cellule (solidFill/gradFill au niveau <a:tcPr>)
+    tc = cell._tc
+    tcPr = tc.find(qn("a:tcPr"))
+    if tcPr is not None:
+        for fill_tag in (qn("a:solidFill"), qn("a:gradFill"), qn("a:pattFill"), qn("a:blipFill")):
+            for el in tcPr.findall(fill_tag):
+                tcPr.remove(el)
+
+
 def fill_optional_table(shape, optionnels):
     """Remplit (ou vide) les lignes 1 et 2 de la table Blocs optionnels."""
     tbl = shape.table
@@ -207,9 +222,7 @@ def fill_optional_table(shape, optionnels):
         data_idx = row_idx - 1
 
         if data_idx >= len(optionnels):
-            # Vider : supprimer tous les runs (évite le rectangle orange résiduel)
-            for p in paras:
-                clear_para_runs(p)
+            clear_table_row(row)
             continue
 
         opt = optionnels[data_idx]
@@ -253,12 +266,12 @@ def fill_template(fiche_data, output_path):
     s = shapes.get("object 2")
     if s:
         tf = s.text_frame
-        set_norm_autofit(tf)  # empêche le débordement vers le bas
+        set_norm_autofit(tf)
         if len(tf.paragraphs) > 0:
-            set_para_text(tf.paragraphs[0], f"Fiche Action - Atelier {fiche_data['titre']}")
+            set_para_text(tf.paragraphs[0], fiche_data['titre'])
         if len(tf.paragraphs) > 1:
             set_para_text(tf.paragraphs[1],
-                f"{fiche_data['duree']} | Guide d'animation — Conseillers Numériques CD47")
+                f"Fiche Action | {fiche_data['duree']} | Guide d'animation — Conseillers Numériques CD47")
 
     # ── Objectifs
     s = shapes.get("object 7")
@@ -323,9 +336,10 @@ def fill_template(fiche_data, output_path):
                 fill_optional_table(shape, fiche_data["optionnels"])
             else:
                 hide_shape(shape)
-        elif shape.name == "object 48":  # GROUP décoratif du bloc OPT
-            if not has_opt:
-                hide_shape(shape)
+        elif shape.name == "object 48":
+            # GROUP décoratif du bloc OPT : toujours masqué car on ne peut pas
+            # cibler ses enfants individuellement (1 décoration / ligne optionnelle)
+            hide_shape(shape)
 
     # ── Conseils
     s = shapes.get("object 57")
