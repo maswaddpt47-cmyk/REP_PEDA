@@ -3658,27 +3658,26 @@ async function renderVersionsPanel(num) {
   applyVersionPreset(num, Object.keys(vers)[0], plan);
 }
 
+function findBestVersionKey(plan) {
+  // Exact match
+  for (const [vk, vdata] of Object.entries(plan.versions)) {
+    const vSet = new Set(vdata.indices);
+    if (vSet.size === _versionChecked.size && [..._versionChecked].every(n => vSet.has(n)))
+      return vk;
+  }
+  // Best overlap fallback
+  let bestKey = null, bestScore = -1;
+  for (const [vk, vdata] of Object.entries(plan.versions)) {
+    const overlap = vdata.indices.filter(n => _versionChecked.has(n)).length;
+    if (overlap > bestScore) { bestScore = overlap; bestKey = vk; }
+  }
+  return bestKey || "complet";
+}
+
 function applyVersionPreset(num, key, plan) {
   document.querySelectorAll(".vtab").forEach(b => b.classList.toggle("active", b.dataset.key === key));
   _versionChecked = new Set(plan.versions[key].indices);
   renderSlideList(plan);
-  // Mettre à jour le lien de la fiche animateur selon la version active
-  if (plan.analyse) {
-    const fiches = document.getElementById("modal-fiche-list");
-    if (fiches) {
-      const actionRow = fiches.querySelector('[data-key="action"]');
-      if (actionRow) {
-        const openBtn = actionRow.querySelector(".fiche-open-btn");
-        const dlBtn   = actionRow.querySelector(".fiche-dl-btn");
-        if (openBtn && !openBtn.dataset.id) {
-          const localUrl = `./assets/fiches/${num}-fiche-${key}.pptx`;
-          actionRow.classList.add("has-link");
-          openBtn.disabled = false; openBtn.dataset.local = localUrl;
-          dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
-        }
-      }
-    }
-  }
 }
 
 function renderSlideList(plan) {
@@ -3730,6 +3729,25 @@ function renderSlideList(plan) {
   const label = h > 0 ? `${h}h${m > 0 ? m.toString().padStart(2,"0") : ""}` : `${m} min`;
   total.innerHTML = `Durée estimée : <strong>${label}</strong> · ${_versionChecked.size} slides / ${plan.slides.length}`;
   dlBtn.disabled = false;
+
+  // Mettre à jour le lien de la fiche animateur selon la sélection courante
+  if (plan.analyse) {
+    const fiches = document.getElementById("modal-fiche-list");
+    if (fiches) {
+      const actionRow = fiches.querySelector('[data-key="action"]');
+      if (actionRow) {
+        const openBtn = actionRow.querySelector(".fiche-open-btn");
+        const dlBtn2  = actionRow.querySelector(".fiche-dl-btn");
+        if (openBtn && !openBtn.dataset.id) {
+          const bestKey = findBestVersionKey(plan);
+          const localUrl = `./assets/fiches/${_currentVersionNum}-fiche-${bestKey}.pptx`;
+          actionRow.classList.add("has-link");
+          openBtn.disabled = false; openBtn.dataset.local = localUrl;
+          dlBtn2.disabled  = false; dlBtn2.dataset.local  = localUrl;
+        }
+      }
+    }
+  }
 }
 
 document.getElementById("version-dl-btn").addEventListener("click", async () => {
