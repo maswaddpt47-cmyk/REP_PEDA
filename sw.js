@@ -1,4 +1,4 @@
-const CACHE = "conum47-v8";
+const CACHE = "conum47-v9";
 const STATIC = [
   "./index.html",
   "./test.html",
@@ -24,7 +24,9 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.url.includes("api.github.com")) return;
-  if (e.request.url.includes("/assets/pptx/")) return; // PPTXs : réseau uniquement
+  if (e.request.url.includes("/assets/pptx/")) return;    // PPTXs source : réseau uniquement
+  if (e.request.url.includes("/assets/fiches/")) return;  // Fiches animateur : réseau uniquement
+  if (e.request.url.includes("/assets/memos/")) return;   // Mémos : réseau uniquement
 
   // HTML et données dynamiques : réseau d'abord, cache en fallback offline
   if (e.request.mode === "navigate"

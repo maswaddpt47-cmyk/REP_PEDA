@@ -2436,20 +2436,34 @@ function openModal(num, e) {
   // Suivi d'utilisation
   renderUsagePanel(num);
 
-  // Brancher la fiche animateur générée sur la ligne "Action" si pas de lien Drive
+  // Brancher les fiches générées (action + mémo) si pas de lien Drive
   loadSlidePlans().then(plans => {
     if (!modalAtelier || modalAtelier.num !== num) return;
     if (!plans[num] || !plans[num].analyse) return;
     const _vk = Object.keys(plans[num].versions || {})[0] || "complet";
-    const localUrl = `./assets/fiches/${num}-fiche-${_vk}.pptx`;
+    // Fiche animateur (action)
     const actionRow = list.querySelector('[data-key="action"]');
-    if (!actionRow) return;
-    const openBtn = actionRow.querySelector(".fiche-open-btn");
-    const dlBtn   = actionRow.querySelector(".fiche-dl-btn");
-    if (openBtn && !openBtn.dataset.id) {
-      actionRow.classList.add("has-link");
-      openBtn.disabled = false; openBtn.dataset.local = localUrl;
-      dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
+    if (actionRow) {
+      const openBtn = actionRow.querySelector(".fiche-open-btn");
+      const dlBtn   = actionRow.querySelector(".fiche-dl-btn");
+      if (openBtn && !openBtn.dataset.id) {
+        const localUrl = `./assets/fiches/${num}-fiche-${_vk}.pptx`;
+        actionRow.classList.add("has-link");
+        openBtn.disabled = false; openBtn.dataset.local = localUrl;
+        dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
+      }
+    }
+    // Fiche mémo (memo)
+    const memoRow = list.querySelector('[data-key="memo"]');
+    if (memoRow) {
+      const openBtn = memoRow.querySelector(".fiche-open-btn");
+      const dlBtn   = memoRow.querySelector(".fiche-dl-btn");
+      if (openBtn && !openBtn.dataset.id) {
+        const memoUrl = `./assets/memos/${num}-memo.pptx`;
+        memoRow.classList.add("has-link");
+        openBtn.disabled = false; openBtn.dataset.local = memoUrl;
+        dlBtn.disabled   = false; dlBtn.dataset.local   = memoUrl;
+      }
     }
   });
 
