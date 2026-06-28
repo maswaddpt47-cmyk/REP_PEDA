@@ -2,7 +2,7 @@
 Génère les fiches mémo participant PPTX from scratch — format A4 recto-verso.
 Structure fidèle au template Fiche_Memo.pptx : cartes numérotées, BSA, contact.
 """
-import json, re
+import json, re, math
 from pathlib import Path
 from pptx import Presentation
 from pptx.util import Cm, Pt
@@ -47,6 +47,17 @@ HEADER_H    = 1.42
 FIRST_TOP   = 4.86
 STEPS_PER_PAGE = 4
 MAX_STEPS      = 8
+CHARS_PER_LINE = 78   # estimation conservative à 10pt Arial sur 16.19 cm
+LINE_H_CM      = 0.42 # hauteur d'une ligne wrappée à 10pt + espacement
+
+
+def calc_step_h(bullets):
+    """Hauteur dynamique d'un bloc step selon le nombre de lignes wrappées."""
+    if not bullets:
+        return STEP_H
+    n_lines = sum(max(1, math.ceil(len(b) / CHARS_PER_LINE)) for b in bullets[:4])
+    bullet_area = n_lines * LINE_H_CM + 0.35  # contenu + marge basse
+    return max(SEP_Y_IN + 0.22 + bullet_area, STEP_H)
 
 
 # ══════════════════════════════════════════════════════
@@ -108,11 +119,12 @@ def draw_memo_header(slide, titre, subtitle):
 
 def draw_memo_step(slide, num, titre, bullets, top, color_idx):
     """Carte étape : accent coloré + numéro + titre + bullets."""
+    h  = calc_step_h(bullets)
     ac, bg = STEP_PALETTE[color_idx % 2]
 
     # Background + accent strip
-    rect(slide, ML, top, CW, STEP_H, bg)
-    rect(slide, ML, top, ACCENT_W, STEP_H, ac)
+    rect(slide, ML, top, CW, h, bg)
+    rect(slide, ML, top, ACCENT_W, h, ac)
 
     # Horizontal separator (divides number/title from bullets)
     rect(slide, SEP_X, top + SEP_Y_IN, SEP_W, 0.02, SEP_CLR)
@@ -130,13 +142,13 @@ def draw_memo_step(slide, num, titre, bullets, top, color_idx):
     # Bullets — below separator
     if bullets:
         tf_bull = tbox(slide, ML + ACCENT_W + 0.15, top + SEP_Y_IN + 0.12,
-                       CW - ACCENT_W - 0.25, STEP_H - SEP_Y_IN - 0.18)
+                       CW - ACCENT_W - 0.25, h - SEP_Y_IN - 0.22)
         first = True
         for b in bullets[:4]:
             p(tf_bull, f"→ {b}", 10, clr=DRK, first=first)
             first = False
 
-    return top + STEP_H + STEP_GAP
+    return top + h + STEP_GAP
 
 
 def draw_suite_box(slide, page2_topics, top):
@@ -291,8 +303,19 @@ def build_memo(memo_data, output_path):
     # Sous-titre : 3 premiers titres d'étapes
     subtitle = " | ".join(s['titre'] for s in steps[:3])
 
-    p1_steps = steps[:STEPS_PER_PAGE]
-    p2_steps = steps[STEPS_PER_PAGE:]
+    # Découpage page 1 / page 2 basé sur la hauteur disponible
+    # Page 1 : FIRST_TOP → ~25.5 cm (réserve suite box + bas de page)
+    PAGE1_MAX = 25.50 - FIRST_TOP - 1.83 - 0.40  # suite_box_h + marge
+    PAGE2_MAX = 25.50 - FIRST_TOP
+    p1_steps, p2_steps = [], []
+    used = 0.0
+    for step in steps:
+        h = calc_step_h(step['bullets'])
+        if not p1_steps or used + h + STEP_GAP <= PAGE1_MAX:
+            p1_steps.append(step)
+            used += h + STEP_GAP
+        else:
+            p2_steps.append(step)
     needs_p2 = bool(p2_steps) or bool(bsa)
     total_pages = 2 if needs_p2 else 1
 
