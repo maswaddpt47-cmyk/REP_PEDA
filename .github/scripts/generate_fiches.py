@@ -302,12 +302,14 @@ def extract_fiche(pptx_path, slides_meta, indices=None):
         })
         cumtime += meta["min"]
 
-    # Optionnels : TOUJOURS depuis la liste complète (bonus "si le temps le permet")
+    # Optionnels : slides optionnelles NON incluses dans cette version
+    # (role "titre" exclu ; conclusion incluse si marquée optionnel)
     opt_raw = [(prs.slides[m["n"] - 1], m) for m in slides_meta
-               if m.get("optionnel") and m["role"] not in ("titre", "conclusion")]
+               if m.get("optionnel") and m["role"] != "titre"
+               and (idx_set is None or m["n"] not in idx_set)]
     optionnels = [{"min": m["min"], "titre": trunc(clean(m["titre"]), 38),
                    "bullets": get_bullets(s, m["titre"], 3)}
-                  for s, m in opt_raw[:2]]
+                  for s, m in opt_raw]
 
     return {
         "titre": titre, "duree": duree_str,
