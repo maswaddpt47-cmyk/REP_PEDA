@@ -40,8 +40,13 @@ CW       = 18.05           # largeur contenu
 
 STEP_H      = 2.08    # hauteur d'une étape déroulé
 OPT_HDR_H   = 0.55    # hauteur header section OPT
-OPT_ROW_H   = 1.65    # hauteur d'une ligne OPT
 CONS_H      = 2.50    # hauteur section conseils
+
+
+def opt_row_h(opt):
+    """Hauteur dynamique d'une ligne OPT selon le nombre de bullets."""
+    n = len(opt.get("bullets", []))
+    return 1.05 + n * 0.42  # durée+titre+padding + n bullets
 
 MATERIEL_DEFAULT = [
     "1 PC ou tablette par participant",
@@ -168,8 +173,8 @@ def draw_opt(slide, optionnels, top):
     if not optionnels:
         return top
 
-    n = len(optionnels)
-    total_h = OPT_HDR_H + n * OPT_ROW_H + 0.10
+    row_heights = [opt_row_h(o) for o in optionnels]
+    total_h = OPT_HDR_H + sum(row_heights) + 0.10
 
     # Fond + bordure section
     rect(slide, ML, top, CW, total_h, BG_OPT, ORG, 1.5)
@@ -181,10 +186,11 @@ def draw_opt(slide, optionnels, top):
       8.5, bold=True, clr=WHT, align=PP_ALIGN.CENTER, first=True)
 
     row_top = top + OPT_HDR_H
-    for opt in optionnels:
+    for i, opt in enumerate(optionnels):
+        rh = row_heights[i]
         rect(slide, ML, row_top, CW, 0.04, ORG)   # séparateur fin
 
-        tf2 = tbox(slide, ML + 0.30, row_top + 0.12, CW - 0.55, OPT_ROW_H - 0.18)
+        tf2 = tbox(slide, ML + 0.30, row_top + 0.12, CW - 0.55, rh - 0.18)
         p(tf2, f"{opt['min']} min", 8, bold=True, clr=ORG, first=True)
         p(tf2, opt["titre"], 9, bold=True, clr=DRK)
 
@@ -204,7 +210,7 @@ def draw_opt(slide, optionnels, top):
         for b in bullets[1:]:
             p(tf2, f". {b}", 8, clr=DRK)
 
-        row_top += OPT_ROW_H
+        row_top += rh
 
     return top + total_h + 0.20
 
@@ -344,7 +350,7 @@ def build_fiche(fiche_data, output_path):
 
     # OPT + conseils — saut de page si nécessaire
     n_opt   = len(fiche_data["optionnels"])
-    opt_h   = (OPT_HDR_H + n_opt * OPT_ROW_H + 0.30) if n_opt else 0
+    opt_h   = (OPT_HDR_H + sum(opt_row_h(o) for o in fiche_data["optionnels"]) + 0.30) if n_opt else 0
     cons_h  = CONS_H + 0.30
 
     if top + opt_h + cons_h > SH - 0.30:
