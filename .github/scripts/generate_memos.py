@@ -219,7 +219,7 @@ def get_memo_bullets(slide, title, max_b=4):
             # Skip if essentially the slide title
             if t_norm == title_norm or t_norm in title_norm or title_norm in t_norm:
                 continue
-            bullets.append(trunc(t, 65))
+            bullets.append(t)
             if len(bullets) >= max_b: break
         if len(bullets) >= max_b: break
     return bullets
@@ -241,7 +241,7 @@ def extract_memo(pptx_path, slides_meta, version_indices=None):
         slide = prs.slides[meta['n'] - 1]
         bullets = get_memo_bullets(slide, meta['titre'], 4)
         steps.append({
-            'titre':   trunc(clean(meta['titre']), 45),
+            'titre':   clean(meta['titre']),
             'bullets': bullets,
         })
 
@@ -263,7 +263,7 @@ def extract_memo(pptx_path, slides_meta, version_indices=None):
         slide = prs.slides[meta['n'] - 1]
         bullets = get_memo_bullets(slide, meta['titre'], 4)
         bsa.append({
-            'titre':   trunc(clean(meta['titre']), 50),
+            'titre':   clean(meta['titre']),
             'bullets': bullets,
         })
 
