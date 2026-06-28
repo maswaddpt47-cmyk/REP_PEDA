@@ -1,17 +1,47 @@
 """
-Génère les fiches animateur PPTX pour chaque atelier analysé.
-Lit slide-plans.json + assets/pptx/KEY.pptx → assets/fiches/KEY-fiche.pptx
+Génère les fiches animateur PPTX from scratch — layout 100% dynamique.
+Palette et structure fidèles au template original, sans dépendance au fichier .pptx.
+N étapes déroulé, N lignes OPT (0-2), multi-pages si nécessaire.
 """
 import json, re
 from pathlib import Path
 from pptx import Presentation
-from pptx.oxml.ns import qn
+from pptx.util import Cm, Pt
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
 
-ROOT        = Path(__file__).parent.parent.parent
-PPTX_DIR    = ROOT / "assets" / "pptx"
-FICHES_DIR  = ROOT / "assets" / "fiches"
-TEMPLATE    = ROOT / "assets" / "fiche-template.pptx"
-PLANS_FILE  = ROOT / "assets" / "slide-plans.json"
+ROOT       = Path(__file__).parent.parent.parent
+PPTX_DIR   = ROOT / "assets" / "pptx"
+FICHES_DIR = ROOT / "assets" / "fiches"
+PLANS_FILE = ROOT / "assets" / "slide-plans.json"
+
+# ── Palette (extraite du template original)
+BLU    = RGBColor(0x43, 0x88, 0xBC)   # bleu objectifs / titres
+TEA    = RGBColor(0x18, 0x7C, 0x88)   # teal matériel
+SKY    = RGBColor(0x5E, 0xB3, 0xD2)   # bleu clair
+ORG    = RGBColor(0xE6, 0x7D, 0x21)   # orange OPT
+YEL    = RGBColor(0xF8, 0xA8, 0x24)   # jaune conseils
+DRK    = RGBColor(0x2B, 0x2B, 0x2B)   # texte sombre
+GRY    = RGBColor(0x6E, 0x6E, 0x6D)   # gris sous-titre
+WHT    = RGBColor(0xFF, 0xFF, 0xFF)
+BG_BLU = RGBColor(0xEC, 0xF5, 0xFF)   # fond objectifs
+BG_TEA = RGBColor(0xEB, 0xF7, 0xF6)   # fond matériel
+BG_STP = RGBColor(0xF8, 0xF9, 0xFD)   # fond étape déroulé
+BD_STP = RGBColor(0xDD, 0xE6, 0xED)   # bordure étape
+BG_OPT = RGBColor(0xFF, 0xF8, 0xEF)   # fond OPT
+BG_CNS = RGBColor(0xFF, 0xFC, 0xE7)   # fond conseils
+
+BADGE_CYCLE = [SKY, BLU, TEA, BLU, TEA, SKY]   # couleurs badges étapes (cycle)
+
+# ── Dimensions (cm)
+SW, SH   = 20.99, 29.70   # slide A4 portrait
+ML       = 1.47            # marge gauche
+CW       = 18.05           # largeur contenu
+
+STEP_H      = 2.08    # hauteur d'une étape déroulé
+OPT_HDR_H   = 0.55    # hauteur header section OPT
+OPT_ROW_H   = 1.65    # hauteur d'une ligne OPT
+CONS_H      = 2.50    # hauteur section conseils
 
 MATERIEL_DEFAULT = [
     "1 PC ou tablette par participant",
@@ -19,7 +49,6 @@ MATERIEL_DEFAULT = [
     "Grand écran / vidéoprojecteur",
     "Fiches mémo (1 par participant)",
 ]
-
 CONSEILS_DEFAULT = [
     "Adapter le rythme selon le niveau du groupe.",
     "Laisser les participants manipuler dès que possible.",
@@ -28,14 +57,175 @@ CONSEILS_DEFAULT = [
 ]
 
 
-def clean(text):
-    """Supprime emojis et caractères parasites."""
-    return re.sub(r'[^\x00-\x7FÀ-ɏ‘’–—«»]', '', text).strip()
+# ══════════════════════════════════════════════════════
+# Primitives de dessin
+# ══════════════════════════════════════════════════════
 
+def rect(slide, l, t, w, h, fill, line=None, lw=0.5):
+    """Rectangle coloré (en cm)."""
+    s = slide.shapes.add_shape(1, Cm(l), Cm(t), Cm(w), Cm(h))
+    s.fill.solid()
+    s.fill.fore_color.rgb = fill
+    if line:
+        s.line.color.rgb = line
+        s.line.width = Pt(lw)
+    else:
+        s.line.fill.background()
+    s.text_frame.text = ""
+    return s
+
+
+def tbox(slide, l, t, w, h):
+    """Boîte de texte sans fond (en cm)."""
+    tb = slide.shapes.add_textbox(Cm(l), Cm(t), Cm(w), Cm(h))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    tf.margin_top    = Cm(0.00)
+    tf.margin_bottom = Cm(0.00)
+    tf.margin_left   = Cm(0.05)
+    tf.margin_right  = Cm(0.05)
+    return tf
+
+
+def p(tf, text, sz, bold=False, clr=DRK, align=PP_ALIGN.LEFT, first=False, italic=False):
+    """Ajoute un paragraphe+run dans un text_frame."""
+    para = tf.paragraphs[0] if first else tf.add_paragraph()
+    para.alignment = align
+    para.space_before = Pt(0)
+    para.space_after  = Pt(1)
+    if text:
+        run = para.add_run()
+        run.text = text
+        run.font.size   = Pt(sz)
+        run.font.bold   = bold
+        run.font.italic = italic
+        run.font.color.rgb = clr
+        run.font.name   = "Arial"
+    return para
+
+
+# ══════════════════════════════════════════════════════
+# Blocs de contenu
+# ══════════════════════════════════════════════════════
+
+def draw_header(slide, titre, duree, top):
+    tf = tbox(slide, ML, top, CW, 1.30)
+    p(tf, titre, 17, bold=True, clr=BLU, align=PP_ALIGN.CENTER, first=True)
+    p(tf, f"Fiche Action | {duree} | Guide d'animation — Conseillers Numériques CD47",
+      8, clr=GRY, align=PP_ALIGN.CENTER)
+    return top + 1.35
+
+
+def draw_cols(slide, objectifs, materiel, top):
+    col_w = 8.40
+    gap   = 1.25
+    col_h = 2.50
+
+    # ── Objectifs
+    rect(slide, ML, top, col_w, col_h, BG_BLU, BLU, 1.0)
+    tf = tbox(slide, ML + 0.25, top + 0.15, col_w - 0.40, col_h - 0.20)
+    p(tf, "Objectifs", 9.5, bold=True, clr=BLU, first=True)
+    for obj in objectifs:
+        p(tf, f"> {obj}" if obj else "", 8.5, clr=DRK)
+
+    # ── Matériel
+    mat_l = ML + col_w + gap
+    rect(slide, mat_l, top, col_w, col_h, BG_TEA, TEA, 1.0)
+    tf2 = tbox(slide, mat_l + 0.25, top + 0.15, col_w - 0.40, col_h - 0.20)
+    p(tf2, "Matériel nécessaire", 9.5, bold=True, clr=TEA, first=True)
+    for item in materiel:
+        p(tf2, f"> {item}", 8.5, clr=DRK)
+
+    return top + col_h + 0.20
+
+
+def draw_step(slide, step, idx, top):
+    clr = BADGE_CYCLE[idx % 6]
+
+    # Fond de ligne + accent gauche coloré
+    rect(slide, ML,        top, CW,   STEP_H, BG_STP, BD_STP, 0.5)
+    rect(slide, ML,        top, 0.55, STEP_H, clr)
+
+    # Badge heure (centré verticalement dans l'accent)
+    bh = 0.44
+    bt = top + (STEP_H - bh) / 2
+    rect(slide, ML + 0.65, bt, 1.30, bh, clr)
+    tb = tbox(slide, ML + 0.65, bt, 1.30, bh)
+    p(tb, step["heure"], 8, bold=True, clr=WHT, align=PP_ALIGN.CENTER, first=True)
+
+    # Contenu : durée + titre + bullet
+    tf = tbox(slide, ML + 2.15, top + 0.18, CW - 2.35, STEP_H - 0.26)
+    p(tf, f"{step['min']} min", 8, bold=True, clr=clr, first=True)
+    p(tf, step["titre"], 9, bold=True, clr=DRK)
+    if step.get("bullet"):
+        p(tf, f". {step['bullet']}", 8, clr=DRK)
+
+    return top + STEP_H
+
+
+def draw_opt(slide, optionnels, top):
+    """Dessine la section Blocs optionnels (0, 1 ou 2 lignes)."""
+    if not optionnels:
+        return top
+
+    n = len(optionnels)
+    total_h = OPT_HDR_H + n * OPT_ROW_H + 0.10
+
+    # Fond + bordure section
+    rect(slide, ML, top, CW, total_h, BG_OPT, ORG, 1.5)
+
+    # En-tête orange
+    rect(slide, ML, top, CW, OPT_HDR_H, ORG)
+    tf = tbox(slide, ML + 0.20, top + 0.08, CW - 0.40, OPT_HDR_H - 0.10)
+    p(tf, "Blocs optionnels — À aborder si le temps le permet",
+      8.5, bold=True, clr=WHT, align=PP_ALIGN.CENTER, first=True)
+
+    row_top = top + OPT_HDR_H
+    for opt in optionnels:
+        rect(slide, ML, row_top, CW, 0.04, ORG)   # séparateur fin
+
+        tf2 = tbox(slide, ML + 0.30, row_top + 0.12, CW - 0.55, OPT_ROW_H - 0.18)
+        p(tf2, f"{opt['min']} min", 8, bold=True, clr=ORG, first=True)
+        p(tf2, opt["titre"], 9, bold=True, clr=DRK)
+
+        bullets = opt.get("bullets", [])
+        if bullets:
+            # Badge OPT. + premier bullet sur la même ligne
+            para_obj = tf2.add_paragraph()
+            para_obj.space_before = Pt(0)
+            para_obj.space_after  = Pt(1)
+            r0 = para_obj.add_run()
+            r0.text = "OPT.  "
+            r0.font.size = Pt(8); r0.font.bold = True
+            r0.font.color.rgb = ORG; r0.font.name = "Arial"
+            r1 = para_obj.add_run()
+            r1.text = f". {bullets[0]}"
+            r1.font.size = Pt(8); r1.font.color.rgb = DRK; r1.font.name = "Arial"
+        for b in bullets[1:]:
+            p(tf2, f". {b}", 8, clr=DRK)
+
+        row_top += OPT_ROW_H
+
+    return top + total_h + 0.20
+
+
+def draw_conseils(slide, conseils, top):
+    rect(slide, ML, top, CW, 0.12, YEL)   # filet jaune
+    tf = tbox(slide, ML + 0.25, top + 0.18, CW - 0.40, CONS_H - 0.20)
+    p(tf, "Conseils pour une bonne animation", 9.5, bold=True, clr=DRK, first=True)
+    for c in conseils:
+        p(tf, f"> {c}", 8.5, clr=DRK)
+
+
+# ══════════════════════════════════════════════════════
+# Extraction des données depuis le PPTX source
+# ══════════════════════════════════════════════════════
+
+def clean(text):
+    return re.sub(r'[^\x00-\x7FÀ-ɏ‘’–—«»]', '', text).strip()
 
 def trunc(t, n):
     return t[:n] + "…" if len(t) > n else t
-
 
 def get_slide_title(slide):
     if slide.shapes.title:
@@ -48,12 +238,9 @@ def get_slide_title(slide):
                 return t.split("\n")[0].strip()
     return "(sans titre)"
 
-
 def get_first_bullet(slide, title):
-    """Retourne la première phrase de contenu d'une slide (hors titre)."""
     for shape in slide.shapes:
-        if not shape.has_text_frame:
-            continue
+        if not shape.has_text_frame: continue
         for para in shape.text_frame.paragraphs:
             t = para.text.strip()
             if t and t != title and len(t) > 10:
@@ -61,333 +248,147 @@ def get_first_bullet(slide, title):
                 return t[:90] + ("…" if len(t) > 90 else "")
     return ""
 
-
-def get_bullets(slide, title, max_bullets=3):
-    """Retourne jusqu'à max_bullets phrases de contenu d'une slide (hors titre)."""
+def get_bullets(slide, title, max_b=3):
     bullets = []
     for shape in slide.shapes:
-        if not shape.has_text_frame:
-            continue
+        if not shape.has_text_frame: continue
         for para in shape.text_frame.paragraphs:
             t = para.text.strip()
             if t and t != title and len(t) > 10:
                 bullets.append(trunc(clean(t), 75))
-                if len(bullets) >= max_bullets:
-                    return bullets
+                if len(bullets) >= max_b: return bullets
     return bullets
 
 
 def extract_fiche(pptx_path, slides_meta, indices=None):
-    """indices : liste 1-indexée des slides à inclure (version preset). None = toutes."""
+    """Extrait les données structurées depuis un PPTX + métadonnées."""
     prs = Presentation(pptx_path)
-
-    # Titre atelier (slide 1 du PPTX original, toujours)
     titre = clean(get_slide_title(prs.slides[0]))
 
-    # Filtrer les paires slide/meta selon la version
     idx_set = set(indices) if indices is not None else None
     pairs = [(s, m) for s, m in zip(prs.slides, slides_meta)
              if idx_set is None or m["n"] in idx_set]
 
-    # Durée totale = slides sélectionnées uniquement
+    # Durée adaptée à la version
     duree_min = sum(m["min"] for _, m in pairs)
     h, mv = divmod(duree_min, 60)
-    duree_str = f"{h}h{mv:02d}" if h and mv else (f"{h}h" if h else f"{mv} min")
+    duree_str = (f"{h}h{mv:02d}" if h and mv else (f"{h}h" if h else f"{mv} min"))
 
-    # Slides de contenu (hors titre et conclusion)
-    content_slides = [
-        (slide, meta) for slide, meta in pairs
-        if meta["role"] in ("contenu", "demo", "chapitre") and meta["n"] > 1
-    ]
+    # Objectifs : 4 premières slides de contenu de la version
+    content = [(s, m) for s, m in pairs
+               if m["role"] in ("contenu", "demo", "chapitre") and m["n"] > 1]
+    objectifs = [trunc(clean(m["titre"]), 55) for _, m in content[:4]]
+    while len(objectifs) < 4: objectifs.append("")
 
-    # Objectifs : titres des 4 premières slides de contenu (max 55 car.)
-    objectifs = [trunc(clean(m["titre"]), 55) for _, m in content_slides[:4]]
-    while len(objectifs) < 4:
-        objectifs.append("")
-
-    # Déroulé : slides non-titre non-optionnelles (max 6)
-    deroulé = []
-    cumtime = 0
+    # Déroulé : slides non-optionnelles de la version, max 6 par page
+    deroulé, cumtime = [], 0
     for slide, meta in pairs:
         if meta["role"] == "titre":
-            cumtime += meta["min"]
-            continue
+            cumtime += meta["min"]; continue
         if meta.get("optionnel"):
-            cumtime += meta["min"]
-            continue
+            cumtime += meta["min"]; continue
         h2, m2 = divmod(cumtime, 60)
-        heure_str = f"{h2}:{m2:02d}"
-        bullet = get_first_bullet(slide, meta["titre"])
         deroulé.append({
-            "heure": heure_str,
-            "min": meta["min"],
+            "heure": f"{h2}:{m2:02d}",
+            "min":   meta["min"],
             "titre": trunc(clean(meta["titre"]), 48),
-            "bullet": bullet,
+            "bullet": get_first_bullet(slide, meta["titre"]),
         })
         cumtime += meta["min"]
-        if len(deroulé) == 6:
-            break
 
-    # Blocs optionnels (max 2) — toujours depuis la liste COMPLÈTE (pas filtrée par version)
-    # Ce sont des contenus bonus "si le temps le permet", valables quelle que soit la version
-    optional_slides = [
-        (slide, meta) for slide, meta in zip(prs.slides, slides_meta)
-        if meta.get("optionnel") and meta["role"] not in ("titre", "conclusion")
-    ]
-    optionnels = []
-    for slide, meta in optional_slides[:2]:
-        titre_opt = trunc(clean(meta["titre"]), 38)
-        bullets = get_bullets(slide, meta["titre"], max_bullets=3)
-        optionnels.append({
-            "min": meta["min"],
-            "titre": titre_opt,
-            "bullets": bullets,
-        })
+    # Optionnels : TOUJOURS depuis la liste complète (bonus "si le temps le permet")
+    opt_raw = [(prs.slides[m["n"] - 1], m) for m in slides_meta
+               if m.get("optionnel") and m["role"] not in ("titre", "conclusion")]
+    optionnels = [{"min": m["min"], "titre": trunc(clean(m["titre"]), 38),
+                   "bullets": get_bullets(s, m["titre"], 3)}
+                  for s, m in opt_raw[:2]]
 
     return {
-        "titre": titre,
-        "duree": duree_str,
-        "objectifs": objectifs,
-        "materiel": MATERIEL_DEFAULT,
-        "deroulé": deroulé,
-        "optionnels": optionnels,
+        "titre": titre, "duree": duree_str,
+        "objectifs": objectifs, "materiel": MATERIEL_DEFAULT,
+        "deroulé": deroulé, "optionnels": optionnels,
         "conseils": CONSEILS_DEFAULT,
     }
 
 
-def set_para_text(para, text):
-    """Remplace le texte d'un paragraphe en conservant le style du premier run."""
-    p_xml = para._p
-    runs = p_xml.findall(qn("a:r"))
-    if not runs:
-        return
-    first_run_xml = runs[0]
-    for r in runs[1:]:
-        p_xml.remove(r)
-    t_el = first_run_xml.find(qn("a:t"))
-    if t_el is not None:
-        t_el.text = text
+# ══════════════════════════════════════════════════════
+# Construction du PPTX
+# ══════════════════════════════════════════════════════
 
+def build_fiche(fiche_data, output_path):
+    prs = Presentation()
+    prs.slide_width  = Cm(SW)
+    prs.slide_height = Cm(SH)
 
-def clear_para_runs(para):
-    """Supprime tous les runs d'un paragraphe (évite les artefacts de style)."""
-    p_xml = para._p
-    for r in p_xml.findall(qn("a:r")):
-        p_xml.remove(r)
+    def new_slide():
+        s = prs.slides.add_slide(prs.slide_layouts[6])  # blank
+        s.background.fill.solid()
+        s.background.fill.fore_color.rgb = WHT
+        return s
 
+    slide = new_slide()
+    top   = 3.40   # réserve l'espace logo/fond (à insérer plus tard)
 
-def set_badge_para(para, badge_text, bullet_text):
-    """Para avec badge stylé (run[0] conservé) + bullet en run plain séparé."""
-    import copy
-    p_xml = para._p
-    runs = p_xml.findall(qn("a:r"))
-    if not runs:
-        return
-    # Remettre le texte du badge dans run[0] (garde son style orange)
-    t_el = runs[0].find(qn("a:t"))
-    if t_el is not None:
-        t_el.text = badge_text
-    # Supprimer tous les runs suivants
-    for r in runs[1:]:
-        p_xml.remove(r)
-    # Ajouter un run plain pour le bullet (copie sans couleur ni gras)
-    new_run = copy.deepcopy(runs[0])
-    rPr = new_run.find(qn("a:rPr"))
-    if rPr is not None:
-        for fill in rPr.findall(qn("a:solidFill")):
-            rPr.remove(fill)
-        rPr.attrib.pop("b", None)
-        rPr.set("sz", "900")
-    new_t = new_run.find(qn("a:t"))
-    if new_t is not None:
-        new_t.text = f"\t{bullet_text}"
-    p_xml.append(new_run)
+    top = draw_header(slide, fiche_data["titre"], fiche_data["duree"], top)
+    top += 0.15
+    top = draw_cols(slide, fiche_data["objectifs"], fiche_data["materiel"], top)
 
+    # Déroulé — saut de page si nécessaire
+    for i, step in enumerate(fiche_data["deroulé"]):
+        if top + STEP_H > SH - CONS_H - 0.60:
+            slide = new_slide()
+            top   = 1.50
+        top = draw_step(slide, step, i, top)
 
-def clear_table_row(row):
-    """Vide une ligne de tableau : texte + fond de cellule (évite les rectangles oranges résiduels)."""
-    from lxml import etree
-    cell = row.cells[0]
-    for p in cell.text_frame.paragraphs:
-        clear_para_runs(p)
-    # Effacer aussi le fond de cellule (solidFill/gradFill au niveau <a:tcPr>)
-    tc = cell._tc
-    tcPr = tc.find(qn("a:tcPr"))
-    if tcPr is not None:
-        for fill_tag in (qn("a:solidFill"), qn("a:gradFill"), qn("a:pattFill"), qn("a:blipFill")):
-            for el in tcPr.findall(fill_tag):
-                tcPr.remove(el)
+    top += 0.25
 
+    # OPT + conseils — saut de page si nécessaire
+    n_opt   = len(fiche_data["optionnels"])
+    opt_h   = (OPT_HDR_H + n_opt * OPT_ROW_H + 0.30) if n_opt else 0
+    cons_h  = CONS_H + 0.30
 
-def fill_optional_table(shape, optionnels):
-    """Remplit (ou vide) les lignes 1 et 2 de la table Blocs optionnels."""
-    tbl = shape.table
-    for row_idx in [1, 2]:
-        row = tbl.rows[row_idx]
-        cell = row.cells[0]
-        paras = cell.text_frame.paragraphs
-        data_idx = row_idx - 1
+    if top + opt_h + cons_h > SH - 0.30:
+        slide = new_slide()
+        top   = 1.50
 
-        if data_idx >= len(optionnels):
-            clear_table_row(row)
-            continue
+    top = draw_opt(slide, fiche_data["optionnels"], top)
 
-        opt = optionnels[data_idx]
-        bullets = opt.get("bullets", [])
-        if len(paras) > 0:
-            set_para_text(paras[0], f"{opt['min']} min")
-        if len(paras) > 1:
-            set_para_text(paras[1], opt["titre"])
-        # para[2] : badge "OPT." (run[0] stylé) + premier bullet en run plain
-        if len(paras) > 2:
-            set_badge_para(paras[2], "OPT.", f". {bullets[0]}" if bullets else "")
-        if len(paras) > 3:
-            set_para_text(paras[3], f". {bullets[1]}" if len(bullets) > 1 else "")
-        if len(paras) > 4:
-            set_para_text(paras[4], f". {bullets[2]}" if len(bullets) > 2 else "")
-
-
-def set_norm_autofit(text_frame):
-    """Remplace spAutoFit par normAutofit pour que le texte rétrécisse au lieu de déborder."""
-    from lxml import etree
-    bodyPr = text_frame._txBody.find(qn("a:bodyPr"))
-    if bodyPr is None:
-        return
-    for tag in (qn("a:spAutoFit"), qn("a:noAutofit"), qn("a:normAutofit")):
-        for el in bodyPr.findall(tag):
-            bodyPr.remove(el)
-    bodyPr.append(etree.SubElement(bodyPr, qn("a:normAutofit")))
-
-
-def hide_shape(shape):
-    """Déplace la forme hors de la slide (left très négatif) pour la masquer."""
-    shape.left = -10000000  # ~-11 cm hors diapo
-
-
-def fill_template(fiche_data, output_path):
-    prs = Presentation(TEMPLATE)
-    slide = prs.slides[0]
-    shapes = {s.name: s for s in slide.shapes if s.has_text_frame}
-
-    # ── Titre + durée
-    s = shapes.get("object 2")
-    if s:
-        tf = s.text_frame
-        set_norm_autofit(tf)
-        if len(tf.paragraphs) > 0:
-            set_para_text(tf.paragraphs[0], fiche_data['titre'])
-        if len(tf.paragraphs) > 1:
-            set_para_text(tf.paragraphs[1],
-                f"Fiche Action | {fiche_data['duree']} | Guide d'animation — Conseillers Numériques CD47")
-
-    # ── Objectifs
-    s = shapes.get("object 7")
-    if s:
-        tf = s.text_frame
-        for i, obj in enumerate(fiche_data["objectifs"][:4], 1):
-            if i < len(tf.paragraphs):
-                set_para_text(tf.paragraphs[i], obj)
-
-    # ── Matériel
-    s = shapes.get("object 11")
-    if s:
-        tf = s.text_frame
-        for i, item in enumerate(fiche_data["materiel"][:4], 1):
-            if i < len(tf.paragraphs):
-                set_para_text(tf.paragraphs[i], item)
-
-    # ── Déroulé (6 étapes : paires heure/contenu)
-    step_pairs = [
-        ("object 16", "object 17"),
-        ("object 22", "object 23"),
-        ("object 28", "object 29"),
-        ("object 34", "object 35"),
-        ("object 40", "object 41"),
-        ("object 46", "object 47"),
-    ]
-    for idx, (time_name, content_name) in enumerate(step_pairs):
-        if idx >= len(fiche_data["deroulé"]):
-            s_time = shapes.get(time_name)
-            s_cont = shapes.get(content_name)
-            if s_time:
-                set_para_text(s_time.text_frame.paragraphs[0], "")
-            if s_cont:
-                for p in s_cont.text_frame.paragraphs:
-                    set_para_text(p, "")
-            continue
-
-        step = fiche_data["deroulé"][idx]
-
-        s_time = shapes.get(time_name)
-        if s_time:
-            set_para_text(s_time.text_frame.paragraphs[0], step["heure"])
-
-        s_cont = shapes.get(content_name)
-        if s_cont:
-            tf = s_cont.text_frame
-            paras = tf.paragraphs
-            if len(paras) > 0:
-                set_para_text(paras[0], f"{step['min']} min")
-            if len(paras) > 1:
-                set_para_text(paras[1], step["titre"])
-            if len(paras) > 2:
-                set_para_text(paras[2], f". {step['bullet']}" if step["bullet"] else "")
-            for i in range(3, len(paras)):
-                set_para_text(paras[i], "")
-
-    # ── Blocs optionnels (table object 53 + décoration object 48)
-    has_opt = bool(fiche_data["optionnels"])
-    for shape in slide.shapes:
-        if shape.name == "object 53" and shape.shape_type == 19:  # TABLE
-            if has_opt:
-                fill_optional_table(shape, fiche_data["optionnels"])
-            else:
-                hide_shape(shape)
-        elif shape.name == "object 48":
-            # GROUP décoratif du bloc OPT : toujours masqué car on ne peut pas
-            # cibler ses enfants individuellement (1 décoration / ligne optionnelle)
-            hide_shape(shape)
-
-    # ── Conseils
-    s = shapes.get("object 57")
-    if s:
-        tf = s.text_frame
-        for i, conseil in enumerate(fiche_data["conseils"][:4], 1):
-            if i < len(tf.paragraphs):
-                set_para_text(tf.paragraphs[i], conseil)
+    # Conseils : ancrés en bas de la slide courante (pas d'espace vide)
+    cons_top = max(top + 0.20, SH - CONS_H - 0.30)
+    draw_conseils(slide, fiche_data["conseils"], cons_top)
 
     prs.save(output_path)
 
 
+# ══════════════════════════════════════════════════════
+# Point d'entrée
+# ══════════════════════════════════════════════════════
+
 def main():
     FICHES_DIR.mkdir(exist_ok=True)
-
     with open(PLANS_FILE) as f:
         plans = json.load(f)
 
     generated = []
     for pptx_path in sorted(PPTX_DIR.glob("*.pptx")):
-        key = pptx_path.stem
+        key  = pptx_path.stem
         plan = plans.get(key, {})
         if not plan.get("analyse") or not plan.get("slides"):
-            print(f"SKIP {key} — non analysé")
-            continue
+            print(f"SKIP {key} — non analysé"); continue
 
-        versions = plan.get("versions") or {}
-        if not versions:
-            # Fallback : version unique complète
-            versions = {"complet": {"indices": [s["n"] for s in plan["slides"]], "label": "Complet"}}
-
+        versions = plan.get("versions") or {
+            "complet": {"indices": [s["n"] for s in plan["slides"]]}
+        }
         ok = []
         for vk, vdata in versions.items():
             try:
-                fiche_data = extract_fiche(pptx_path, plan["slides"], indices=vdata["indices"])
+                fiche_data = extract_fiche(pptx_path, plan["slides"],
+                                           indices=vdata["indices"])
                 out = FICHES_DIR / f"{key}-fiche-{vk}.pptx"
-                fill_template(fiche_data, out)
+                build_fiche(fiche_data, out)
                 ok.append(f"{vk}({fiche_data['duree']})")
             except Exception as e:
                 print(f"ERREUR {key}/{vk}: {e}")
-
         if ok:
             print(f"OK {key}: {', '.join(ok)}")
             generated.append(key)
