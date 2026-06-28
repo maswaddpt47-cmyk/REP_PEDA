@@ -128,9 +128,10 @@ def extract_fiche(pptx_path, slides_meta, indices=None):
         if len(deroulé) == 6:
             break
 
-    # Blocs optionnels (max 2, pour la table en bas de fiche)
+    # Blocs optionnels (max 2) — toujours depuis la liste COMPLÈTE (pas filtrée par version)
+    # Ce sont des contenus bonus "si le temps le permet", valables quelle que soit la version
     optional_slides = [
-        (slide, meta) for slide, meta in pairs
+        (slide, meta) for slide, meta in zip(prs.slides, slides_meta)
         if meta.get("optionnel") and meta["role"] not in ("titre", "conclusion")
     ]
     optionnels = []
