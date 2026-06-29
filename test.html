@@ -2441,28 +2441,28 @@ function openModal(num, e) {
     if (!modalAtelier || modalAtelier.num !== num) return;
     if (!plans[num] || !plans[num].analyse) return;
     const _vk = Object.keys(plans[num].versions || {})[0] || "complet";
-    // Fiche animateur (action)
+    // Fiche animateur (action) — toujours le PPTX local généré
     const actionRow = list.querySelector('[data-key="action"]');
     if (actionRow) {
       const openBtn = actionRow.querySelector(".fiche-open-btn");
       const dlBtn   = actionRow.querySelector(".fiche-dl-btn");
-      if (openBtn && !openBtn.dataset.id) {
+      if (openBtn) {
         const localUrl = `./assets/fiches/${num}-fiche-${_vk}.pptx`;
         actionRow.classList.add("has-link");
-        openBtn.disabled = false; openBtn.dataset.local = localUrl;
-        dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
+        delete openBtn.dataset.id; openBtn.disabled = false; openBtn.dataset.local = localUrl;
+        delete dlBtn.dataset.id;   dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
       }
     }
-    // Fiche mémo (memo)
+    // Fiche mémo (memo) — toujours le PPTX local généré
     const memoRow = list.querySelector('[data-key="memo"]');
     if (memoRow) {
       const openBtn = memoRow.querySelector(".fiche-open-btn");
       const dlBtn   = memoRow.querySelector(".fiche-dl-btn");
-      if (openBtn && !openBtn.dataset.id) {
+      if (openBtn) {
         const memoUrl = `./assets/memos/${num}-memo.pptx`;
         memoRow.classList.add("has-link");
-        openBtn.disabled = false; openBtn.dataset.local = memoUrl;
-        dlBtn.disabled   = false; dlBtn.dataset.local   = memoUrl;
+        delete openBtn.dataset.id; openBtn.disabled = false; openBtn.dataset.local = memoUrl;
+        delete dlBtn.dataset.id;   dlBtn.disabled   = false; dlBtn.dataset.local   = memoUrl;
       }
     }
   });
@@ -3820,12 +3820,12 @@ function renderSlideList(plan) {
       if (actionRow) {
         const openBtn = actionRow.querySelector(".fiche-open-btn");
         const dlBtn2  = actionRow.querySelector(".fiche-dl-btn");
-        if (openBtn && !openBtn.dataset.id) {
+        if (openBtn) {
           const bestKey = findBestVersionKey(plan);
           const localUrl = `./assets/fiches/${_currentVersionNum}-fiche-${bestKey}.pptx`;
           actionRow.classList.add("has-link");
-          openBtn.disabled = false; openBtn.dataset.local = localUrl;
-          dlBtn2.disabled  = false; dlBtn2.dataset.local  = localUrl;
+          delete openBtn.dataset.id; openBtn.disabled = false; openBtn.dataset.local = localUrl;
+          delete dlBtn2.dataset.id;  dlBtn2.disabled  = false; dlBtn2.dataset.local  = localUrl;
         }
       }
     }
