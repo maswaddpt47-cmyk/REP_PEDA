@@ -2697,7 +2697,13 @@ document.getElementById("edit-modal-close").addEventListener("click", closeEditM
 
 // ── UPLOAD PPTX SOURCE
 let pptxUploading = false;
+let pptxPickerOpen = false;
+document.getElementById("pptx-upload-label").addEventListener("click", () => {
+  pptxPickerOpen = true;
+  setTimeout(() => { if (!pptxUploading) pptxPickerOpen = false; }, 15000);
+});
 document.getElementById("pptx-upload-input").addEventListener("change", async e => {
+  pptxPickerOpen = false;
   const file = e.target.files[0];
   if (!file || !editAtelier) return;
   const tok = getGhToken();
@@ -2752,7 +2758,7 @@ document.getElementById("edit-add-fiche-confirm").addEventListener("click", () =
   showToast(`✓ Fiche "${label}" ajoutée — clique Enregistrer pour sauvegarder`);
 });
 document.getElementById("edit-modal").addEventListener("click", e => {
-  if (pptxUploading) return;
+  if (pptxUploading || pptxPickerOpen) return;
   if (e.target === document.getElementById("edit-modal")) closeEditModal();
 });
 
@@ -3716,17 +3722,14 @@ async function doPartnerSubmit() {
 }
 
 // ── VERSIONS PANEL ──────────────────────────────────────────────────────────
-let _slidePlan = null;
 let _versionChecked = new Set();
 let _currentVersionNum = null;
 
 async function loadSlidePlans() {
-  if (_slidePlan) return _slidePlan;
   try {
     const r = await fetch("assets/slide-plans.json?_=" + Date.now(), { cache: "no-store" });
-    _slidePlan = await r.json();
-  } catch { _slidePlan = {}; }
-  return _slidePlan;
+    return await r.json();
+  } catch { return {}; }
 }
 
 async function renderVersionsPanel(num) {
