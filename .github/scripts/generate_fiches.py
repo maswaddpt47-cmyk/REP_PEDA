@@ -250,8 +250,7 @@ def get_first_bullet(slide, title):
         for para in shape.text_frame.paragraphs:
             t = para.text.strip()
             if t and t != title and len(t) > 10:
-                t = clean(t)
-                return t[:90] + ("…" if len(t) > 90 else "")
+                return clean(t)
     return ""
 
 def get_bullets(slide, title, max_b=3):
@@ -261,7 +260,7 @@ def get_bullets(slide, title, max_b=3):
         for para in shape.text_frame.paragraphs:
             t = para.text.strip()
             if t and t != title and len(t) > 10:
-                bullets.append(trunc(clean(t), 75))
+                bullets.append(clean(t))
                 if len(bullets) >= max_b: return bullets
     return bullets
 
