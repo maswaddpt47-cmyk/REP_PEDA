@@ -11,16 +11,6 @@
       "emoji": "📋"
     },
     {
-      "key": "action",
-      "label": "Action",
-      "emoji": "🎯"
-    },
-    {
-      "key": "memo",
-      "label": "Mémo",
-      "emoji": "📝"
-    },
-    {
       "key": "evaluation",
       "label": "Évaluation",
       "emoji": "✅"
@@ -41,16 +31,6 @@
       "key": "positionnement",
       "label": "Positionnement",
       "emoji": "📋"
-    },
-    {
-      "key": "action",
-      "label": "Action",
-      "emoji": "🎯"
-    },
-    {
-      "key": "memo",
-      "label": "Mémo",
-      "emoji": "📝"
     },
     {
       "key": "evaluation",
@@ -75,16 +55,6 @@
       "emoji": "📋"
     },
     {
-      "key": "action",
-      "label": "Action",
-      "emoji": "🎯"
-    },
-    {
-      "key": "memo",
-      "label": "Mémo",
-      "emoji": "📝"
-    },
-    {
       "key": "evaluation",
       "label": "Évaluation",
       "emoji": "✅"
@@ -105,16 +75,6 @@
       "key": "positionnement",
       "label": "Positionnement",
       "emoji": "📋"
-    },
-    {
-      "key": "action",
-      "label": "Action",
-      "emoji": "🎯"
-    },
-    {
-      "key": "memo",
-      "label": "Mémo",
-      "emoji": "📝"
     },
     {
       "key": "evaluation",
@@ -139,16 +99,6 @@
       "emoji": "📋"
     },
     {
-      "key": "action",
-      "label": "Action",
-      "emoji": "🎯"
-    },
-    {
-      "key": "memo",
-      "label": "Mémo",
-      "emoji": "📝"
-    },
-    {
       "key": "evaluation",
       "label": "Évaluation",
       "emoji": "✅"
@@ -171,16 +121,6 @@
       "emoji": "📋"
     },
     {
-      "key": "action",
-      "label": "Action",
-      "emoji": "🎯"
-    },
-    {
-      "key": "memo",
-      "label": "Mémo",
-      "emoji": "📝"
-    },
-    {
       "key": "evaluation",
       "label": "Évaluation",
       "emoji": "✅"
@@ -201,16 +141,6 @@
       "key": "positionnement",
       "label": "Positionnement",
       "emoji": "📋"
-    },
-    {
-      "key": "action",
-      "label": "Action",
-      "emoji": "🎯"
-    },
-    {
-      "key": "memo",
-      "label": "Mémo",
-      "emoji": "📝"
     },
     {
       "key": "evaluation",
