@@ -68,14 +68,34 @@ CONSEILS_DEFAULT = [
 # Primitives de dessin
 # ══════════════════════════════════════════════════════
 
-def add_bg_picture(slide, img_path, opacity=0.80):
-    """Insère une image pleine page en fond avec transparence (opacity 0-1)."""
+def add_bg_picture(slide, img_path, opacity=1.0):
+    """Fond via bgPr OOXML natif — toujours derrière toutes les shapes (tous viewers)."""
     from lxml import etree
+    # add_picture enregistre le rId de manière fiable ; on retire ensuite la shape du spTree
     pic = slide.shapes.add_picture(str(img_path), Cm(0), Cm(0), Cm(SW), Cm(SH))
     a_ns = 'http://schemas.openxmlformats.org/drawingml/2006/main'
-    blip = pic._element.find(f'.//{{{a_ns}}}blip')
-    if blip is not None:
-        etree.SubElement(blip, f'{{{a_ns}}}alphaModFix', amt=str(int(opacity * 100000)))
+    r_ns = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+    p_ns = 'http://schemas.openxmlformats.org/presentationml/2006/main'
+    blip_el = pic._element.find(f'.//{{{a_ns}}}blip')
+    rId = blip_el.get(f'{{{r_ns}}}embed')
+    slide.shapes._spTree.remove(pic._element)
+    cSld = slide.shapes._spTree.getparent()
+    bg = cSld.find(f'{{{p_ns}}}bg')
+    if bg is None:
+        bg = etree.SubElement(cSld, f'{{{p_ns}}}bg')
+        cSld.remove(bg)
+        cSld.insert(list(cSld).index(slide.shapes._spTree), bg)
+    bgPr = bg.find(f'{{{p_ns}}}bgPr')
+    if bgPr is None:
+        bgPr = etree.SubElement(bg, f'{{{p_ns}}}bgPr')
+    for child in list(bgPr):
+        bgPr.remove(child)
+    blipFill = etree.SubElement(bgPr, f'{{{a_ns}}}blipFill')
+    blipNode = etree.SubElement(blipFill, f'{{{a_ns}}}blip', {f'{{{r_ns}}}embed': rId})
+    if opacity < 1.0:
+        etree.SubElement(blipNode, f'{{{a_ns}}}alphaModFix', amt=str(int(opacity * 100000)))
+    etree.SubElement(etree.SubElement(blipFill, f'{{{a_ns}}}stretch'), f'{{{a_ns}}}fillRect')
+    etree.SubElement(bgPr, f'{{{a_ns}}}effectLst')
 
 
 def rect(slide, l, t, w, h, fill, line=None, lw=0.5):
