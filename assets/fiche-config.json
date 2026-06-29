@@ -1,11 +1,6 @@
 {
   "B2": [
     {
-      "key": "presentation",
-      "label": "Présentation",
-      "emoji": "📊"
-    },
-    {
       "key": "positionnement",
       "label": "Positionnement",
       "emoji": "📋"
@@ -22,11 +17,6 @@
     }
   ],
   "E5": [
-    {
-      "key": "presentation",
-      "label": "Présentation",
-      "emoji": "📊"
-    },
     {
       "key": "positionnement",
       "label": "Positionnement",
@@ -45,11 +35,6 @@
   ],
   "E6": [
     {
-      "key": "presentation",
-      "label": "Présentation",
-      "emoji": "📊"
-    },
-    {
       "key": "positionnement",
       "label": "Positionnement",
       "emoji": "📋"
@@ -66,11 +51,6 @@
     }
   ],
   "B10": [
-    {
-      "key": "presentation",
-      "label": "Présentation",
-      "emoji": "📊"
-    },
     {
       "key": "positionnement",
       "label": "Positionnement",
@@ -89,11 +69,6 @@
   ],
   "A4": [
     {
-      "key": "presentation",
-      "label": "Présentation",
-      "emoji": "📊"
-    },
-    {
       "key": "positionnement",
       "label": "Positionnement",
       "emoji": "📋"
@@ -111,11 +86,6 @@
   ],
   "A5": [
     {
-      "key": "presentation",
-      "label": "Présentation",
-      "emoji": "📊"
-    },
-    {
       "key": "positionnement",
       "label": "Positionnement",
       "emoji": "📋"
@@ -132,11 +102,6 @@
     }
   ],
   "A6": [
-    {
-      "key": "presentation",
-      "label": "Présentation",
-      "emoji": "📊"
-    },
     {
       "key": "positionnement",
       "label": "Positionnement",

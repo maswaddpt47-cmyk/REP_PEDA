@@ -1309,6 +1309,14 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
     <div class="edit-modal-title" id="edit-modal-title"></div>
     <div class="edit-modal-sub">Renseigne les liens Google Drive pour chaque document</div>
     <div id="edit-fields-container"></div>
+    <div id="pptx-upload-row" style="margin:10px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <label style="font-size:12px;color:var(--muted);">📎 Présentation PPTX source :</label>
+      <label id="pptx-upload-label" style="cursor:pointer;padding:5px 12px;border:1px dashed var(--border);border-radius:6px;font-size:12px;color:var(--text);">
+        Choisir un fichier…
+        <input type="file" id="pptx-upload-input" accept=".pptx" style="display:none">
+      </label>
+      <span id="pptx-upload-status" style="font-size:12px;color:var(--muted);"></span>
+    </div>
     <button class="modal-add-fiche-btn" id="edit-add-fiche-btn">＋ Ajouter une fiche</button>
     <div id="edit-add-fiche-form" style="display:none">
       <div class="add-fiche-row">
@@ -1515,7 +1523,6 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
 
 <script>
 const FICHES = [
-  { key: "presentation",   label: "Présentation",   emoji: "📊" },
   { key: "positionnement", label: "Positionnement", emoji: "📋" },
   { key: "evaluation",     label: "Évaluation",      emoji: "✅" },
   { key: "emargement",     label: "Émargement",      emoji: "✍️" },
@@ -1666,7 +1673,7 @@ async function pushFicheConfigToRepo(config, tok) {
     return await ghPutFile(GH_FICHE_CONFIG, "feat: configuration fiches ateliers", payload, existing ? existing.sha : undefined, tok);
   } catch { return false; }
 }
-const FICHES_AUTO = new Set(["action", "memo"]); // générés localement, retirés du dropal
+const FICHES_AUTO = new Set(["action", "memo", "presentation"]); // servis localement, retirés du dropal
 
 function getFichesForAtelier(num) {
   const config = loadFicheConfig();
@@ -2337,13 +2344,13 @@ function openModal(num, e) {
   list.querySelectorAll(".fiche-open-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       if (btn.dataset.id) window.open(driveViewUrl(btn.dataset.id), "_blank");
-      else if (btn.dataset.local) { const a = document.createElement("a"); a.href = btn.dataset.local; a.download = btn.dataset.local.split("/").pop(); document.body.appendChild(a); a.click(); a.remove(); }
+      else if (btn.dataset.local) { const a = document.createElement("a"); a.href = btn.dataset.local; a.download = btn.dataset.dlname || btn.dataset.local.split("/").pop(); document.body.appendChild(a); a.click(); a.remove(); }
     });
   });
   list.querySelectorAll(".fiche-dl-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       if (btn.dataset.id) window.open(driveDownloadUrl(btn.dataset.id), "_blank");
-      else if (btn.dataset.local) { const a = document.createElement("a"); a.href = btn.dataset.local; a.download = btn.dataset.local.split("/").pop(); document.body.appendChild(a); a.click(); a.remove(); }
+      else if (btn.dataset.local) { const a = document.createElement("a"); a.href = btn.dataset.local; a.download = btn.dataset.dlname || btn.dataset.local.split("/").pop(); document.body.appendChild(a); a.click(); a.remove(); }
     });
   });
   list.querySelectorAll(".fiche-copy-btn").forEach(btn => {
@@ -2380,7 +2387,26 @@ function openModal(num, e) {
 
   const qrBtn = document.getElementById("modal-qr-btn");
   document.getElementById("modal-qr-box").style.display = "none";
-  qrBtn.disabled = !links.presentation;
+  qrBtn.disabled = false;
+
+  // Présentation — toujours le PPTX local
+  loadSlidePlans().then(plans => {
+    if (!modalAtelier || modalAtelier.num !== num) return;
+    const presRow = list.querySelector('[data-key="presentation"]');
+    if (presRow) {
+      const openBtn = presRow.querySelector(".fiche-open-btn");
+      const dlBtn   = presRow.querySelector(".fiche-dl-btn");
+      if (openBtn) {
+        const localUrl = `./assets/pptx/${num}.pptx`;
+        const titre    = modalAtelier.titre || num;
+        presRow.classList.add("has-link");
+        delete openBtn.dataset.id; openBtn.disabled = false;
+        openBtn.dataset.local = localUrl; openBtn.dataset.dlname = `${num} - ${titre}.pptx`;
+        delete dlBtn.dataset.id;   dlBtn.disabled   = false;
+        dlBtn.dataset.local   = localUrl; dlBtn.dataset.dlname   = `${num} - ${titre}.pptx`;
+      }
+    }
+  });
 
   // Notes
   document.getElementById("modal-note").value = getNote(num);
@@ -2637,6 +2663,32 @@ document.getElementById("btn-clear").addEventListener("click", async () => {
 });
 document.getElementById("btn-cancel").addEventListener("click", closeEditModal);
 document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
+
+// ── UPLOAD PPTX SOURCE
+document.getElementById("pptx-upload-input").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file || !editAtelier) return;
+  const tok = getGhToken();
+  if (!tok) { showToast("⚠ Token GitHub requis"); return; }
+  const status = document.getElementById("pptx-upload-status");
+  const label  = document.getElementById("pptx-upload-label");
+  status.textContent = "⏳ Envoi en cours…";
+  label.style.opacity = "0.5";
+  try {
+    const buf    = await file.arrayBuffer();
+    const b64    = btoa(String.fromCharCode(...new Uint8Array(buf)));
+    const path   = `assets/pptx/${editAtelier.num}.pptx`;
+    const existing = await ghGetFile(path, tok);
+    const result = await ghPutFile(path, `feat: PPTX source ${editAtelier.num}`, b64, existing ? existing.sha : undefined, tok);
+    if (result === "auth_error") { clearGhToken(); showToast("⚠ Token invalide"); }
+    else { status.textContent = `✓ ${editAtelier.num}.pptx envoyé — CI en cours…`; showToast(`✓ ${editAtelier.num}.pptx uploadé`); }
+  } catch (err) {
+    status.textContent = "⚠ Erreur lors de l'envoi";
+    showToast("⚠ Erreur upload PPTX");
+  }
+  label.style.opacity = "";
+  e.target.value = "";
+});
 
 document.getElementById("edit-add-fiche-btn").addEventListener("click", () => {
   document.getElementById("edit-add-fiche-form").style.display = "";
@@ -3125,10 +3177,10 @@ document.getElementById("token-clear-btn").addEventListener("click", () => {
 document.getElementById("modal-qr-btn").addEventListener("click", () => {
   const box = document.getElementById("modal-qr-box");
   if (box.style.display === "block") { box.style.display = "none"; return; }
-  const id = modalAtelier ? getAtlierLinks(modalAtelier.num).presentation : "";
-  if (!id) return;
+  if (!modalAtelier) return;
+  const pptxUrl = `https://${GH_REPO.split("/")[0]}.github.io/${GH_REPO.split("/")[1]}/assets/pptx/${modalAtelier.num}.pptx`;
   document.getElementById("modal-qr-img").src =
-    `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(driveViewUrl(id))}`;
+    `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(pptxUrl)}`;
   box.style.display = "block";
 });
 document.getElementById("modal-qr-close").addEventListener("click", () => {
