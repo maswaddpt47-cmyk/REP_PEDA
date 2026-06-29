@@ -1666,9 +1666,11 @@ async function pushFicheConfigToRepo(config, tok) {
     return await ghPutFile(GH_FICHE_CONFIG, "feat: configuration fiches ateliers", payload, existing ? existing.sha : undefined, tok);
   } catch { return false; }
 }
+const FICHES_AUTO = new Set(["action", "memo"]); // générés localement, retirés du dropal
+
 function getFichesForAtelier(num) {
   const config = loadFicheConfig();
-  if (config[num]) return config[num];
+  if (config[num]) return config[num].filter(f => !FICHES_AUTO.has(f.key));
   return [...FICHES, ...(loadCustomFiches()[num] || [])];
 }
 async function loadRepoFiches() {
