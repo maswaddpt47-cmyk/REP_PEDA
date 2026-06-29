@@ -2325,7 +2325,24 @@ function openModal(num, e) {
 
   const allFiches = getFichesForAtelier(num);
   const list = document.getElementById("modal-fiche-list");
-  list.innerHTML = allFiches.map(f => {
+
+  // Lignes locales toujours présentes (présentation + fiches générées)
+  const localRows = [
+    { key: "presentation", label: "Présentation", emoji: "📊" },
+    { key: "action",       label: "Action",        emoji: "🎯" },
+    { key: "memo",         label: "Mémo",          emoji: "📝" },
+  ].map(f => `
+    <div class="fiche-row" data-key="${f.key}">
+      <span class="fiche-icon">${f.emoji}</span>
+      <span class="fiche-label">${f.label}</span>
+      <div class="fiche-actions">
+        <button class="fiche-open-btn" disabled>▶ Ouvrir</button>
+        <button class="fiche-dl-btn"   disabled>⬇</button>
+        <button class="fiche-copy-btn" disabled>📋</button>
+      </div>
+    </div>`).join("");
+
+  list.innerHTML = localRows + allFiches.map(f => {
     const id = links[f.key] || "";
     const isCustom = f.key.startsWith("cf_");
     return `

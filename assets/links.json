@@ -1,66 +1,25 @@
 {
-  "E7": {
-    "presentation": "1E9GwPW1i9FvNGp5sbglvKljX1HIlfKiq"
-  },
-  "D2": {
-    "presentation": "1m1XJ3HlbEa3MsVT2GOXvdsdnLPAlyz5-"
-  },
-  "B3": {
-    "presentation": "1qOMo_BJXag0FUQQhRfMvvdti5auitrxZ"
-  },
-  "B9": {
-    "presentation": "1Nsr83W6vEvrPSZZH_2ztfKKePllHat1r"
-  },
-  "A1": {
-    "presentation": "1AsQ8EMEIw9E1PCf2Lbtb3stiM0mf-jXH"
-  },
-  "A2": {
-    "presentation": "1IwX9sxMlDMBpTN70Q9RCrLTVzPzf6i1M"
-  },
-  "A3": {
-    "presentation": "1Os_6BNIF0Bukl1iquWQlZC8BhS4KjNu8"
-  },
-  "A4": {
-    "presentation": "14TmLwJOosDC_5Xs1-blOu8LK965HUCQB"
-  },
-  "B4": {
-    "presentation": "10RaFWyAPZ4tfXurwCS-CFL_tsdOGjF1P"
-  },
-  "B7": {
-    "presentation": "1XER9ApG-ikBNUz9B9wKW3egENIQlIpZQ"
-  },
-  "B8": {
-    "presentation": "1XT01dKS7iZIXexoZC4vQ_e6GRFhTA0Ge"
-  },
-  "B6": {
-    "presentation": "12bZO87TGfY5-KJf6MyeNPKd0LuRYS5-A"
-  },
-  "B5": {
-    "presentation": "1IioRXN3MWxr5owPXa02PaH6SZSfRWu8S"
-  },
-  "B1": {
-    "presentation": "1ToPdRd_W9QKQz1Yts8jy8G8dygofmobo"
-  },
+  "E7": {},
+  "D2": {},
+  "B3": {},
+  "B9": {},
+  "A1": {},
+  "A2": {},
+  "A3": {},
+  "A4": {},
+  "B4": {},
+  "B7": {},
+  "B8": {},
+  "B6": {},
+  "B5": {},
+  "B1": {},
   "B2": {
-    "presentation": "1hbDRiyTmLIAVK9soVDKZx523NCsyT-5z",
-    "action": "1W9zF0gPkQdTU6mjTRo_NcMkzc4kgIMAw",
-    "memo": "1h9bgRoDrm2XgrVlE771RiOqijHARKqe9",
     "evaluation": "1KhrBuE64x6ESODjTXwt8i4uZPDBYsc9j",
     "emargement": "1DuBkRAsUW-4cGl3dkE9ACvxCvfprZzXI"
   },
-  "E5": {
-    "presentation": "1PL2BhlpEGWSZegS3sUE2iZXFhu5G5biA"
-  },
-  "E6": {
-    "presentation": "1aE4ErN6aHjt12JlH79laozkhJraNo276"
-  },
-  "A5": {
-    "presentation": "1gjStQm_wYKK8ebhTckmqFOiBLbSuJ-MD"
-  },
-  "A6": {
-    "presentation": "1FfhVEAPufD_wQKiSSTUP4nWRHoVG7Hau"
-  },
-  "B10": {
-    "presentation": "1wsBXrzN7PPCf1g7Gzru6c8VCLD88FCwr"
-  }
+  "E5": {},
+  "E6": {},
+  "A5": {},
+  "A6": {},
+  "B10": {}
 }
