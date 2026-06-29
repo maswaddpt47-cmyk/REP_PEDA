@@ -109,12 +109,23 @@ def main():
     with open(PLANS_FILE) as f:
         plans = json.load(f)
 
+    # Charge le catalogue personnalisé pour les nouvelles tuiles
+    cat_file = ROOT / "assets" / "catalogue.json"
+    catalogue = {}
+    if cat_file.exists():
+        try:
+            for entry in json.load(open(cat_file)):
+                catalogue[entry["num"]] = entry
+        except Exception:
+            pass
+
     updated = []
     for pptx in sorted(PPTX_DIR.glob("*.pptx")):
         key = pptx.stem  # e.g. "B10"
         if key not in plans:
-            print(f"SKIP {key} — clé absente du catalogue")
-            continue
+            cat = catalogue.get(key, {})
+            plans[key] = {"titre": cat.get("titre", key), "chap": cat.get("chap", key[0] if key else "?")}
+            print(f"NOUVEAU {key} — ajouté depuis catalogue.json")
 
         slides, versions = analyze(pptx)
         plans[key]["analyse"] = True
