@@ -1,7 +1,6 @@
-const CACHE = "conum47-v9";
+const CACHE = "conum47-v10";
 const STATIC = [
   "./index.html",
-  "./test.html",
   "./assets/icon.svg",
   "./assets/slide-plans.json",
 ];
