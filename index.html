@@ -2704,15 +2704,16 @@ document.getElementById("pptx-upload-label").addEventListener("click", () => {
 });
 document.getElementById("pptx-upload-input").addEventListener("change", async e => {
   pptxPickerOpen = false;
+  pptxUploading = true;  // raised immediately — backdrop cannot close dropal from here
   const file = e.target.files[0];
-  if (!file || !editAtelier) return;
+  const savedAtelier = editAtelier;  // captured before any async / modal close
+  if (!file || !savedAtelier) { pptxUploading = false; e.target.value = ""; return; }
   const tok = getGhToken();
-  if (!tok) { showToast("⚠ Token GitHub requis"); return; }
+  if (!tok) { pptxUploading = false; showToast("⚠ Token GitHub requis"); e.target.value = ""; return; }
   const status = document.getElementById("pptx-upload-status");
   const label  = document.getElementById("pptx-upload-label");
-  status.textContent = "⏳ Envoi en cours…";
-  label.style.opacity = "0.5";
-  pptxUploading = true;
+  if (status) status.textContent = "⏳ Envoi en cours…";
+  if (label)  label.style.opacity = "0.5";
   try {
     const buf   = await file.arrayBuffer();
     const bytes = new Uint8Array(buf);
@@ -2720,19 +2721,27 @@ document.getElementById("pptx-upload-input").addEventListener("change", async e 
     for (let i = 0; i < bytes.length; i += 8192)
       binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
     const b64      = btoa(binary);
-    const path     = `assets/pptx/${editAtelier.num}.pptx`;
+    const path     = `assets/pptx/${savedAtelier.num}.pptx`;
     const existing = await ghGetFile(path, tok);
-    const result   = await ghPutBinaryFile(path, `feat: PPTX source ${editAtelier.num}`, b64, existing ? existing.sha : undefined, tok);
-    if (result === "auth_error") { clearGhToken(); status.textContent = "⚠ Token invalide"; showToast("⚠ Token invalide", 6000); }
-    else if (result === true) { status.textContent = `✓ ${editAtelier.num}.pptx envoyé — CI en cours…`; showToast(`✓ ${editAtelier.num}.pptx uploadé — fiches générées dans ~1 min`, 7000); }
-    else { status.textContent = `⚠ Erreur ${result?.error || ""}: ${result?.message || "GitHub API"}`; showToast(`⚠ Upload échoué (${result?.error || "?"})`, 6000); }
+    const result   = await ghPutBinaryFile(path, `feat: PPTX source ${savedAtelier.num}`, b64, existing ? existing.sha : undefined, tok);
+    if (result === "auth_error") {
+      clearGhToken();
+      if (status) status.textContent = "⚠ Token invalide";
+      showToast("⚠ Token invalide", 6000);
+    } else if (result === true) {
+      if (status) status.textContent = `✓ ${savedAtelier.num}.pptx envoyé — CI en cours…`;
+      showToast(`✓ ${savedAtelier.num}.pptx uploadé — fiches générées dans ~1 min`, 7000);
+    } else {
+      if (status) status.textContent = `⚠ Erreur ${result?.error || ""}: ${result?.message || "GitHub API"}`;
+      showToast(`⚠ Upload échoué (${result?.error || "?"})`, 6000);
+    }
   } catch (err) {
     console.error("PPTX upload exception:", err);
-    status.textContent = `⚠ Exception: ${err.message}`;
+    if (status) status.textContent = `⚠ Exception: ${err.message}`;
     showToast("⚠ Erreur upload PPTX", 6000);
   }
   pptxUploading = false;
-  label.style.opacity = "";
+  if (label) label.style.opacity = "";
   e.target.value = "";
 });
 
