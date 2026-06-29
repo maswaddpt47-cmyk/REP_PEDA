@@ -1807,12 +1807,17 @@ async function ghPutFile(path, message, content, sha, token) {
   return res.ok ? true : false;
 }
 async function ghPutBinaryFile(path, message, b64content, sha, token) {
+  const body = JSON.stringify({ message, content: b64content, sha, branch: "main" });
   const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
-    method: "PUT", headers: ghHeaders(token),
-    body: JSON.stringify({ message, content: b64content, sha, branch: "main" })
+    method: "PUT", headers: ghHeaders(token), body
   });
   if (res.status === 401 || res.status === 403) { clearGhToken(); return "auth_error"; }
-  return res.ok ? true : false;
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    console.error("ghPutBinaryFile error", res.status, detail);
+    return { error: res.status, message: detail.message || "unknown" };
+  }
+  return true;
 }
 
 async function uploadToRepo(num, filename, imageDataUrl, token) {
@@ -2709,10 +2714,12 @@ document.getElementById("pptx-upload-input").addEventListener("change", async e 
     const path     = `assets/pptx/${editAtelier.num}.pptx`;
     const existing = await ghGetFile(path, tok);
     const result   = await ghPutBinaryFile(path, `feat: PPTX source ${editAtelier.num}`, b64, existing ? existing.sha : undefined, tok);
-    if (result === "auth_error") { clearGhToken(); showToast("⚠ Token invalide"); }
-    else { status.textContent = `✓ ${editAtelier.num}.pptx envoyé — CI en cours…`; showToast(`✓ ${editAtelier.num}.pptx uploadé`); }
+    if (result === "auth_error") { clearGhToken(); status.textContent = "⚠ Token invalide"; showToast("⚠ Token invalide"); }
+    else if (result === true) { status.textContent = `✓ ${editAtelier.num}.pptx envoyé — CI en cours…`; showToast(`✓ ${editAtelier.num}.pptx uploadé`); }
+    else { status.textContent = `⚠ Erreur ${result?.error || ""}: ${result?.message || "GitHub API"}. Voir console.`; showToast(`⚠ Upload échoué (${result?.error || "?"})`); }
   } catch (err) {
-    status.textContent = "⚠ Erreur lors de l'envoi";
+    console.error("PPTX upload exception:", err);
+    status.textContent = `⚠ Exception: ${err.message}`;
     showToast("⚠ Erreur upload PPTX");
   }
   label.style.opacity = "";
