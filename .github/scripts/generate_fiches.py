@@ -14,6 +14,8 @@ ROOT       = Path(__file__).parent.parent.parent
 PPTX_DIR   = ROOT / "assets" / "pptx"
 FICHES_DIR = ROOT / "assets" / "fiches"
 PLANS_FILE = ROOT / "assets" / "slide-plans.json"
+BG_P1      = ROOT / "assets" / "bg-p1.png"   # fond page 1 (avec logo)
+BG_P2      = ROOT / "assets" / "bg-p2.png"   # fond page 2+ (sans logo)
 
 # ── Palette (extraite du template original)
 BLU    = RGBColor(0x43, 0x88, 0xBC)   # bleu objectifs / titres
@@ -65,6 +67,16 @@ CONSEILS_DEFAULT = [
 # ══════════════════════════════════════════════════════
 # Primitives de dessin
 # ══════════════════════════════════════════════════════
+
+def add_bg_picture(slide, img_path, opacity=0.80):
+    """Insère une image pleine page en fond avec transparence (opacity 0-1)."""
+    from lxml import etree
+    pic = slide.shapes.add_picture(str(img_path), Cm(0), Cm(0), Cm(SW), Cm(SH))
+    a_ns = 'http://schemas.openxmlformats.org/drawingml/2006/main'
+    blip = pic._element.find(f'.//{{{a_ns}}}blip')
+    if blip is not None:
+        etree.SubElement(blip, f'{{{a_ns}}}alphaModFix', amt=str(int(opacity * 100000)))
+
 
 def rect(slide, l, t, w, h, fill, line=None, lw=0.5):
     """Rectangle coloré (en cm)."""
@@ -327,14 +339,19 @@ def build_fiche(fiche_data, output_path):
     prs.slide_width  = Cm(SW)
     prs.slide_height = Cm(SH)
 
+    _page = [0]
     def new_slide():
+        _page[0] += 1
         s = prs.slides.add_slide(prs.slide_layouts[6])  # blank
         s.background.fill.solid()
         s.background.fill.fore_color.rgb = WHT
+        bg = BG_P1 if _page[0] == 1 else BG_P2
+        if bg.exists():
+            add_bg_picture(s, bg)
         return s
 
     slide = new_slide()
-    top   = 3.40   # réserve l'espace logo/fond (à insérer plus tard)
+    top   = 3.40   # espace logo bg-p1.png en haut à gauche
 
     top = draw_header(slide, fiche_data["titre"], fiche_data["duree"], top)
     top += 0.15
