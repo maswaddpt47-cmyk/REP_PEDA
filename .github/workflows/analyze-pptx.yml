@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "assets/pptx/*.pptx"
+  workflow_dispatch:
 
 permissions:
   contents: write
