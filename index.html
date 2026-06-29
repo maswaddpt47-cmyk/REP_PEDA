@@ -2715,12 +2715,13 @@ document.getElementById("pptx-upload-input").addEventListener("change", async e 
   if (status) status.textContent = "⏳ Envoi en cours…";
   if (label)  label.style.opacity = "0.5";
   try {
-    const buf   = await file.arrayBuffer();
-    const bytes = new Uint8Array(buf);
-    let binary  = "";
-    for (let i = 0; i < bytes.length; i += 8192)
-      binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
-    const b64      = btoa(binary);
+    // FileReader.readAsDataURL = méthode native fiable sur mobile (évite btoa + spread)
+    const b64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = () => reject(new Error("Lecture fichier échouée"));
+      reader.readAsDataURL(file);
+    });
     const path     = `assets/pptx/${savedAtelier.num}.pptx`;
     const existing = await ghGetFile(path, tok);
     const result   = await ghPutBinaryFile(path, `feat: PPTX source ${savedAtelier.num}`, b64, existing ? existing.sha : undefined, tok);
@@ -2737,8 +2738,8 @@ document.getElementById("pptx-upload-input").addEventListener("change", async e 
     }
   } catch (err) {
     console.error("PPTX upload exception:", err);
-    if (status) status.textContent = `⚠ Exception: ${err.message}`;
-    showToast("⚠ Erreur upload PPTX", 6000);
+    if (status) status.textContent = `⚠ ${err.message}`;
+    showToast(`⚠ ${err.message || "Erreur upload PPTX"}`, 7000);
   }
   pptxUploading = false;
   if (label) label.style.opacity = "";
