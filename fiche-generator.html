@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Générateur de fiches autonome — ARIANE 47</title>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js"></script>
+<style>
+  :root{
+    --bg:#13151a; --surface:#1b1e26; --surface-2:#22262f; --border:#2c303a;
+    --text:#eef0f4; --muted:#8a8f9c; --accent:#4f8ef7; --accent-2:#5eb3d2;
+    --ok:#22c55e; --warn:#f8a824; --err:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  header h1{font-size:20px;margin:0}
+  .sub{color:var(--muted);font-size:13.5px;line-height:1.5;margin:6px 0 28px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
+  .card h2{font-size:15px;margin:0 0 12px;color:var(--accent-2)}
+  .drop{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:.15s}
+  .drop:hover,.drop.drag{border-color:var(--accent);background:rgba(79,142,247,.06)}
+  .drop input{display:none}
+  .drop .ic{font-size:30px;margin-bottom:6px}
+  .drop .name{margin-top:8px;font-size:13px;color:var(--accent-2);word-break:break-all}
+  .summary{display:none}
+  .summary.show{display:block}
+  .summary-row{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--border)}
+  .summary-row:last-child{border-bottom:none}
+  .summary-row b{color:var(--text)}
+  .versions{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .ver-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;cursor:pointer;font-size:13.5px}
+  .ver-opt:hover{border-color:var(--accent)}
+  .ver-opt.sel{border-color:var(--accent);background:rgba(79,142,247,.08)}
+  .ver-opt input{accent-color:var(--accent)}
+  .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  button.gen{flex:1;min-width:200px;padding:13px 16px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;transition:.15s}
+  button.gen:disabled{opacity:.4;cursor:not-allowed}
+  .gen.action{background:linear-gradient(135deg,#4388bc,#5eb3d2)}
+  .gen.memo{background:linear-gradient(135deg,#187c88,#1ea0a8)}
+  button.gen:not(:disabled):hover{filter:brightness(1.1)}
+  .status{min-height:20px;font-size:13px;margin-top:14px}
+  .status.ok{color:var(--ok)}
+  .status.err{color:var(--err)}
+  .status.busy{color:var(--accent-2)}
+  .hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
+  a.back{color:var(--accent-2);text-decoration:none;font-size:13px}
+  a.back:hover{text-decoration:underline}
+  .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.25);border-top-color:var(--accent-2);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div style="font-size:26px">🧩</div>
+    <h1>Générateur de fiches autonome</h1>
+  </header>
+  <div class="sub">
+    Génère une Fiche Action et un Mémo participant à partir d'un PPTX que tu choisis sur ton appareil —
+    sans rien envoyer sur GitHub, sans toucher au catalogue ni à <code>slide-plans.json</code>.
+    Tout se passe dans cet onglet ; le PPTX reste sur ta machine.
+  </div>
+
+  <div class="card">
+    <h2>1. Choisir le PPTX source</h2>
+    <label class="drop" id="drop">
+      <div class="ic">📂</div>
+      <div>Glisser un fichier .pptx ici, ou cliquer pour parcourir</div>
+      <div class="name" id="file-name"></div>
+      <input type="file" id="file-input" accept=".pptx">
+    </label>
+  </div>
+
+  <div class="card summary" id="summary-card">
+    <h2>2. Aperçu détecté</h2>
+    <div class="summary-row"><span>Titre</span><b id="sum-titre"></b></div>
+    <div class="summary-row"><span>Slides</span><b id="sum-slides"></b></div>
+    <div class="summary-row"><span>Durée totale (complet)</span><b id="sum-duree"></b></div>
+
+    <div class="versions" id="versions"></div>
+  </div>
+
+  <div class="card summary" id="gen-card">
+    <h2>3. Générer</h2>
+    <div class="actions">
+      <button class="gen action" id="btn-fiche" disabled>📋 Fiche Action (.pptx)</button>
+      <button class="gen memo" id="btn-memo" disabled>📝 Mémo participant (.pptx)</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="hint">
+    Outil indépendant du catalogue — le PPTX uploadé ici n'est jamais ajouté à <code>assets/pptx/</code> et
+    n'apparaît dans aucune tuile. Pour publier officiellement un atelier, dépose le PPTX dans
+    <code>assets/pptx/</code> via le flux habituel (la pipeline GitHub Actions s'en charge).
+    Nécessite une connexion internet (librairies de lecture/écriture .pptx chargées depuis un CDN).
+  </div>
+
+  <p><a class="back" href="./index.html">← Retour au catalogue</a></p>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   1. LECTURE DU PPTX UPLOADÉ (JSZip + parsing XML minimal)
+   ════════════════════════════════════════════════════════════ */
+
+async function parsePptx(file){
+  const zip = await JSZip.loadAsync(file);
+  const presEntry = zip.file('ppt/presentation.xml');
+  const relsEntry = zip.file('ppt/_rels/presentation.xml.rels');
+  if(!presEntry || !relsEntry) throw new Error("Fichier .pptx invalide (structure OOXML introuvable).");
+
+  const presXml = await presEntry.async('text');
+  const relsXml = await relsEntry.async('text');
+  const presDoc = new DOMParser().parseFromString(presXml, 'application/xml');
+  const relsDoc = new DOMParser().parseFromString(relsXml, 'application/xml');
+
+  const relMap = {};
+  Array.from(relsDoc.getElementsByTagName('Relationship')).forEach(r=>{
+    relMap[r.getAttribute('Id')] = r.getAttribute('Target');
+  });
+
+  const sldIds = Array.from(presDoc.getElementsByTagName('p:sldId'));
+  if(!sldIds.length) throw new Error("Aucune slide trouvée dans le PPTX.");
+
+  const slidePaths = sldIds.map(sid=>{
+    const rid = sid.getAttribute('r:id') || sid.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
+    const target = relMap[rid];
+    if(!target) return null;
+    return 'ppt/' + target.replace(/^\.?\/?/,'');
+  }).filter(Boolean);
+
+  const slides = [];
+  for(let i=0;i<slidePaths.length;i++){
+    const entry = zip.file(slidePaths[i]);
+    if(!entry) continue;
+    const xml = await entry.async('text');
+    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+    slides.push(parseSlideXml(doc, i+1));
+  }
+  if(!slides.length) throw new Error("Impossible de lire les slides du PPTX.");
+  return slides;
+}
+
+function parseSlideXml(doc, idx){
+  const spList = Array.from(doc.getElementsByTagName('p:sp'));
+  const shapes = [];
+  for(const sp of spList){
+    let isTitle = false;
+    const ph = sp.getElementsByTagName('p:ph')[0];
+    if(ph){
+      const type = ph.getAttribute('type');
+      if(type === 'title' || type === 'ctrTitle') isTitle = true;
+    }
+    const txBody = sp.getElementsByTagName('p:txBody')[0];
+    if(!txBody) continue;
+    const paragraphs = Array.from(txBody.getElementsByTagName('a:p')).map(ap=>
+      Array.from(ap.getElementsByTagName('a:t')).map(t=>t.textContent).join('')
+    );
+    shapes.push({ isTitle, paragraphs });
+  }
+  return { n: idx, shapes };
+}
+
+function getSlideTitle(slide){
+  const titleShape = slide.shapes.find(s=>s.isTitle);
+  if(titleShape){
+    const t = titleShape.paragraphs.join('\n').trim();
+    if(t) return t;
+  }
+  for(const s of slide.shapes){
+    const t = s.paragraphs.join('\n').trim();
+    if(t && t.length < 120) return t.split('\n')[0].trim();
+  }
+  return '(sans titre)';
+}
+
+/* ════════════════════════════════════════════════════════════
+   2. ANALYSE (port de analyze_pptx.py)
+   ════════════════════════════════════════════════════════════ */
+
+function classifyRole(title, idx){
+  const t = title.toLowerCase();
+  if(idx === 0) return 'titre';
+  if(['programme','au menu','sommaire','objectif'].some(w=>t.includes(w))) return 'intro';
+  if(['chapitre','partie','module','étape'].some(w=>t.includes(w))) return 'chapitre';
+  if(['démo','demo','pratique','exercice','manipulation','tutoriel'].some(w=>t.includes(w))) return 'demo';
+  if(['pour aller plus loin','ressource','bilan','conclusion','récap','merci','questions fréquentes'].some(w=>t.includes(w))) return 'conclusion';
+  return 'contenu';
+}
+
+const DURATION = { titre:2, intro:4, chapitre:2, demo:12, contenu:8, conclusion:5 };
+
+function postProcessRoles(slides){
+  const body = slides.filter(s=>!['titre','intro','conclusion'].includes(s.role));
+  if(body.length){
+    const chapCount = body.filter(s=>s.role==='chapitre').length;
+    if(chapCount / body.length > 0.5){
+      slides.forEach(s=>{ if(s.role==='chapitre'){ s.role='contenu'; s.min=10; } });
+    }
+  }
+  return slides;
+}
+
+function isOptionalSlide(slide){
+  const t = slide.titre.toLowerCase();
+  return ['optionnel','pour aller plus loin','ressource','numérique responsable','éco-geste'].some(w=>t.includes(w));
+}
+
+function minsLabel(m){
+  const h = Math.floor(m/60), m2 = m%60;
+  if(h && m2) return `${h}h${String(m2).padStart(2,'0')}`;
+  if(h) return `${h}h`;
+  return `${m} min`;
+}
+
+function computeVersions(slides){
+  const allIdx = slides.map(s=>s.n);
+  const total = slides.reduce((a,s)=>a+s.min,0);
+  const mustKeep = s=>['titre','intro','chapitre'].includes(s.role);
+
+  let v1h30 = slides.filter(s=>!s.optionnel);
+  let dur = v1h30.reduce((a,s)=>a+s.min,0);
+  if(dur > 95){
+    for(let i=v1h30.length-1;i>=0;i--){
+      if(dur <= 95) break;
+      const s = v1h30[i];
+      if(mustKeep(s)) continue;
+      v1h30.splice(i,1); dur -= s.min;
+    }
+  }
+  let v1h = v1h30.slice();
+  let dur1h = v1h.reduce((a,s)=>a+s.min,0);
+  if(dur1h > 65){
+    for(let i=v1h.length-1;i>=0;i--){
+      if(dur1h <= 65) break;
+      const s = v1h[i];
+      if(mustKeep(s)) continue;
+      v1h.splice(i,1); dur1h -= s.min;
+    }
+  }
+  const idx = lst=>lst.map(s=>s.n);
+  return {
+    '1h':     { indices: idx(v1h),   label: `1h — ${minsLabel(v1h.reduce((a,s)=>a+s.min,0))} · ${v1h.length} slides` },
+    '1h30':   { indices: idx(v1h30), label: `1h30 — ${minsLabel(v1h30.reduce((a,s)=>a+s.min,0))} · ${v1h30.length} slides` },
+    'complet':{ indices: allIdx,     label: `Complet — ${minsLabel(total)} · ${allIdx.length} slides` },
+  };
+}
+
+function analyzeSlides(slidesData){
+  let slides = slidesData.map((s,i)=>{
+    const titre = getSlideTitle(s);
+    const role = classifyRole(titre, i);
+    return { n: i+1, titre, role, min: DURATION[role] ?? 8, optionnel: false };
+  });
+  slides = postProcessRoles(slides);
+  slides.forEach(s=>{ s.optionnel = isOptionalSlide(s); });
+  return slides;
+}
+
+/* ════════════════════════════════════════════════════════════
+   3. EXTRACTION DU CONTENU (port de generate_fiches.py / generate_memos.py)
+   ════════════════════════════════════════════════════════════ */
+
+function cleanText(text){
+  return (text || '').replace(/[^\x00-\x7FÀ-ɏ‘’–—«»]/g, '').trim();
+}
+function trunc(t, n){ return t.length > n ? t.slice(0,n) + '…' : t; }
+function normLoose(t){ return (t||'').replace(/[^a-zA-Z0-9À-ɏ_\s]/g,'').toLowerCase().trim(); }
+
+const MATERIEL_DEFAULT = [
+  "1 PC ou tablette par participant",
+  "Connexion Wi-Fi stable",
+  "Grand écran / vidéoprojecteur",
+  "Fiches mémo (1 par participant)",
+];
+const CONSEILS_DEFAULT = [
+  "Adapter le rythme selon le niveau du groupe.",
+  "Laisser les participants manipuler dès que possible.",
+  "Prévoir un compte de démonstration pour ne pas exposer de données personnelles.",
+  "Terminer en distribuant la fiche mémo — c'est le support qu'ils garderont.",
+];
+
+function getFirstBullet(slide, title){
+  for(const shape of slide.shapes){
+    for(const para of shape.paragraphs){
+      const t = para.trim();
+      if(t && t !== title && t.length > 10) return cleanText(t);
+    }
+  }
+  return '';
+}
+function getBullets(slide, title, maxB=3){
+  const bullets = [];
+  for(const shape of slide.shapes){
+    for(const para of shape.paragraphs){
+      const t = para.trim();
+      if(t && t !== title && t.length > 10){
+        bullets.push(cleanText(t));
+        if(bullets.length >= maxB) return bullets;
+      }
+    }
+  }
+  return bullets;
+}
+function getMemoBullets(slide, title, maxB=4){
+  const bullets = [];
+  const titleNorm = normLoose(title);
+  for(const shape of slide.shapes){
+    for(const para of shape.paragraphs){
+      const t = cleanText(para.trim());
+      if(t.length < 10) continue;
+      const tNorm = normLoose(t);
+      if(tNorm === titleNorm || titleNorm.includes(tNorm) || tNorm.includes(titleNorm)) continue;
+      bullets.push(t);
+      if(bullets.length >= maxB) break;
+    }
+    if(bullets.length >= maxB) break;
+  }
+  return bullets;
+}
+
+function extractFiche(slidesData, slidesMeta, indices){
+  const titre = cleanText(getSlideTitle(slidesData[0]));
+  const idxSet = indices ? new Set(indices) : null;
+  const pairs = slidesData.map((s,i)=>[s, slidesMeta[i]]).filter(([,m])=> !idxSet || idxSet.has(m.n));
+
+  const dureeMin = pairs.reduce((a,[,m])=>a+m.min,0);
+  const h = Math.floor(dureeMin/60), mv = dureeMin%60;
+  const dureeStr = (h && mv) ? `${h}h${String(mv).padStart(2,'0')}` : (h ? `${h}h` : `${mv} min`);
+
+  const content = pairs.filter(([,m])=>['contenu','demo','chapitre'].includes(m.role) && m.n > 1);
+  const objectifs = content.slice(0,4).map(([,m])=>trunc(cleanText(m.titre),55));
+  while(objectifs.length < 4) objectifs.push('');
+
+  const deroule = []; let cumtime = 0;
+  for(const [slide, meta] of pairs){
+    if(meta.role === 'titre'){ cumtime += meta.min; continue; }
+    if(meta.optionnel){ cumtime += meta.min; continue; }
+    const h2 = Math.floor(cumtime/60), m2 = cumtime%60;
+    deroule.push({
+      heure: `${h2}:${String(m2).padStart(2,'0')}`,
+      min: meta.min,
+      titre: trunc(cleanText(meta.titre),48),
+      bullet: getFirstBullet(slide, meta.titre),
+    });
+    cumtime += meta.min;
+  }
+
+  const optRaw = slidesMeta.map((m,i)=>[slidesData[i],m])
+    .filter(([,m])=> m.optionnel && m.role !== 'titre' && (!idxSet || !idxSet.has(m.n)));
+  const optionnels = optRaw.map(([s,m])=>({
+    min: m.min, titre: trunc(cleanText(m.titre),38), bullets: getBullets(s, m.titre, 3),
+  }));
+
+  return { titre, duree: dureeStr, objectifs, materiel: MATERIEL_DEFAULT, deroule, optionnels, conseils: CONSEILS_DEFAULT };
+}
+
+function extractMemo(slidesData, slidesMeta, indices){
+  const idxSet = (indices && indices.length) ? new Set(indices) : null;
+  const rolesSteps = new Set(['contenu','demo']);
+
+  const steps = [];
+  slidesMeta.forEach((meta,i)=>{
+    if(!rolesSteps.has(meta.role)) return;
+    if(meta.optionnel) return;
+    if(idxSet && !idxSet.has(meta.n)) return;
+    const slide = slidesData[i];
+    steps.push({ titre: cleanText(meta.titre), bullets: getMemoBullets(slide, meta.titre, 4) });
+  });
+
+  let titreRaw = '';
+  for(const shape of slidesData[0].shapes){
+    const t = shape.paragraphs.join('\n').trim();
+    if(t && t.length < 120){ titreRaw = t.split('\n')[0].trim(); break; }
+  }
+  const titre = trunc(cleanText(titreRaw), 60);
+
+  const bsa = [];
+  slidesMeta.forEach((meta,i)=>{
+    if(!meta.optionnel) return;
+    if(['titre','chapitre'].includes(meta.role)) return;
+    if(idxSet && idxSet.has(meta.n)) return;
+    const slide = slidesData[i];
+    bsa.push({ titre: cleanText(meta.titre), bullets: getMemoBullets(slide, meta.titre, 4) });
+  });
+
+  return { titre, steps, bsa };
+}
+
+/* ════════════════════════════════════════════════════════════
+   4. CONSTRUCTION DES PPTX (port des primitives de dessin)
+   ════════════════════════════════════════════════════════════ */
+
+const COLORS = {
+  BLU:'4388BC', TEA:'187C88', SKY:'5EB3D2', ORG:'E67D21', YEL:'F8A824',
+  DRK:'2B2B2B', GRY:'6E6E6D', WHT:'FFFFFF',
+  BG_BLU:'ECF5FF', BG_TEA:'EBF7F6', BG_STP:'F8F9FD', BD_STP:'DDE6ED', BG_OPT:'FFF8EF', BG_CNS:'FFFCE7',
+  BRN:'5D4037', BG_BSA:'FFFCE7', BG_BDA:'EBF5FF', BG_SUITE:'EFF7FF', SEP_CLR:'DDDDDD',
+};
+const BADGE_CYCLE = [COLORS.SKY,COLORS.BLU,COLORS.TEA,COLORS.BLU,COLORS.TEA,COLORS.SKY];
+const STEP_PALETTE = [[COLORS.BLU,COLORS.BG_BLU],[COLORS.TEA,COLORS.BG_TEA]];
+
+const SW_CM = 20.99, SH_CM = 29.70;
+const CM = v => v / 2.54;
+const MARGIN_PT = CM(0.05) * 72;
+
+function rect(slide, l, t, w, h, fill, line=null, lw=0.5){
+  slide.addShape('rect', {
+    x:CM(l), y:CM(t), w:CM(w), h:CM(h),
+    fill:{ color:fill },
+    line: line ? { color:line, width:lw } : { type:'none' },
+  });
+}
+
+function textbox(slide, l, t, w, h, runs){
+  const items = runs.map(r=>({
+    text: r.text || '',
+    options: {
+      fontFace:'Arial', fontSize:r.size, bold:!!r.bold, italic:!!r.italic,
+      color:r.color || COLORS.DRK, align:r.align || 'left',
+      breakLine: r.brk !== false,
+      paraSpaceBefore: 0, paraSpaceAfter: 1,
+    },
+  }));
+  slide.addText(items, {
+    x:CM(l), y:CM(t), w:CM(w), h:CM(h),
+    margin:[0, MARGIN_PT, 0, MARGIN_PT], valign:'top', wrap:true,
+  });
+}
+
+function bg(slide, path){ slide.background = { path }; }
+
+/* ── Fiche Action ── */
+const F = { ML:1.47, CW:18.05, STEP_H:2.08, OPT_HDR_H:0.55, CONS_H:2.50 };
+function fOptRowH(opt){ return 1.05 + (opt.bullets||[]).length * 0.42; }
+
+function drawFicheHeader(slide, titre, duree, top){
+  textbox(slide, F.ML, top, F.CW, 1.30, [
+    { text: titre, size:17, bold:true, color:COLORS.BLU, align:'center' },
+    { text: `Fiche Action | ${duree} | Guide d'animation — Conseillers Numériques CD47`, size:8, color:COLORS.GRY, align:'center' },
+  ]);
+  return top + 1.35;
+}
+function drawFicheCols(slide, objectifs, materiel, top){
+  const colW=8.40, gap=1.25, colH=2.50;
+  rect(slide, F.ML, top, colW, colH, COLORS.BG_BLU, COLORS.BLU, 1.0);
+  const objRuns = [{ text:'Objectifs', size:9.5, bold:true, color:COLORS.BLU }];
+  objectifs.forEach(o=>objRuns.push({ text:o?`> ${o}`:'', size:8.5 }));
+  textbox(slide, F.ML+0.25, top+0.15, colW-0.40, colH-0.20, objRuns);
+
+  const matL = F.ML+colW+gap;
+  rect(slide, matL, top, colW, colH, COLORS.BG_TEA, COLORS.TEA, 1.0);
+  const matRuns = [{ text:'Matériel nécessaire', size:9.5, bold:true, color:COLORS.TEA }];
+  materiel.forEach(m=>matRuns.push({ text:`> ${m}`, size:8.5 }));
+  textbox(slide, matL+0.25, top+0.15, colW-0.40, colH-0.20, matRuns);
+
+  return top + colH + 0.20;
+}
+function drawFicheStep(slide, step, idx, top){
+  const clr = BADGE_CYCLE[idx % 6];
+  rect(slide, F.ML, top, F.CW, F.STEP_H, COLORS.BG_STP, COLORS.BD_STP, 0.5);
+  rect(slide, F.ML, top, 0.55, F.STEP_H, clr);
+
+  const bh=0.44, bt = top + (F.STEP_H-bh)/2;
+  rect(slide, F.ML+0.65, bt, 1.30, bh, clr);
+  textbox(slide, F.ML+0.65, bt, 1.30, bh, [{ text:step.heure, size:8, bold:true, color:COLORS.WHT, align:'center' }]);
+
+  const runs = [
+    { text:`${step.min} min`, size:8, bold:true, color:clr },
+    { text:step.titre, size:9, bold:true, color:COLORS.DRK },
+  ];
+  if(step.bullet) runs.push({ text:`. ${step.bullet}`, size:8 });
+  textbox(slide, F.ML+2.15, top+0.18, F.CW-2.35, F.STEP_H-0.26, runs);
+
+  return top + F.STEP_H;
+}
+function drawFicheOpt(slide, optionnels, top){
+  if(!optionnels.length) return top;
+  const rowHeights = optionnels.map(fOptRowH);
+  const totalH = F.OPT_HDR_H + rowHeights.reduce((a,b)=>a+b,0) + 0.10;
+
+  rect(slide, F.ML, top, F.CW, totalH, COLORS.BG_OPT, COLORS.ORG, 1.5);
+  rect(slide, F.ML, top, F.CW, F.OPT_HDR_H, COLORS.ORG);
+  textbox(slide, F.ML+0.20, top+0.08, F.CW-0.40, F.OPT_HDR_H-0.10, [
+    { text:"Blocs optionnels — À aborder si le temps le permet", size:8.5, bold:true, color:COLORS.WHT, align:'center' },
+  ]);
+
+  let rowTop = top + F.OPT_HDR_H;
+  optionnels.forEach((opt,i)=>{
+    const rh = rowHeights[i];
+    rect(slide, F.ML, rowTop, F.CW, 0.04, COLORS.ORG);
+    const runs = [
+      { text:`${opt.min} min`, size:8, bold:true, color:COLORS.ORG },
+      { text:opt.titre, size:9, bold:true, color:COLORS.DRK },
+    ];
+    const bullets = opt.bullets || [];
+    if(bullets.length){
+      runs.push({ text:'OPT.  ', size:8, bold:true, color:COLORS.ORG, brk:false });
+      runs.push({ text:`. ${bullets[0]}`, size:8 });
+      bullets.slice(1).forEach(b=>runs.push({ text:`. ${b}`, size:8 }));
+    }
+    textbox(slide, F.ML+0.30, rowTop+0.12, F.CW-0.55, rh-0.18, runs);
+    rowTop += rh;
+  });
+
+  return top + totalH + 0.20;
+}
+function drawFicheConseils(slide, conseils, top){
+  rect(slide, F.ML, top, F.CW, 0.12, COLORS.YEL);
+  const runs = [{ text:'Conseils pour une bonne animation', size:9.5, bold:true, color:COLORS.DRK }];
+  conseils.forEach(c=>runs.push({ text:`> ${c}`, size:8.5 }));
+  textbox(slide, F.ML+0.25, top+0.18, F.CW-0.40, F.CONS_H-0.20, runs);
+}
+
+function buildFiche(pptx, data){
+  pptx.defineLayout({ name:'FicheA4', width:CM(SW_CM), height:CM(SH_CM) });
+  pptx.layout = 'FicheA4';
+  let page = 0;
+  function newSlide(){
+    page++;
+    const s = pptx.addSlide();
+    bg(s, page === 1 ? 'assets/bg-p1.png' : 'assets/bg-p2.png');
+    return s;
+  }
+  let slide = newSlide();
+  let top = 3.40;
+  top = drawFicheHeader(slide, data.titre, data.duree, top);
+  top += 0.15;
+  top = drawFicheCols(slide, data.objectifs, data.materiel, top);
+
+  data.deroule.forEach((step,i)=>{
+    if(top + F.STEP_H > SH_CM - F.CONS_H - 0.60){ slide = newSlide(); top = 1.50; }
+    top = drawFicheStep(slide, step, i, top);
+  });
+  top += 0.25;
+
+  const nOpt = data.optionnels.length;
+  const optH = nOpt ? (F.OPT_HDR_H + data.optionnels.reduce((a,o)=>a+fOptRowH(o),0) + 0.30) : 0;
+  const consH = F.CONS_H + 0.30;
+  if(top + optH + consH > SH_CM - 0.30){ slide = newSlide(); top = 1.50; }
+
+  top = drawFicheOpt(slide, data.optionnels, top);
+  const consTop = Math.max(top + 0.20, SH_CM - F.CONS_H - 0.30);
+  drawFicheConseils(slide, data.conseils, consTop);
+}
+
+/* ── Mémo participant ── */
+const M = {
+  ML:1.48, CW:18.03, ACCENT_W:1.59, STEP_H:3.81, STEP_GAP:0.18,
+  SEP_X:3.35, SEP_Y_IN:1.17, SEP_W:15.98,
+  HEADER_TOP:3.28, HEADER_H:1.42, FIRST_TOP:4.86,
+  STEPS_PER_PAGE:4, MAX_STEPS:8, CHARS_PER_LINE:78, LINE_H_CM:0.42,
+};
+function calcStepH(bullets){
+  if(!bullets || !bullets.length) return M.STEP_H;
+  const nLines = bullets.slice(0,4).reduce((a,b)=>a+Math.max(1, Math.ceil(b.length / M.CHARS_PER_LINE)), 0);
+  const bulletArea = nLines * M.LINE_H_CM + 0.35;
+  return Math.max(M.SEP_Y_IN + 0.22 + bulletArea, M.STEP_H);
+}
+function drawMemoHeader(slide, titre, subtitle){
+  const titreDisplay = titre.replace(/^(Mon mémo[\s—-]+)/,'');
+  const runs = [{ text:`Mon mémo — ${titreDisplay}`, size:18, bold:true, color:COLORS.BLU }];
+  if(subtitle) runs.push({ text:subtitle, size:10, color:COLORS.GRY });
+  textbox(slide, M.ML, M.HEADER_TOP, M.CW, M.HEADER_H, runs);
+}
+function drawMemoStep(slide, num, titre, bullets, top, colorIdx){
+  const h = calcStepH(bullets);
+  const [ac, bgc] = STEP_PALETTE[colorIdx % 2];
+
+  rect(slide, M.ML, top, M.CW, h, bgc);
+  rect(slide, M.ML, top, M.ACCENT_W, h, ac);
+  rect(slide, M.SEP_X, top + M.SEP_Y_IN, M.SEP_W, 0.02, COLORS.SEP_CLR);
+
+  const numH = 0.80, numT = top + (M.SEP_Y_IN - numH)/2;
+  textbox(slide, M.ML, numT, M.ACCENT_W, numH, [{ text:String(num), size:22, bold:true, color:COLORS.WHT, align:'center' }]);
+
+  textbox(slide, M.ML+M.ACCENT_W+0.20, top+0.10, M.CW-M.ACCENT_W-0.30, M.SEP_Y_IN-0.14, [
+    { text:titre, size:11, bold:true, color:ac },
+  ]);
+
+  if(bullets && bullets.length){
+    const runs = bullets.slice(0,4).map(b=>({ text:`→ ${b}`, size:10 }));
+    textbox(slide, M.ML+M.ACCENT_W+0.15, top+M.SEP_Y_IN+0.12, M.CW-M.ACCENT_W-0.25, h-M.SEP_Y_IN-0.22, runs);
+  }
+  return top + h + M.STEP_GAP;
+}
+function drawSuiteBox(slide, page2Topics, top){
+  const h = 1.83;
+  rect(slide, M.ML, top, M.CW, h, COLORS.BG_SUITE, COLORS.BLU, 0.5);
+  const topicsStr = page2Topics.slice(0,3).filter(Boolean).join(' | ');
+  textbox(slide, M.ML+2.80, top+0.10, M.CW-3.0, h-0.15, [
+    { text:`→ Suite en page 2 : ${topicsStr}`, size:10.5, bold:true, color:COLORS.BLU },
+    { text:"Votre Conseiller Numérique : 05 53 47 31 32  ·  conseiller-numerique@lotetgaronne.fr", size:8.5, color:COLORS.GRY },
+  ]);
+}
+function drawBsa(slide, titre, bullets, top){
+  const n = bullets.length;
+  let h = 0.71 + 0.55 + n*0.50 + 0.25;
+  h = Math.max(h, 2.20);
+
+  rect(slide, M.ML, top, M.CW, h, COLORS.BG_BSA, COLORS.YEL, 0.7);
+  rect(slide, M.ML+0.46, top+0.71, M.CW-0.92, 0.02, COLORS.YEL);
+
+  textbox(slide, M.ML+0.40, top+0.08, M.CW-0.55, 0.65, [{ text:titre, size:12, bold:true, color:COLORS.BRN }]);
+
+  if(bullets.length){
+    const runs = bullets.map(b=>({ text:`→ ${b}`, size:10.5 }));
+    textbox(slide, M.ML+0.40, top+0.78, M.CW-0.55, h-0.88, runs);
+  }
+  return top + h + M.STEP_GAP;
+}
+function drawBda(slide, top){
+  const h = 4.20;
+  rect(slide, M.ML, top, M.CW, h, COLORS.BG_BDA, COLORS.BLU, 0.8);
+  rect(slide, 6.17, top+1.63, 8.64, 0.02, COLORS.SKY);
+
+  textbox(slide, M.ML+3.50, top+0.18, 11.50, h-0.30, [
+    { text:"Besoin d'aide ?", size:13, bold:true, color:COLORS.BLU },
+    { text:"Votre Conseiller Numérique est là pour vous accompagner !", size:11, bold:true, color:COLORS.TEA },
+    { text:"conseiller-numerique@lotetgaronne.fr  ·  Tél : 05 53 47 31 32", size:11 },
+    { text:"www.lotetgaronne.fr/inclusion-numerique", size:10, color:COLORS.GRY },
+    { text:"Direction des Systèmes d'Information — Service Inclusion Numérique — CD47", size:9, color:COLORS.GRY },
+  ]);
+}
+function drawFooter(slide, page, total){
+  textbox(slide, 6.62, 27.57, 7.77, 0.50, [
+    { text:`v1.0 – 2025 – CD47 Service Inclusion Numérique  |  Page ${page}/${total}`, size:8, color:COLORS.GRY, align:'center' },
+  ]);
+}
+
+function buildMemo(pptx, data){
+  pptx.defineLayout({ name:'MemoA4', width:CM(SW_CM), height:CM(SH_CM) });
+  pptx.layout = 'MemoA4';
+  let page = 0;
+  function newSlide(){
+    page++;
+    const s = pptx.addSlide();
+    bg(s, page === 1 ? 'assets/bg-p1.png' : 'assets/bg-p2.png');
+    return s;
+  }
+
+  const steps = data.steps.slice(0, M.MAX_STEPS);
+  const bsa = data.bsa;
+  const subtitle = steps.slice(0,3).map(s=>s.titre).join(' | ');
+
+  const PAGE1_MAX = 25.50 - M.FIRST_TOP - 1.83 - 0.40;
+  const p1Steps = [], p2Steps = [];
+  let used = 0.0;
+  for(const step of steps){
+    const h = calcStepH(step.bullets);
+    if(!p1Steps.length || used + h + M.STEP_GAP <= PAGE1_MAX){
+      p1Steps.push(step); used += h + M.STEP_GAP;
+    } else {
+      p2Steps.push(step);
+    }
+  }
+  const needsP2 = p2Steps.length > 0 || bsa.length > 0;
+  const totalPages = needsP2 ? 2 : 1;
+
+  const s1 = newSlide();
+  drawMemoHeader(s1, data.titre, subtitle);
+  let top = M.FIRST_TOP;
+  p1Steps.forEach((step,i)=>{ top = drawMemoStep(s1, i+1, step.titre, step.bullets, top, i); });
+
+  if(needsP2){
+    const suiteTopics = p2Steps.slice(0,3).map(s=>s.titre);
+    if(bsa.length && suiteTopics.length < 3) suiteTopics.push(bsa[0].titre);
+    top = Math.max(top + 0.20, M.FIRST_TOP + M.STEPS_PER_PAGE * (M.STEP_H + M.STEP_GAP) + 0.40);
+    drawSuiteBox(s1, suiteTopics, top);
+  } else {
+    top += 0.30;
+    bsa.forEach(b=>{ top = drawBsa(s1, b.titre, b.bullets, top); });
+    const bdaTop = Math.max(top + 0.30, SH_CM - 5.0);
+    drawBda(s1, bdaTop);
+  }
+  drawFooter(s1, 1, totalPages);
+
+  if(needsP2){
+    const s2 = newSlide();
+    drawMemoHeader(s2, data.titre, subtitle);
+    top = M.FIRST_TOP;
+    p2Steps.forEach((step,i)=>{ top = drawMemoStep(s2, p1Steps.length+i+1, step.titre, step.bullets, top, p1Steps.length+i); });
+    top += 0.30;
+    bsa.forEach(b=>{ top = drawBsa(s2, b.titre, b.bullets, top); });
+    const bdaTop = Math.max(top + 0.30, SH_CM - 5.0);
+    drawBda(s2, bdaTop);
+    drawFooter(s2, 2, totalPages);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   5. INTERFACE
+   ════════════════════════════════════════════════════════════ */
+
+const dropEl = document.getElementById('drop');
+const fileInput = document.getElementById('file-input');
+const fileNameEl = document.getElementById('file-name');
+const summaryCard = document.getElementById('summary-card');
+const genCard = document.getElementById('gen-card');
+const versionsEl = document.getElementById('versions');
+const btnFiche = document.getElementById('btn-fiche');
+const btnMemo = document.getElementById('btn-memo');
+const statusEl = document.getElementById('status');
+
+let state = { slidesData:null, meta:null, versions:null, selectedVersion:'1h30', baseName:'atelier' };
+
+['dragover','dragenter'].forEach(ev=>dropEl.addEventListener(ev, e=>{ e.preventDefault(); dropEl.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev=>dropEl.addEventListener(ev, e=>{ e.preventDefault(); dropEl.classList.remove('drag'); }));
+dropEl.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files[0];
+  if(f) handleFile(f);
+});
+fileInput.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(f) handleFile(f);
+});
+
+function setStatus(msg, cls){
+  statusEl.textContent = msg || '';
+  statusEl.className = 'status' + (cls ? ' '+cls : '');
+}
+
+async function handleFile(file){
+  if(!/\.pptx$/i.test(file.name)){
+    setStatus("Le fichier doit être un .pptx", 'err');
+    return;
+  }
+  fileNameEl.textContent = file.name;
+  state.baseName = file.name.replace(/\.pptx$/i,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'') || 'atelier';
+  setStatus('Lecture du PPTX…', 'busy');
+  btnFiche.disabled = true; btnMemo.disabled = true;
+  summaryCard.classList.remove('show'); genCard.classList.remove('show');
+
+  try{
+    state.slidesData = await parsePptx(file);
+    state.meta = analyzeSlides(state.slidesData);
+    state.versions = computeVersions(state.meta);
+    renderSummary();
+    setStatus('', '');
+  }catch(err){
+    console.error(err);
+    setStatus("Erreur de lecture : " + err.message, 'err');
+  }
+}
+
+function renderSummary(){
+  const titre = getSlideTitle(state.slidesData[0]) || '(sans titre)';
+  document.getElementById('sum-titre').textContent = titre;
+  document.getElementById('sum-slides').textContent = state.slidesData.length;
+  document.getElementById('sum-duree').textContent = state.versions.complet.label;
+
+  versionsEl.innerHTML = '';
+  ['1h','1h30','complet'].forEach(vk=>{
+    const row = document.createElement('label');
+    row.className = 'ver-opt' + (vk === state.selectedVersion ? ' sel' : '');
+    row.innerHTML = `<input type="radio" name="ver" value="${vk}" ${vk===state.selectedVersion?'checked':''}> ${state.versions[vk].label}`;
+    row.querySelector('input').addEventListener('change', ()=>{
+      state.selectedVersion = vk;
+      versionsEl.querySelectorAll('.ver-opt').forEach(el=>el.classList.remove('sel'));
+      row.classList.add('sel');
+    });
+    versionsEl.appendChild(row);
+  });
+
+  summaryCard.classList.add('show');
+  genCard.classList.add('show');
+  btnFiche.disabled = false; btnMemo.disabled = false;
+}
+
+btnFiche.addEventListener('click', async ()=>{
+  setStatus('', '');
+  btnFiche.disabled = true; btnMemo.disabled = true;
+  setStatus('Génération de la Fiche Action…', 'busy');
+  try{
+    const indices = state.versions[state.selectedVersion].indices;
+    const data = extractFiche(state.slidesData, state.meta, indices);
+    const pptx = new PptxGenJS();
+    buildFiche(pptx, data);
+    await pptx.writeFile({ fileName: `${state.baseName}-fiche-${state.selectedVersion}.pptx` });
+    setStatus('✓ Fiche Action téléchargée.', 'ok');
+  }catch(err){
+    console.error(err);
+    setStatus("Erreur de génération : " + err.message, 'err');
+  }
+  btnFiche.disabled = false; btnMemo.disabled = false;
+});
+
+btnMemo.addEventListener('click', async ()=>{
+  setStatus('', '');
+  btnFiche.disabled = true; btnMemo.disabled = true;
+  setStatus('Génération du Mémo participant…', 'busy');
+  try{
+    const indices = state.versions[state.selectedVersion].indices;
+    const data = extractMemo(state.slidesData, state.meta, indices);
+    const pptx = new PptxGenJS();
+    buildMemo(pptx, data);
+    await pptx.writeFile({ fileName: `${state.baseName}-memo.pptx` });
+    setStatus('✓ Mémo participant téléchargé.', 'ok');
+  }catch(err){
+    console.error(err);
+    setStatus("Erreur de génération : " + err.message, 'err');
+  }
+  btnFiche.disabled = false; btnMemo.disabled = false;
+});
+</script>
+</body>
+</html>
