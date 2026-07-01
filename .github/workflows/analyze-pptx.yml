@@ -23,6 +23,9 @@ jobs:
 
       - run: pip install python-pptx
 
+      - name: Supprimer les artefacts orphelins (PPTX supprimé)
+        run: python .github/scripts/cleanup_orphans.py
+
       - name: Analyser les nouveaux PPTXs
         run: python .github/scripts/analyze_pptx.py
 

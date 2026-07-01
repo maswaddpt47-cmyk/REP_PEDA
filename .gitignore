@@ -1,6 +1,22 @@
-# Backups automatiques (règle CLAUDE.md #2)
-*.backup_*
+# OS
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
 
 # Python
 __pycache__/
 *.pyc
+*.pyo
+
+# Node
+node_modules/
+
+# Temporaires
+*.tmp
+*.log
