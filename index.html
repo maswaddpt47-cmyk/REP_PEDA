@@ -1311,14 +1311,14 @@ body:not(.has-token) .modal-versions-wrap { display: none !important; }
     <div class="edit-modal-title" id="edit-modal-title"></div>
     <div class="edit-modal-sub">Renseigne les liens Google Drive pour chaque document</div>
     <div id="edit-fields-container"></div>
-    <div id="pptx-upload-row" style="margin:10px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div id="pptx-upload-row" style="margin:10px 0 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <label style="font-size:12px;color:var(--muted);">📎 Présentation PPTX source :</label>
       <label id="pptx-upload-label" style="cursor:pointer;padding:5px 12px;border:1px dashed var(--border);border-radius:6px;font-size:12px;color:var(--text);">
         Choisir un fichier…
         <input type="file" id="pptx-upload-input" accept=".pptx" style="display:none">
       </label>
-      <span id="pptx-upload-status" style="font-size:12px;color:var(--muted);"></span>
     </div>
+    <div id="pptx-upload-status" style="margin:4px 0 8px;font-size:11px;color:var(--muted);min-height:16px;"></div>
     <button class="modal-add-fiche-btn" id="edit-add-fiche-btn">＋ Ajouter une fiche</button>
     <div id="edit-add-fiche-form" style="display:none">
       <div class="add-fiche-row">
@@ -2575,18 +2575,25 @@ function openEditModal(num, e) {
   const _eafeBtn = document.getElementById("edit-add-fiche-emoji-btn");
   _eafeBtn.dataset.emoji = "📄"; _eafeBtn.textContent = "📄";
   document.getElementById("edit-add-fiche-label").value = "";
-  const pptxStatus = document.getElementById("pptx-upload-status");
-  if (pptxStatus) {
-    const plan = SLIDE_PLANS_GLOBAL[num];
+  function _showPptxDate(n) {
+    const pptxStatus = document.getElementById("pptx-upload-status");
+    if (!pptxStatus) return;
+    const plan = SLIDE_PLANS_GLOBAL[n];
     if (plan && plan.updated_at) {
       const d = new Date(plan.updated_at);
       const label = d.toLocaleDateString("fr-FR", {day:"2-digit", month:"2-digit", year:"numeric"}) +
                     " à " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
-      pptxStatus.textContent = `Dernière mise à jour : ${label}`;
+      pptxStatus.textContent = `Dernière mise à jour PPTX : ${label}`;
     } else {
-      pptxStatus.textContent = "";
+      pptxStatus.textContent = "Aucun PPTX déposé pour cet atelier.";
     }
   }
+  _showPptxDate(num);
+  // Rafraîchit aussi depuis le serveur au cas où le cache serait obsolète
+  fetch("assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"})
+    .then(r => r.json())
+    .then(data => { SLIDE_PLANS_GLOBAL = data; _showPptxDate(num); })
+    .catch(() => {});
   document.getElementById("edit-modal").classList.add("open");
   setTimeout(() => document.getElementById("edit-fields-container").querySelector("input")?.focus(), 200);
 }
