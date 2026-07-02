@@ -219,5 +219,22 @@
       "label": "Émargement",
       "emoji": "✍️"
     }
+  ],
+  "B9": [
+    {
+      "key": "positionnement",
+      "label": "Positionnement",
+      "emoji": "📋"
+    },
+    {
+      "key": "evaluation",
+      "label": "Évaluation",
+      "emoji": "✅"
+    },
+    {
+      "key": "emargement",
+      "label": "Émargement",
+      "emoji": "✍️"
+    }
   ]
 }
