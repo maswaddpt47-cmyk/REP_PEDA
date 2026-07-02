@@ -718,9 +718,9 @@
       },
       {
         "n": 7,
-        "titre": "ÉTAPE 2 SUR 3",
-        "role": "chapitre",
-        "min": 2,
+        "titre": "Identifier un site fiable",
+        "role": "contenu",
+        "min": 8,
         "optionnel": false
       },
       {
@@ -732,9 +732,9 @@
       },
       {
         "n": 9,
-        "titre": "ÉTAPE 3 SUR 3",
-        "role": "chapitre",
-        "min": 2,
+        "titre": "Payer en toute sécurité",
+        "role": "contenu",
+        "min": 8,
         "optionnel": false
       },
       {
@@ -771,6 +771,20 @@
         "role": "chapitre",
         "min": 2,
         "optionnel": false
+      },
+      {
+        "n": 15,
+        "titre": "Offre départementale d’Inclusion Numérique",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 16,
+        "titre": "Besoin d'aide ? Nous sommes là !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
       }
     ],
     "versions": {
@@ -785,11 +799,9 @@
           7,
           8,
           9,
-          10,
-          11,
           14
         ],
-        "label": "1h — 1h02 · 12 slides"
+        "label": "1h — 58 min · 10 slides"
       },
       "1h30": {
         "indices": [
@@ -808,7 +820,7 @@
           13,
           14
         ],
-        "label": "1h30 — 1h18 · 14 slides"
+        "label": "1h30 — 1h30 · 14 slides"
       },
       "complet": {
         "indices": [
@@ -825,9 +837,11 @@
           11,
           12,
           13,
-          14
+          14,
+          15,
+          16
         ],
-        "label": "Complet — 1h18 · 14 slides"
+        "label": "Complet — 1h46 · 16 slides"
       }
     }
   },
@@ -1811,6 +1825,20 @@
         "role": "contenu",
         "min": 8,
         "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "Offre départementale d’Inclusion Numérique",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "Besoin d'aide ? Nous sommes là !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
       }
     ],
     "versions": {
@@ -1840,9 +1868,11 @@
           7,
           8,
           9,
-          10
+          10,
+          11,
+          12
         ],
-        "label": "1h30 — 1h04 · 10 slides"
+        "label": "1h30 — 1h20 · 12 slides"
       },
       "complet": {
         "indices": [
@@ -1855,9 +1885,11 @@
           7,
           8,
           9,
-          10
+          10,
+          11,
+          12
         ],
-        "label": "Complet — 1h04 · 10 slides"
+        "label": "Complet — 1h20 · 12 slides"
       }
     }
   },
