@@ -82,7 +82,7 @@
       },
       {
         "n": 12,
-        "titre": "🌱 Chapitre 4 — Numérique responsable",
+        "titre": "🌱 Chapitre 4\t — Numérique responsable",
         "role": "chapitre",
         "min": 2,
         "optionnel": true
@@ -107,6 +107,20 @@
         "role": "conclusion",
         "min": 5,
         "optionnel": true
+      },
+      {
+        "n": 16,
+        "titre": "Offre départementale d’Inclusion Numérique",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 17,
+        "titre": "Besoin d'aide ? Nous sommes là !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
       }
     ],
     "versions": {
@@ -140,9 +154,11 @@
           10,
           11,
           13,
-          14
+          14,
+          16,
+          17
         ],
-        "label": "1h30 — 1h17 · 13 slides"
+        "label": "1h30 — 1h33 · 15 slides"
       },
       "complet": {
         "indices": [
@@ -160,11 +176,14 @@
           12,
           13,
           14,
-          15
+          15,
+          16,
+          17
         ],
-        "label": "Complet — 1h24 · 15 slides"
+        "label": "Complet — 1h40 · 17 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "E7": {
     "analyse": true,
@@ -329,7 +348,8 @@
         ],
         "label": "Complet — 1h50 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "D2": {
     "analyse": true,
@@ -499,7 +519,8 @@
         ],
         "label": "Complet — 1h26 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B3": {
     "analyse": true,
@@ -668,7 +689,8 @@
         ],
         "label": "Complet — 1h30 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B9": {
     "analyse": true,
@@ -843,7 +865,8 @@
         ],
         "label": "Complet — 1h46 · 16 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "A1": {
     "analyse": true,
@@ -1016,7 +1039,8 @@
         ],
         "label": "Complet — 1h58 · 16 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:20Z"
   },
   "A2": {
     "analyse": true,
@@ -1137,7 +1161,8 @@
         ],
         "label": "Complet — 1h14 · 10 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:20Z"
   },
   "A3": {
     "analyse": true,
@@ -1302,7 +1327,8 @@
         ],
         "label": "Complet — 1h50 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:20Z"
   },
   "A4": {
     "analyse": true,
@@ -1468,7 +1494,8 @@
         ],
         "label": "Complet — 1h44 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:20Z"
   },
   "B4": {
     "analyse": true,
@@ -1590,7 +1617,8 @@
         ],
         "label": "Complet — 1h10 · 10 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B7": {
     "analyse": true,
@@ -1750,7 +1778,8 @@
         ],
         "label": "Complet — 1h22 · 14 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B8": {
     "analyse": true,
@@ -1891,7 +1920,8 @@
         ],
         "label": "Complet — 1h20 · 12 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B6": {
     "analyse": true,
@@ -2081,7 +2111,8 @@
         ],
         "label": "Complet — 2h05 · 18 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B5": {
     "analyse": true,
@@ -2246,7 +2277,8 @@
         ],
         "label": "Complet — 1h48 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B1": {
     "analyse": true,
@@ -2419,7 +2451,8 @@
         ],
         "label": "Complet — 1h55 · 16 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "B2": {
     "analyse": true,
@@ -2583,7 +2616,8 @@
         ],
         "label": "Complet — 1h54 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "E5": {
     "analyse": true,
@@ -2703,7 +2737,8 @@
         ],
         "label": "Complet — 1h21 · 10 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "E6": {
     "analyse": true,
@@ -2866,7 +2901,8 @@
         ],
         "label": "Complet — 1h48 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:21Z"
   },
   "A5": {
     "analyse": true,
@@ -3023,7 +3059,8 @@
         ],
         "label": "Complet — 1h42 · 14 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:20Z"
   },
   "A6": {
     "analyse": true,
@@ -3188,6 +3225,7 @@
         ],
         "label": "Complet — 1h50 · 15 slides"
       }
-    }
+    },
+    "updated_at": "2026-07-02T13:51:20Z"
   }
 }
