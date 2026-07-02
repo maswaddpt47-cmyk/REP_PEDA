@@ -2590,7 +2590,7 @@ function openEditModal(num, e) {
   }
   _showPptxDate(num);
   // Rafraîchit aussi depuis le serveur au cas où le cache serait obsolète
-  fetch("assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"})
+  fetch("https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"})
     .then(r => r.json())
     .then(data => { SLIDE_PLANS_GLOBAL = data; _showPptxDate(num); })
     .catch(() => {});
@@ -3012,7 +3012,7 @@ if (listViewActive) {
 if (localStorage.getItem(DIRTY_KEY)) updateSyncDot("dirty");
 (async () => {
   await loadManifest();
-  try { const r = await fetch("assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"}); SLIDE_PLANS_GLOBAL = await r.json(); } catch {}
+  try { const r = await fetch("https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"}); SLIDE_PLANS_GLOBAL = await r.json(); } catch {}
   const tok = getGhToken();
   if (tok && localStorage.getItem(DIRTY_KEY)) await pushLinksToRepo(tok);
   await loadRepoLinks();
@@ -3038,7 +3038,7 @@ setInterval(async () => {
   const beforeFiches = localStorage.getItem(CUSTOM_FICHES_KEY);
   const beforeFicheConfig = localStorage.getItem(FICHE_CONFIG_KEY);
   await loadManifest();
-  try { const r = await fetch("assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"}); SLIDE_PLANS_GLOBAL = await r.json(); } catch {}
+  try { const r = await fetch("https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"}); SLIDE_PLANS_GLOBAL = await r.json(); } catch {}
   await loadRepoLinks();
   await loadRepoFiches();
   await loadRepoCatalogue();
@@ -3066,7 +3066,7 @@ document.getElementById("btn-refresh").addEventListener("click", async () => {
   updateSyncDot("syncing");
   const tok = getGhToken();
   if (tok) await pushLinksToRepo(tok);
-  try { const r = await fetch("assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"}); SLIDE_PLANS_GLOBAL = await r.json(); } catch {}
+  try { const r = await fetch("https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"}); SLIDE_PLANS_GLOBAL = await r.json(); } catch {}
   await loadRepoLinks();
   await loadRepoFiches();
   await loadRepoCatalogue();
@@ -3767,7 +3767,7 @@ let _currentVersionNum = null;
 
 async function loadSlidePlans() {
   try {
-    const r = await fetch("assets/slide-plans.json?_=" + Date.now(), { cache: "no-store" });
+    const r = await fetch("https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/slide-plans.json?_=" + Date.now(), { cache: "no-store" });
     return await r.json();
   } catch { return {}; }
 }
