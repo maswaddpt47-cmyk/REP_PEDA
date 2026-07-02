@@ -4,6 +4,7 @@ Met à jour assets/slide-plans.json pour chaque atelier dont le PPTX existe.
 Préserve les entrées marquées analyse:true manuellement (sauf si le PPTX a changé).
 """
 import json, os, re
+from datetime import datetime, timezone
 from pathlib import Path
 from pptx import Presentation
 
@@ -129,6 +130,7 @@ def main():
 
         slides, versions = analyze(pptx)
         plans[key]["analyse"] = True
+        plans[key]["updated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         plans[key]["slides"] = slides
         plans[key]["versions"] = versions
         total = sum(s["min"] for s in slides)

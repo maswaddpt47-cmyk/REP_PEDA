@@ -2575,6 +2575,18 @@ function openEditModal(num, e) {
   const _eafeBtn = document.getElementById("edit-add-fiche-emoji-btn");
   _eafeBtn.dataset.emoji = "📄"; _eafeBtn.textContent = "📄";
   document.getElementById("edit-add-fiche-label").value = "";
+  const pptxStatus = document.getElementById("pptx-upload-status");
+  if (pptxStatus) {
+    const plan = SLIDE_PLANS_GLOBAL[num];
+    if (plan && plan.updated_at) {
+      const d = new Date(plan.updated_at);
+      const label = d.toLocaleDateString("fr-FR", {day:"2-digit", month:"2-digit", year:"numeric"}) +
+                    " à " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+      pptxStatus.textContent = `Dernière mise à jour : ${label}`;
+    } else {
+      pptxStatus.textContent = "";
+    }
+  }
   document.getElementById("edit-modal").classList.add("open");
   setTimeout(() => document.getElementById("edit-fields-container").querySelector("input")?.focus(), 200);
 }
@@ -2731,7 +2743,14 @@ document.getElementById("pptx-upload-input").addEventListener("change", async e 
       if (status) status.textContent = "⚠ Token invalide";
       showToast("⚠ Token invalide", 6000);
     } else if (result === true) {
-      if (status) status.textContent = `✓ ${savedAtelier.num}.pptx envoyé — CI en cours…`;
+      const nowLabel = (() => {
+        const d = new Date();
+        return d.toLocaleDateString("fr-FR", {day:"2-digit", month:"2-digit", year:"numeric"}) +
+               " à " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+      })();
+      if (!SLIDE_PLANS_GLOBAL[savedAtelier.num]) SLIDE_PLANS_GLOBAL[savedAtelier.num] = {};
+      SLIDE_PLANS_GLOBAL[savedAtelier.num].updated_at = new Date().toISOString();
+      if (status) status.textContent = `✓ Envoyé le ${nowLabel} — CI en cours…`;
       showToast(`✓ ${savedAtelier.num}.pptx uploadé — fiches générées dans ~1 min`, 7000);
     } else {
       if (status) status.textContent = `⚠ Erreur ${result?.error || ""}: ${result?.message || "GitHub API"}`;
