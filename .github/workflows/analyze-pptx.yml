@@ -9,6 +9,11 @@ on:
 permissions:
   contents: write
 
+# Un seul run à la fois — les suivants attendent plutôt que de conflictr sur les binaires PPTX
+concurrency:
+  group: analyze-pptx
+  cancel-in-progress: false
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
