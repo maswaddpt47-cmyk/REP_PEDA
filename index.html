@@ -2584,6 +2584,8 @@ function openEditModal(num, e) {
       const label = d.toLocaleDateString("fr-FR", {day:"2-digit", month:"2-digit", year:"numeric"}) +
                     " à " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
       pptxStatus.textContent = `Dernière mise à jour PPTX : ${label}`;
+    } else if (plan && plan.pptx_sha256) {
+      pptxStatus.textContent = "PPTX présent — déposez un nouveau fichier pour mettre à jour.";
     } else {
       pptxStatus.textContent = "Aucun PPTX déposé pour cet atelier.";
     }
