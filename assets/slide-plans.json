@@ -1668,20 +1668,13 @@
       },
       {
         "n": 13,
-        "titre": "Questions fréquentes (FAQ)",
-        "role": "conclusion",
-        "min": 5,
-        "optionnel": false
-      },
-      {
-        "n": 14,
-        "titre": "Ateliers numériques du Lot-et-Garonne",
+        "titre": "Offre départementale d’Inclusion Numérique",
         "role": "contenu",
         "min": 8,
         "optionnel": false
       },
       {
-        "n": 15,
+        "n": 14,
         "titre": "Besoin d'aide ? Nous sommes là !",
         "role": "contenu",
         "min": 8,
@@ -1720,10 +1713,9 @@
           11,
           12,
           13,
-          14,
-          15
+          14
         ],
-        "label": "1h30 — 1h27 · 15 slides"
+        "label": "1h30 — 1h22 · 14 slides"
       },
       "complet": {
         "indices": [
@@ -1740,10 +1732,9 @@
           11,
           12,
           13,
-          14,
-          15
+          14
         ],
-        "label": "Complet — 1h27 · 15 slides"
+        "label": "Complet — 1h22 · 14 slides"
       }
     }
   },
@@ -1985,6 +1976,20 @@
         "role": "contenu",
         "min": 8,
         "optionnel": false
+      },
+      {
+        "n": 17,
+        "titre": "Offre départementale d’Inclusion Numérique",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 18,
+        "titre": "Besoin d'aide ? Nous sommes là !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
       }
     ],
     "versions": {
@@ -2038,9 +2043,11 @@
           13,
           14,
           15,
-          16
+          16,
+          17,
+          18
         ],
-        "label": "Complet — 1h49 · 16 slides"
+        "label": "Complet — 2h05 · 18 slides"
       }
     }
   },
