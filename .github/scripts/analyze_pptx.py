@@ -3,7 +3,7 @@ Analyse automatique des PPTXs dans assets/pptx/.
 Met à jour assets/slide-plans.json pour chaque atelier dont le PPTX existe.
 Préserve les entrées marquées analyse:true manuellement (sauf si le PPTX a changé).
 """
-import json, os, re
+import hashlib, json, os, re
 from datetime import datetime, timezone
 from pathlib import Path
 from pptx import Presentation
@@ -128,9 +128,14 @@ def main():
             plans[key] = {"titre": cat.get("titre", key), "chap": cat.get("chap", key[0] if key else "?")}
             print(f"NOUVEAU {key} — ajouté depuis catalogue.json")
 
+        # Ne mettre à jour updated_at que si le contenu du PPTX a réellement changé
+        sha = hashlib.sha256(pptx.read_bytes()).hexdigest()
+        if plans[key].get("pptx_sha256") != sha:
+            plans[key]["updated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            plans[key]["pptx_sha256"] = sha
+
         slides, versions = analyze(pptx)
         plans[key]["analyse"] = True
-        plans[key]["updated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         plans[key]["slides"] = slides
         plans[key]["versions"] = versions
         total = sum(s["min"] for s in slides)
