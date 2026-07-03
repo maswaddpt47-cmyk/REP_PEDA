@@ -2453,7 +2453,7 @@ function openModal(num, e) {
       const openBtn = actionRow.querySelector(".fiche-open-btn");
       const dlBtn   = actionRow.querySelector(".fiche-dl-btn");
       if (openBtn) {
-        const localUrl = `./assets/fiches/${num}-fiche-${_vk}.pptx`;
+        const localUrl = `https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/fiches/${num}-fiche-${_vk}.pptx`;
         actionRow.classList.add("has-link");
         delete openBtn.dataset.id; openBtn.disabled = false; openBtn.dataset.local = localUrl;
         delete dlBtn.dataset.id;   dlBtn.disabled   = false; dlBtn.dataset.local   = localUrl;
@@ -2465,7 +2465,7 @@ function openModal(num, e) {
       const openBtn = memoRow.querySelector(".fiche-open-btn");
       const dlBtn   = memoRow.querySelector(".fiche-dl-btn");
       if (openBtn) {
-        const memoUrl = `./assets/memos/${num}-memo.pptx`;
+        const memoUrl = `https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/memos/${num}-memo.pptx`;
         memoRow.classList.add("has-link");
         delete openBtn.dataset.id; openBtn.disabled = false; openBtn.dataset.local = memoUrl;
         delete dlBtn.dataset.id;   dlBtn.disabled   = false; dlBtn.dataset.local   = memoUrl;
@@ -2591,10 +2591,20 @@ function openEditModal(num, e) {
     }
   }
   _showPptxDate(num);
-  // Rafraîchit aussi depuis le serveur au cas où le cache serait obsolète
+  // Rafraîchit depuis le serveur — sans écraser une date plus récente déjà en mémoire (post-upload)
+  const _dateAvant = SLIDE_PLANS_GLOBAL[num]?.updated_at;
   fetch("https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/slide-plans.json?_=" + Date.now(), {cache:"no-store"})
     .then(r => r.json())
-    .then(data => { SLIDE_PLANS_GLOBAL = data; _showPptxDate(num); })
+    .then(data => {
+      const fetchedDate = data[num]?.updated_at;
+      const localDate   = _dateAvant;
+      // Ne pas écraser si la date locale est plus récente (upload en cours)
+      if (localDate && fetchedDate && new Date(localDate) > new Date(fetchedDate)) {
+        data[num].updated_at = localDate;
+      }
+      SLIDE_PLANS_GLOBAL = data;
+      _showPptxDate(num);
+    })
     .catch(() => {});
   document.getElementById("edit-modal").classList.add("open");
   setTimeout(() => document.getElementById("edit-fields-container").querySelector("input")?.focus(), 200);
@@ -3892,7 +3902,7 @@ function renderSlideList(plan) {
         const dlBtn2  = actionRow.querySelector(".fiche-dl-btn");
         if (openBtn) {
           const bestKey = findBestVersionKey(plan);
-          const localUrl = `./assets/fiches/${_currentVersionNum}-fiche-${bestKey}.pptx`;
+          const localUrl = `https://raw.githubusercontent.com/maswaddpt47-cmyk/REP_PEDA/main/assets/fiches/${_currentVersionNum}-fiche-${bestKey}.pptx`;
           actionRow.classList.add("has-link");
           delete openBtn.dataset.id; openBtn.disabled = false; openBtn.dataset.local = localUrl;
           delete dlBtn2.dataset.id;  dlBtn2.disabled  = false; dlBtn2.dataset.local  = localUrl;
