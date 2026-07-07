@@ -236,5 +236,22 @@
       "label": "Émargement",
       "emoji": "✍️"
     }
+  ],
+  "B3": [
+    {
+      "key": "positionnement",
+      "label": "Positionnement",
+      "emoji": "📋"
+    },
+    {
+      "key": "evaluation",
+      "label": "Évaluation",
+      "emoji": "✅"
+    },
+    {
+      "key": "emargement",
+      "label": "Émargement",
+      "emoji": "✍️"
+    }
   ]
 }
