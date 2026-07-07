@@ -2730,6 +2730,20 @@
         "role": "conclusion",
         "min": 5,
         "optionnel": false
+      },
+      {
+        "n": 11,
+        "titre": "Offre départementale d’Inclusion Numérique",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
+      },
+      {
+        "n": 12,
+        "titre": "Besoin d'aide ? Nous sommes là !",
+        "role": "contenu",
+        "min": 8,
+        "optionnel": false
       }
     ],
     "versions": {
@@ -2756,9 +2770,10 @@
           7,
           8,
           9,
-          10
+          10,
+          11
         ],
-        "label": "1h30 — 1h21 · 10 slides"
+        "label": "1h30 — 1h29 · 11 slides"
       },
       "complet": {
         "indices": [
@@ -2771,13 +2786,15 @@
           7,
           8,
           9,
-          10
+          10,
+          11,
+          12
         ],
-        "label": "Complet — 1h21 · 10 slides"
+        "label": "Complet — 1h37 · 12 slides"
       }
     },
-    "pptx_sha256": "a7e67ee45b4e76f23c40224d36b6b09ce4ae72a84c1166502cff5c7619a33590",
-    "updated_at": "2026-06-27T14:54:11Z"
+    "pptx_sha256": "18d7e439673136c7bc901223a730ef5633235e153b76b72bb7ae8525355e2545",
+    "updated_at": "2026-07-07T11:17:48Z"
   },
   "E6": {
     "analyse": true,
