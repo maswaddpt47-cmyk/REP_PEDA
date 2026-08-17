@@ -302,8 +302,13 @@ function analyzeSlides(slidesData){
     const hasBody = getBullets(slidesData[i], s.titre, 1).length > 0;
     if(hasBody) return;
     const imagePath = slidesData[i].imagePath;
+    const imageBlob = slidesData[i].imageBlob;
     const reused = imagePath && imageCounts[imagePath] >= 2;
-    if(!imagePath || reused){
+    // Une image de quelques Ko est presque toujours une icône/un logo simple,
+    // jamais une capture d'écran lisible (ex. cheminement de connexion) : on
+    // s'épargne l'OCR (temps + ressources) et on omet directement.
+    const tooSmallForOcr = imageBlob && imageBlob.size < 5000;
+    if(!imagePath || reused || tooSmallForOcr){
       s.role = 'sans_contenu'; s.min = 0;
     } else {
       s.needsOcr = true;
@@ -321,14 +326,22 @@ async function runOcrPass(slidesData, meta, onProgress){
   try{
     for(const m of candidates){
       const slide = slidesData[m.n - 1];
-      if(!slide.imageBlob) continue;
+      if(!slide.imageBlob){ m.role = 'sans_contenu'; m.min = 0; continue; }
       if(onProgress) onProgress(m.titre);
       try{
         const { data } = await worker.recognize(slide.imageBlob);
         const lines = (data.text || '').split('\n').map(l=>l.trim()).filter(l=>l.length > 8);
-        if(lines.length) slide.shapes.push({ isTitle:false, paragraphs: lines });
+        // Un visuel décoratif produit un OCR pauvre/vide : en dessous de 2 lignes
+        // exploitables, ce n'est pas du contenu — on omet plutôt que de laisser
+        // une entrée quasi vide dans la fiche.
+        if(lines.length >= 2){
+          slide.shapes.push({ isTitle:false, paragraphs: lines });
+        } else {
+          m.role = 'sans_contenu'; m.min = 0;
+        }
       }catch(err){
         console.error('OCR échouée pour', m.titre, err);
+        m.role = 'sans_contenu'; m.min = 0;
       }
     }
   } finally {
