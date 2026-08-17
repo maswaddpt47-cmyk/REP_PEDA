@@ -563,7 +563,7 @@ const M = {
   ML:1.48, CW:18.03, ACCENT_W:1.59, STEP_H:3.81, STEP_GAP:0.18,
   SEP_X:3.35, SEP_Y_IN:1.17, SEP_W:15.98,
   HEADER_TOP:3.28, HEADER_H:1.42, FIRST_TOP:4.86,
-  STEPS_PER_PAGE:4, MAX_STEPS:8, CHARS_PER_LINE:78, LINE_H_CM:0.42,
+  CHARS_PER_LINE:78, LINE_H_CM:0.42,
 };
 function calcStepH(bullets){
   if(!bullets || !bullets.length) return M.STEP_H;
@@ -597,15 +597,6 @@ function drawMemoStep(slide, num, titre, bullets, top, colorIdx){
     textbox(slide, M.ML+M.ACCENT_W+0.15, top+M.SEP_Y_IN+0.12, M.CW-M.ACCENT_W-0.25, h-M.SEP_Y_IN-0.22, runs);
   }
   return top + h + M.STEP_GAP;
-}
-function drawSuiteBox(slide, page2Topics, top){
-  const h = 1.83;
-  rect(slide, M.ML, top, M.CW, h, COLORS.BG_SUITE, COLORS.BLU, 0.5);
-  const topicsStr = page2Topics.slice(0,3).filter(Boolean).join(' | ');
-  textbox(slide, M.ML+2.80, top+0.10, M.CW-3.0, h-0.15, [
-    { text:`→ Suite en page 2 : ${topicsStr}`, size:10.5, bold:true, color:COLORS.BLU },
-    { text:"Votre Conseiller Numérique : 05 53 47 31 32  ·  conseiller-numerique@lotetgaronne.fr", size:8.5, color:COLORS.GRY },
-  ]);
 }
 function drawBsa(slide, titre, bullets, top){
   const n = bullets.length;
@@ -653,52 +644,55 @@ function buildMemo(pptx, data){
     return s;
   }
 
-  const steps = data.steps.slice(0, M.MAX_STEPS);
+  const steps = data.steps;
   const bsa = data.bsa;
   const subtitle = steps.slice(0,3).map(s=>s.titre).join(' | ');
 
-  const PAGE1_MAX = 25.50 - M.FIRST_TOP - 1.83 - 0.40;
-  const p1Steps = [], p2Steps = [];
-  let used = 0.0;
+  // Répartit les steps sur autant de pages que nécessaire — pas de plafond au
+  // nombre d'étapes, un atelier avec beaucoup de contenu prend plus de pages.
+  const PAGE_STEP_MAX = 27.57 - M.FIRST_TOP - 0.30;
+  const stepPages = [];
+  let current = [], used = 0;
   for(const step of steps){
     const h = calcStepH(step.bullets);
-    if(!p1Steps.length || used + h + M.STEP_GAP <= PAGE1_MAX){
-      p1Steps.push(step); used += h + M.STEP_GAP;
-    } else {
-      p2Steps.push(step);
+    if(current.length && used + h + M.STEP_GAP > PAGE_STEP_MAX){
+      stepPages.push(current);
+      current = []; used = 0;
     }
+    current.push(step); used += h + M.STEP_GAP;
   }
-  const needsP2 = p2Steps.length > 0 || bsa.length > 0;
-  const totalPages = needsP2 ? 2 : 1;
+  stepPages.push(current);
 
-  const s1 = newSlide();
-  drawMemoHeader(s1, data.titre, subtitle);
-  let top = M.FIRST_TOP;
-  p1Steps.forEach((step,i)=>{ top = drawMemoStep(s1, i+1, step.titre, step.bullets, top, i); });
+  // Le bloc "Bon à savoir" + contact tient sur la dernière page des steps si la
+  // place le permet, sinon il part sur une page dédiée (estimation prudente).
+  const tailNeeded = 0.30 + bsa.length * 2.5 + 4.50;
+  const bsaOnLastPage = (used + tailNeeded) <= (SH_CM - M.FIRST_TOP - 0.30);
+  const totalPages = stepPages.length + (bsaOnLastPage ? 0 : 1);
 
-  if(needsP2){
-    const suiteTopics = p2Steps.slice(0,3).map(s=>s.titre);
-    if(bsa.length && suiteTopics.length < 3) suiteTopics.push(bsa[0].titre);
-    top = Math.max(top + 0.20, M.FIRST_TOP + M.STEPS_PER_PAGE * (M.STEP_H + M.STEP_GAP) + 0.40);
-    drawSuiteBox(s1, suiteTopics, top);
-  } else {
-    top += 0.30;
-    bsa.forEach(b=>{ top = drawBsa(s1, b.titre, b.bullets, top); });
+  let stepNum = 0;
+  stepPages.forEach((pageSteps, pIdx)=>{
+    const s = newSlide();
+    drawMemoHeader(s, data.titre, subtitle);
+    let top = M.FIRST_TOP;
+    pageSteps.forEach(step=>{ top = drawMemoStep(s, ++stepNum, step.titre, step.bullets, top, stepNum-1); });
+
+    if(pIdx === stepPages.length - 1 && bsaOnLastPage){
+      top += 0.30;
+      bsa.forEach(b=>{ top = drawBsa(s, b.titre, b.bullets, top); });
+      const bdaTop = Math.max(top + 0.30, SH_CM - 5.0);
+      drawBda(s, bdaTop);
+    }
+    drawFooter(s, pIdx+1, totalPages);
+  });
+
+  if(!bsaOnLastPage){
+    const s = newSlide();
+    drawMemoHeader(s, data.titre, subtitle);
+    let top = M.FIRST_TOP + 0.30;
+    bsa.forEach(b=>{ top = drawBsa(s, b.titre, b.bullets, top); });
     const bdaTop = Math.max(top + 0.30, SH_CM - 5.0);
-    drawBda(s1, bdaTop);
-  }
-  drawFooter(s1, 1, totalPages);
-
-  if(needsP2){
-    const s2 = newSlide();
-    drawMemoHeader(s2, data.titre, subtitle);
-    top = M.FIRST_TOP;
-    p2Steps.forEach((step,i)=>{ top = drawMemoStep(s2, p1Steps.length+i+1, step.titre, step.bullets, top, p1Steps.length+i); });
-    top += 0.30;
-    bsa.forEach(b=>{ top = drawBsa(s2, b.titre, b.bullets, top); });
-    const bdaTop = Math.max(top + 0.30, SH_CM - 5.0);
-    drawBda(s2, bdaTop);
-    drawFooter(s2, 2, totalPages);
+    drawBda(s, bdaTop);
+    drawFooter(s, totalPages, totalPages);
   }
 }
 
