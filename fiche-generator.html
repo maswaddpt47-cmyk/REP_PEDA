@@ -37,6 +37,8 @@
   .ver-opt:hover{border-color:var(--accent)}
   .ver-opt.sel{border-color:var(--accent);background:rgba(79,142,247,.08)}
   .ver-opt input{accent-color:var(--accent)}
+  .bg-opt{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text);cursor:pointer;margin-top:2px}
+  .bg-opt input{accent-color:var(--accent)}
   .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
   button.gen{flex:1;min-width:200px;padding:13px 16px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;transition:.15s}
   button.gen:disabled{opacity:.4;cursor:not-allowed}
@@ -87,6 +89,10 @@
 
   <div class="card summary" id="gen-card">
     <h2>3. Générer</h2>
+    <label class="bg-opt">
+      <input type="checkbox" id="chk-bg" checked>
+      Inclure l'image de fond du gabarit
+    </label>
     <div class="actions">
       <button class="gen action" id="btn-fiche" disabled>📋 Fiche Action (.pptx)</button>
       <button class="gen memo" id="btn-memo" disabled>📝 Mémo participant (.pptx)</button>
@@ -613,14 +619,15 @@ function drawFicheConseils(slide, conseils, top){
   textbox(slide, F.ML+0.25, top+0.18, F.CW-0.40, F.CONS_H-0.20, runs);
 }
 
-function buildFiche(pptx, data){
+function buildFiche(pptx, data, opts={}){
+  const withBg = opts.bg !== false;
   pptx.defineLayout({ name:'FicheA4', width:CM(SW_CM), height:CM(SH_CM) });
   pptx.layout = 'FicheA4';
   let page = 0;
   function newSlide(){
     page++;
     const s = pptx.addSlide();
-    bg(s, page === 1 ? 'assets/bg-p1.png' : 'assets/bg-p2.png');
+    if(withBg) bg(s, page === 1 ? 'assets/bg-p1.png' : 'assets/bg-p2.png');
     return s;
   }
   let slide = newSlide();
@@ -723,14 +730,15 @@ function drawFooter(slide, page, total){
   ]);
 }
 
-function buildMemo(pptx, data){
+function buildMemo(pptx, data, opts={}){
+  const withBg = opts.bg !== false;
   pptx.defineLayout({ name:'MemoA4', width:CM(SW_CM), height:CM(SH_CM) });
   pptx.layout = 'MemoA4';
   let page = 0;
   function newSlide(){
     page++;
     const s = pptx.addSlide();
-    bg(s, page === 1 ? 'assets/bg-p1.png' : 'assets/bg-p2.png');
+    if(withBg) bg(s, page === 1 ? 'assets/bg-p1.png' : 'assets/bg-p2.png');
     return s;
   }
 
@@ -798,6 +806,7 @@ const genCard = document.getElementById('gen-card');
 const versionsEl = document.getElementById('versions');
 const btnFiche = document.getElementById('btn-fiche');
 const btnMemo = document.getElementById('btn-memo');
+const chkBg = document.getElementById('chk-bg');
 const statusEl = document.getElementById('status');
 
 let state = { slidesData:null, meta:null, versions:null, selectedVersion:'1h30', baseName:'atelier' };
@@ -880,7 +889,7 @@ btnFiche.addEventListener('click', async ()=>{
     const indices = state.versions[state.selectedVersion].indices;
     const data = extractFiche(state.slidesData, state.meta, indices);
     const pptx = new PptxGenJS();
-    buildFiche(pptx, data);
+    buildFiche(pptx, data, { bg: chkBg.checked });
     await pptx.writeFile({ fileName: `${state.baseName}-fiche-${state.selectedVersion}.pptx` });
     setStatus('✓ Fiche Action téléchargée.', 'ok');
   }catch(err){
@@ -898,7 +907,7 @@ btnMemo.addEventListener('click', async ()=>{
     const indices = state.versions[state.selectedVersion].indices;
     const data = extractMemo(state.slidesData, state.meta, indices);
     const pptx = new PptxGenJS();
-    buildMemo(pptx, data);
+    buildMemo(pptx, data, { bg: chkBg.checked });
     await pptx.writeFile({ fileName: `${state.baseName}-memo.pptx` });
     setStatus('✓ Mémo participant téléchargé.', 'ok');
   }catch(err){
