@@ -364,13 +364,20 @@ function extractMemo(slidesData, slidesMeta, indices){
   const idxSet = (indices && indices.length) ? new Set(indices) : null;
   const rolesSteps = new Set(['contenu','demo']);
 
+  // Bloc fixe du gabarit (présentation du Département + clôture), présent sur tous
+  // les PPTX concernés — exclu du Mémo uniquement (la Fiche Action n'y touche pas).
+  const total = slidesMeta.length;
+  const isFrameSlide = n => (n > 1 && n <= 4) || n > total - 2;
+
   const steps = [];
   slidesMeta.forEach((meta,i)=>{
     if(!rolesSteps.has(meta.role)) return;
     if(meta.optionnel) return;
+    if(isFrameSlide(meta.n)) return;
     if(idxSet && !idxSet.has(meta.n)) return;
     const slide = slidesData[i];
-    steps.push({ titre: cleanText(meta.titre), bullets: getMemoBullets(slide, meta.titre, 4) });
+    const bullets = getMemoBullets(slide, meta.titre, 4);
+    steps.push({ titre: cleanText(meta.titre), bullets: bullets.length ? bullets : ['Contenu à compléter'] });
   });
 
   let titreRaw = '';
@@ -384,9 +391,11 @@ function extractMemo(slidesData, slidesMeta, indices){
   slidesMeta.forEach((meta,i)=>{
     if(!meta.optionnel) return;
     if(['titre','chapitre'].includes(meta.role)) return;
+    if(isFrameSlide(meta.n)) return;
     if(idxSet && idxSet.has(meta.n)) return;
     const slide = slidesData[i];
-    bsa.push({ titre: cleanText(meta.titre), bullets: getMemoBullets(slide, meta.titre, 4) });
+    const bullets = getMemoBullets(slide, meta.titre, 4);
+    bsa.push({ titre: cleanText(meta.titre), bullets: bullets.length ? bullets : ['Contenu à compléter'] });
   });
 
   return { titre, steps, bsa };
