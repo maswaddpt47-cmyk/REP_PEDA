@@ -7,6 +7,7 @@
 <title>Générateur de fiches autonome — ARIANE 47</title>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
   :root{
     --bg:#13151a; --surface:#1b1e26; --surface-2:#22262f; --border:#2c303a;
@@ -140,13 +141,43 @@ async function parsePptx(file){
     if(!entry) continue;
     const xml = await entry.async('text');
     const doc = new DOMParser().parseFromString(xml, 'application/xml');
-    slides.push(parseSlideXml(doc, i+1));
+
+    // Résout l'éventuelle image de contenu de la slide, pour repérer les logos
+    // réutilisés (à omettre) et les illustrations uniques (candidates OCR).
+    let imagePath = null, imageBlob = null;
+    const slideName = slidePaths[i].split('/').pop();
+    const slideRelsEntry = zip.file(`ppt/slides/_rels/${slideName}.rels`);
+    if(slideRelsEntry){
+      const slideRelsDoc = new DOMParser().parseFromString(await slideRelsEntry.async('text'), 'application/xml');
+      const slideRelMap = {};
+      Array.from(slideRelsDoc.getElementsByTagName('Relationship')).forEach(r=>{
+        slideRelMap[r.getAttribute('Id')] = r.getAttribute('Target');
+      });
+      const blip = doc.getElementsByTagName('a:blip')[0];
+      const rId = blip ? blip.getAttribute('r:embed') : null;
+      if(rId && slideRelMap[rId]){
+        imagePath = slideRelMap[rId];
+        const mediaEntry = zip.file(resolveRelPath('ppt/slides/', imagePath));
+        if(mediaEntry) imageBlob = await mediaEntry.async('blob');
+      }
+    }
+
+    slides.push(parseSlideXml(doc, i+1, imagePath, imageBlob));
   }
   if(!slides.length) throw new Error("Impossible de lire les slides du PPTX.");
   return slides;
 }
 
-function parseSlideXml(doc, idx){
+function resolveRelPath(basePath, relTarget){
+  const parts = basePath.split('/').filter(Boolean);
+  relTarget.split('/').forEach(seg=>{
+    if(seg === '..') parts.pop();
+    else if(seg !== '.') parts.push(seg);
+  });
+  return parts.join('/');
+}
+
+function parseSlideXml(doc, idx, imagePath, imageBlob){
   const spList = Array.from(doc.getElementsByTagName('p:sp'));
   const shapes = [];
   for(const sp of spList){
@@ -163,7 +194,7 @@ function parseSlideXml(doc, idx){
     );
     shapes.push({ isTitle, paragraphs });
   }
-  return { n: idx, shapes };
+  return { n: idx, shapes, imagePath: imagePath || null, imageBlob: imageBlob || null };
 }
 
 function getSlideTitle(slide){
@@ -258,8 +289,51 @@ function analyzeSlides(slidesData){
     return { n: i+1, titre, role, min: DURATION[role] ?? 8, optionnel: false };
   });
   slides = postProcessRoles(slides);
+
+  // Slides "titre seul" (aucun texte de corps) : ce sont des titres de thème/chapitre,
+  // pas du contenu à détailler. Si l'image associée est un logo/visuel réutilisé
+  // ailleurs dans le deck, on omet directement la slide (Fiche Action ET Mémo). Si
+  // l'image est unique, elle est candidate à l'OCR (passe asynchrone séparée) avant
+  // de trancher.
+  const imageCounts = {};
+  slidesData.forEach(s=>{ if(s.imagePath) imageCounts[s.imagePath] = (imageCounts[s.imagePath]||0) + 1; });
+  slides.forEach((s,i)=>{
+    if(s.role === 'titre') return;
+    const hasBody = getBullets(slidesData[i], s.titre, 1).length > 0;
+    if(hasBody) return;
+    const imagePath = slidesData[i].imagePath;
+    const reused = imagePath && imageCounts[imagePath] >= 2;
+    if(!imagePath || reused){
+      s.role = 'sans_contenu'; s.min = 0;
+    } else {
+      s.needsOcr = true;
+    }
+  });
+
   slides.forEach(s=>{ s.optionnel = isOptionalSlide(s); });
   return slides;
+}
+
+async function runOcrPass(slidesData, meta, onProgress){
+  const candidates = meta.filter(m=>m.needsOcr);
+  if(!candidates.length) return;
+  const worker = await Tesseract.createWorker('fra');
+  try{
+    for(const m of candidates){
+      const slide = slidesData[m.n - 1];
+      if(!slide.imageBlob) continue;
+      if(onProgress) onProgress(m.titre);
+      try{
+        const { data } = await worker.recognize(slide.imageBlob);
+        const lines = (data.text || '').split('\n').map(l=>l.trim()).filter(l=>l.length > 8);
+        if(lines.length) slide.shapes.push({ isTitle:false, paragraphs: lines });
+      }catch(err){
+        console.error('OCR échouée pour', m.titre, err);
+      }
+    }
+  } finally {
+    await worker.terminate();
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -339,7 +413,7 @@ function extractFiche(slidesData, slidesMeta, indices){
 
   const deroule = []; let cumtime = 0;
   for(const [slide, meta] of pairs){
-    if(meta.role === 'titre'){ cumtime += meta.min; continue; }
+    if(meta.role === 'titre' || meta.role === 'sans_contenu'){ cumtime += meta.min; continue; }
     if(meta.optionnel){ cumtime += meta.min; continue; }
     const h2 = Math.floor(cumtime/60), m2 = cumtime%60;
     deroule.push({
@@ -352,7 +426,7 @@ function extractFiche(slidesData, slidesMeta, indices){
   }
 
   const optRaw = slidesMeta.map((m,i)=>[slidesData[i],m])
-    .filter(([,m])=> m.optionnel && m.role !== 'titre' && (!idxSet || !idxSet.has(m.n)));
+    .filter(([,m])=> m.optionnel && m.role !== 'titre' && m.role !== 'sans_contenu' && (!idxSet || !idxSet.has(m.n)));
   const optionnels = optRaw.map(([s,m])=>({
     min: m.min, titre: trunc(cleanText(m.titre),38), bullets: getBullets(s, m.titre, 3),
   }));
@@ -390,7 +464,7 @@ function extractMemo(slidesData, slidesMeta, indices){
   const bsa = [];
   slidesMeta.forEach((meta,i)=>{
     if(!meta.optionnel) return;
-    if(['titre','chapitre'].includes(meta.role)) return;
+    if(['titre','chapitre','sans_contenu'].includes(meta.role)) return;
     if(isFrameSlide(meta.n)) return;
     if(idxSet && idxSet.has(meta.n)) return;
     const slide = slidesData[i];
@@ -745,6 +819,13 @@ async function handleFile(file){
   try{
     state.slidesData = await parsePptx(file);
     state.meta = analyzeSlides(state.slidesData);
+    const ocrCandidates = state.meta.filter(m=>m.needsOcr).length;
+    if(ocrCandidates){
+      setStatus(`Analyse OCR de ${ocrCandidates} illustration(s)…`, 'busy');
+      await runOcrPass(state.slidesData, state.meta, titre=>{
+        setStatus(`Analyse OCR : ${titre}…`, 'busy');
+      });
+    }
     state.versions = computeVersions(state.meta);
     renderSummary();
     setStatus('', '');
