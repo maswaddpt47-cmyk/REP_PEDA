@@ -550,8 +550,11 @@ function buildFiche(pptx, data){
 
   const nOpt = data.optionnels.length;
   const optH = nOpt ? (F.OPT_HDR_H + data.optionnels.reduce((a,o)=>a+fOptRowH(o),0) + 0.30) : 0;
-  const consH = F.CONS_H + 0.30;
-  if(top + optH + consH > SH_CM - 0.30){ slide = newSlide(); top = 1.50; }
+  // Ne créer une page rien que pour les conseils que si le bloc dépasserait
+  // vraiment la page — la marge précédente comptait la même réserve deux fois,
+  // ce qui déclenchait une page quasi vide pour un dépassement de quelques mm.
+  const consTopIfSamePage = Math.max(top + optH + 0.20, SH_CM - F.CONS_H - 0.30);
+  if(consTopIfSamePage + F.CONS_H > SH_CM){ slide = newSlide(); top = 1.50; }
 
   top = drawFicheOpt(slide, data.optionnels, top);
   const consTop = Math.max(top + 0.20, SH_CM - F.CONS_H - 0.30);
