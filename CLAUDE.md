@@ -30,3 +30,7 @@ git push origin main
 ```
 
 L'historique git est le filet de sécurité. En cas de problème : `git log --oneline index.html` pour identifier le bon commit, puis `git show <hash>:index.html > index.html` pour restaurer.
+
+## 3bis. Dates explicites dans les échanges
+
+Utiliser des dates au format **JJ/MM** ou **JJ/MM/AAAA** plutôt que des termes relatifs ("hier", "aujourd'hui", "la semaine dernière", "demain"). La perception du temps de Claude vient d'un contexte injecté en début de session, pas d'une horloge en temps réel — elle devient peu fiable sur une session qui s'étale sur plusieurs jours ou plusieurs reprises. Cette règle s'applique des deux côtés (Claude et l'utilisateur) pour éviter toute ambiguïté.
